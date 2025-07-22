@@ -210,13 +210,7 @@ XmlElement _createDescription(Event event) {
       return XmlElement(
         XmlName('L${i + 1}'),
         [XmlAttribute(XmlName('langName'), _langName(i + 1))],
-        [
-          XmlText(
-            event.componentCode == null
-                ? event.message
-                : '${event.componentCode!} ${event.message}',
-          ),
-        ],
+        [XmlText(event.componentCodesAndMessage)],
       );
     }),
   );

@@ -10,7 +10,7 @@ class Event {
   final String namePath;
   final String group;
   final String message;
-  final ComponentCode? componentCode;
+  final List<ComponentCode> componentCodes;
   final EventPriority priority;
   final bool acknowledgeRequired;
   final List<List<int>> arrayValues;
@@ -20,16 +20,19 @@ class Event {
     required this.namePath,
     required this.group,
     required this.message,
-    this.componentCode,
+    this.componentCodes = const <ComponentCode>[],
     required this.priority,
     required this.acknowledgeRequired,
     required this.arrayValues,
   });
 
+  String get componentCodesAndMessage =>
+      [...componentCodes.map((c) => c.createCode()), message].join(' ');
+
   @override
   String
   toString() => // 'Event(number: $number, namePath: $namePath, group: $group, message: $message)';
-      '${namePath.padRight(60)}  ${componentCode == null ? '' : '(${componentCode!.toCode()}) '}$message ${priority.abbreviation} $acknowledgeRequired';
+      '${namePath.padRight(60)}  $componentCodesAndMessage ${priority.abbreviation} $acknowledgeRequired';
 }
 
 class Counter {
@@ -117,16 +120,15 @@ class EventNode {
       for (var namePath in namePaths) {
         var arrayValues = createArrayValues(namePath);
         var message = createMessage(commentPath, componentCodes, arrayValues);
-        var componentCode = getComponentCode(
-          commentPath,
-          componentCodes,
-          arrayValues,
-        );
         var event = Event(
           number: counter.next(),
           namePath: namePath,
           group: createGroupName(namePath),
-          componentCode: componentCode,
+          componentCodes: updateComponentCodes(
+            commentPath,
+            componentCodes,
+            arrayValues,
+          ),
           message: message,
           priority: priority,
           acknowledgeRequired: acknowledgeNeeded,
@@ -181,7 +183,7 @@ class EventNode {
     return commentPath
         // remove all component codes
         .replaceAll(
-          RegExp(componentCodes.map((cc) => cc.toCode()).join('|')),
+          RegExp(componentCodes.map((cc) => cc.createCode()).join('|')),
           '',
         )
         .replaceAll(
@@ -225,38 +227,39 @@ class EventNode {
     }).toList();
   }
 
-  ComponentCode? getComponentCode(
+  List<ComponentCode> updateComponentCodes(
     String commentPath,
     List<ComponentCode> componentCodes,
     List<List<int>> arrayValues,
   ) {
-    var componentCode = componentCodes.firstOrNull;
-    if (componentCode == null) {
-      return null;
+    if (componentCodes.isEmpty ||
+        arrayValues.isEmpty ||
+        componentCodes.length > 1) {
+      return componentCodes;
     }
-    var pageNumber = componentCode.pageNumber;
-    var letters = getComponentCodeLetters(commentPath, componentCode);
-    var columnNumber = componentCode.columnNumber;
 
-    if (arrayValues.isNotEmpty) {
-      /// calculate the component code when an array is used
-      var columnNumberToAdd = getColumnNumberToAdd(commentPath);
-      var arrayValue =
-          arrayValues.last.last; // We assume the last array will start with 1
-      var unlimitedColumnNumber =
-          componentCode.columnNumber.value +
-          (arrayValue - 1) * columnNumberToAdd;
-      columnNumber = ColumNumber((unlimitedColumnNumber - 1) % 8 + 1);
-      pageNumber =
-          componentCode.pageNumber + ((unlimitedColumnNumber - 1) ~/ 8);
-    }
-    return ComponentCode(
-      site: componentCode.site,
-      electricPanel: componentCode.electricPanel,
-      pageNumber: pageNumber,
-      letters: letters,
-      columnNumber: columnNumber,
-    );
+    /// calculate the component code when an array is used
+    var componentCode = componentCodes.first;
+
+    var columnNumberToAdd = getColumnNumberToAdd(commentPath);
+    var arrayValue =
+        arrayValues.last.last; // We assume the last array will start with 1
+    var unlimitedColumnNumber =
+        componentCode.columnNumber.value + (arrayValue - 1) * columnNumberToAdd;
+    var columnNumber = ColumNumber((unlimitedColumnNumber - 1) % 8 + 1);
+    var pageNumber =
+        componentCode.pageNumber + ((unlimitedColumnNumber - 1) ~/ 8);
+    var letters = getComponentCodeLetters(commentPath, componentCode);
+
+    return [
+      ComponentCode(
+        site: componentCode.site,
+        electricPanel: componentCode.electricPanel,
+        pageNumber: pageNumber,
+        letters: letters,
+        columnNumber: columnNumber,
+      ),
+    ];
   }
 
   List<ComponentCode> getComponentCodes(String commentPath) =>

@@ -66,11 +66,11 @@ class ComponentCode {
       columnNumber.hashCode;
 
   @override
-  String toString() {
-    return 'ComponentCode{site: $site, electricalPanel: $electricPanel, pageNumber: $pageNumber, letters: $letters, columnNumber: $columnNumber}';
-  }
+  String toString() => _code;
 
-  String toCode() {
+  late final String _code = createCode();
+
+  String createCode() {
     var code = StringBuffer();
     if (site != null) {
       code.write('${site!.code}.');
