@@ -1,0 +1,29 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+         {
+            "label": "flutter build windows",
+            "type": "shell",
+            "command": "flutter build windows",
+        },
+        {
+            "label": "build windows msix installer",
+            "type": "shell",
+            "command": "dart run msix:create",
+            "detail": "Results in: build/windows/x64/runner/Release/meyncraft.msix. You might need to do this once to get the signature approved: https://www.youtube.com/watch?v=s40bCNnFUgg",
+            "dependsOn": "flutter build windows",
+        },
+        {y
+            "label": "build launch icon",
+            "type": "shell",
+            "command": "dart run flutter_launcher_icons",
+        },
+        {
+            "label": "dart format .",
+            "type": "shell",
+            "command": "dart format .",
+        }
+    ]
+}

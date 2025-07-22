@@ -1,0 +1,1 @@
+See VS Code task "build windows msix installer" in .vscode/tasks.json

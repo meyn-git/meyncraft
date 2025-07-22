@@ -1,0 +1,1 @@
+See VS Code task "build launch icon" in .vscode/tasks.json

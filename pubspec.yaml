@@ -1,0 +1,44 @@
+name: meyncraft
+description: "A template engine to create Meyn Control System files using templates."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  archive: ^4.0.7
+  collection: ^1.19.1
+  file_picker: ^10.2.0
+  fluent_regex: ^1.0.3
+  flutter:
+    sdk: flutter
+  get_it: ^7.2.3
+  petitparser: ^6.1.0
+  recase: ^4.1.0
+  xml: ^6.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  msix: ^3.16.7
+  flutter_launcher_icons: ^0.14.4
+
+# See .vscode/tasks.json for the build task
+msix_config:
+  display_name: MeynCraft
+  publisher_display_name: Nils ten Hoeve
+  identity_name: nils.ten.hoeve.meyncraft
+  msix_version: 1.0.0.0
+  logo_path: assets/meyn.ico
+
+# See .vscode/tasks.json for the build task
+flutter_launcher_icons:
+  image_path: "assets/meyn.ico"
+  windows:
+    generate: true
+    image_path: "assets/meyn.ico"
+
+flutter:
+  uses-material-design: true
