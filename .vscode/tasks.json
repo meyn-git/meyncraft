@@ -15,7 +15,7 @@
             "detail": "Results in: build/windows/x64/runner/Release/meyncraft.msix. You might need to do this once to get the signature approved: https://www.youtube.com/watch?v=s40bCNnFUgg",
             "dependsOn": "flutter build windows",
         },
-        {y
+        {
             "label": "build launch icon",
             "type": "shell",
             "command": "dart run flutter_launcher_icons",
