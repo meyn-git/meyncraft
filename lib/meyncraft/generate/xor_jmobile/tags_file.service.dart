@@ -34,8 +34,14 @@ File createOutputFile(SysmacProject sysmacProject, String suffix) {
 }
 
 String createFormattedTagsXml(List<XorTag> tags) {
-  var element = XmlElement(XmlName('tags'), [], tags.map((tag) => tag.toXml()));
-  final formattedXml = element.toXmlString(pretty: true, indent: '  ');
+  var document = XmlDocument([
+    XmlComment('This code was generated with MeynCraft on ${DateTime.now()}.'),
+    XmlComment(
+      'For more information see: https://github.com/meyn-git/meyncraft (scroll down for documentation)',
+    ),
+    XmlElement(XmlName('tags'), [], tags.map((tag) => tag.toXml())),
+  ]);
+  final formattedXml = document.toXmlString(pretty: true, indent: '  ');
   return formattedXml;
 }
 

@@ -19,5 +19,5 @@ void generate(String sysmacProjectFilePath) {
     logger.info(s.toString());
   }
   logger.info('Finished.');
-  logger.info('Restart the app to re-generate files.');
+  logger.info('Close MeynCraft and start it again to re-generate files.');
 }

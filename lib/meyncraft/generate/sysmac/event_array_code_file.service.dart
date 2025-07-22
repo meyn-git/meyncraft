@@ -9,13 +9,16 @@ void writeSysmacEventArrayCodeFile(SysmacProject sysmacProject) {
 
   var code = StringBuffer();
   code.writeln(
-    '// The EventGlobal is copied to EventGlobalArray for more efficient communication.',
+    '// The EventGlobal variable is copied to the EventGlobalArray variable.',
   );
   code.writeln(
-    '// This code was generated on 2025-07-17 with sysmac_generator.',
+    '// This is needed for more efficient event communication with HMIs and MeynConnect.',
   );
   code.writeln(
-    '// For more information see: https://github.com/nils-ten-hoeve/sysmac_generator',
+    '// This code was generated with MeynCraft on ${DateTime.now()}.',
+  );
+  code.writeln(
+    '// For more information see: https://github.com/meyn-git/meyncraft (scroll down for documentation)',
   );
   for (var event in events) {
     code.writeln('EventGlobalArray[${event.number}]:=${event.namePath};');

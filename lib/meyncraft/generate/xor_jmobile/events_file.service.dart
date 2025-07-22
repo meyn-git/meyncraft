@@ -49,8 +49,15 @@ File createOutputFile(SysmacProject sysmacProject, String suffix) {
 
 String createFormattedEventsXml(List<Event> events) {
   var alarms = events.map((e) => createJMobileAlarmElement(e)).toList();
-  XmlElement root = XmlElement(XmlName('alarms'), [], alarms);
-  String xml = root.toXmlString(pretty: true, indent: '  ');
+
+  var document = XmlDocument([
+    XmlComment('This code was generated with MeynCraft on ${DateTime.now()}.'),
+    XmlComment(
+      'For more information see: https://github.com/meyn-git/meyncraft (scroll down for documentation)',
+    ),
+    XmlElement(XmlName('alarms'), [], alarms),
+  ]);
+  String xml = document.toXmlString(pretty: true, indent: '  ');
   return xml;
 }
 
