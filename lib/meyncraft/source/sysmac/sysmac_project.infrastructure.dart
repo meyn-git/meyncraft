@@ -42,7 +42,7 @@ class SysmacProjectFactory {
       sysmacProjectArchive,
       dataTypeTree,
     );
-    var details=createDetails(file);
+    var details = createDetails(file);
     var eventService = EventService(globalVariableService);
     return SysmacProject(
       details: details,
@@ -51,8 +51,6 @@ class SysmacProjectFactory {
       eventService: eventService,
     );
   }
-
- 
 }
 
 /// Represents a physical Sysmac project file,
@@ -86,7 +84,6 @@ class SysmacProjectArchive {
       );
     }
   }
-
 
   Archive readArchive(File file) {
     final bytes = file.readAsBytesSync();

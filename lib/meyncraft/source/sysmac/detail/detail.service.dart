@@ -6,26 +6,32 @@ import 'package:meyncraft/meyncraft/source/sysmac/detail/detail.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
 SysmacProjectDetails createDetails(File sysmacProjectFile) {
-  var parseResult = _parseFileName(sysmacProjectFile.path);
-  var site = parseResult.firstWhereOrNull((v) => v is Site);
-  var electricPanel = parseResult.firstWhereOrNull((v) => v is ElectricPanel);
-  var plcName = parseResult.firstWhereOrNull((v) => v is PlcName);
-  var version = parseResult.firstWhereOrNull((v) => v is SysmacProjectVersion);
-  return SysmacProjectDetails(
+  var parseResults = _parseSysmacProjectFilePath(sysmacProjectFile.path);
+  var site = parseResults.firstWhereOrNull((v) => v is Site)?.code;
+  var electricPanel = parseResults
+      .firstWhereOrNull((v) => v is ElectricPanel)
+      ?.code;
+  var plcName = parseResults.firstWhereOrNull((v) => v is PlcName)?.name;
+  var version = parseResults.firstWhereOrNull((v) => v is SysmacProjectVersion);
+  var details = SysmacProjectDetails(
     projectFile: sysmacProjectFile,
     site: site,
     electricPanel: electricPanel,
     plcName: plcName,
     version: version,
   );
+  if (!details.isComplete) {
+    logger.warning(
+      'Invalid file format: "${sysmacProjectFile.path}". Expected it to be something like 4321DE06-Evisceration1-001-005-toBeInstalled.smc2',
+    );
+  }
+  return details;
 }
 
-List<dynamic> _parseFileName(String sysmacProjectFilepath) {
-  var result = _fileNameParser.parse(sysmacProjectFilepath);
+List _parseSysmacProjectFilePath(String path) {
+  var result = _sysmacProjectFilePathParser.parse(path);
   if (result is Failure) {
-    logger.warning(
-      'Invalid file format: "$sysmacProjectFilepath". Expected it to be something like 4321DE06-Evisceration1-001-005-toBeInstalled.smc2',
-    );
+    return [];
   }
   return result.value;
 }
@@ -39,9 +45,9 @@ final Parser<String?> _pathParser =
 
 final Parser _dashParser = char('-');
 
-final Parser<String?> _extensionParser = stringIgnoreCase('.smc2').end();
+final Parser<String?> _extensionParser = stringIgnoreCase('.smc2');
 
-final _fileNameParser =
+final _sysmacProjectFilePathParser =
     _pathParser.optional() &
     Site.parser.optional() &
     _dashParser.optional() &
@@ -50,5 +56,4 @@ final _fileNameParser =
     PlcName.parser.optional() &
     _dashParser.optional() &
     SysmacProjectVersion.parser.optional() &
-    _extensionParser.optional() &
-    endOfInput();
+    _extensionParser;

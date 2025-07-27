@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.infrastructure.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.infrastructure.dart';
@@ -63,14 +65,13 @@ const String xml = """<?xml version="1.0" encoding="utf-8"?>
 </data>""";
 
 void main() {
+  GetIt.I.registerSingleton<Logger>(Logger());
   var dataTypes = DataTypeArchiveXmlFile.fromXml(
     nameSpacePath: 'Test\\NameSpace',
     xml: xml,
   ).toDataTypes();
 
-  group('group name', () {
-    
-  });('class: DataTypeXml', () {
+  group('class: DataTypeXml', () {
     group('method: toDataTypes', () {
       test('5 main DataTypes in test xml', () {
         expect(dataTypes, hasLength(11));

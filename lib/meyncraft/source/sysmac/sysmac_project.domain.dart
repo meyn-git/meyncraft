@@ -20,7 +20,6 @@ class SysmacProject {
   final GlobalVariableService globalVariableService;
   final EventService eventService;
 
-  
   SysmacProject({
     required this.details,
     required this.dataTypeTree,
@@ -28,4 +27,3 @@ class SysmacProject {
     required this.eventService,
   });
 }
-

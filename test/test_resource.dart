@@ -25,12 +25,13 @@ class TestResource {
     }
   }
 
-  static bool _containsPubSpec(Directory directory) =>
-      directory.listSync().any((FileSystemEntity entity) =>
-          entity is File && entity.path.endsWith('pubspec.yaml'));
+  static bool _containsPubSpec(Directory directory) => directory.listSync().any(
+    (FileSystemEntity entity) =>
+        entity is File && entity.path.endsWith('pubspec.yaml'),
+  );
 }
 
 class SysmacProjectTestResource extends TestResource {
   SysmacProjectTestResource()
-      : super('4321DE06-Evisceration-001-005_not_installed.smc2');
+    : super('4321DE06-Evisceration-001-005_not_installed.smc2');
 }

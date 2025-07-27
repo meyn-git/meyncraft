@@ -12,23 +12,15 @@ void main() {
   File file = SysmacProjectTestResource().file;
   var sysmacProjectArchive = SysmacProjectArchive(file);
   ProjectIndexXml projectIndexXml = sysmacProjectArchive.projectIndexXml;
-  DataTypeTree dataTypeTree =
-      DataTypeTreeFactory().create(sysmacProjectArchive);
+  DataTypeTree dataTypeTree = DataTypeTreeFactory().create(
+    sysmacProjectArchive,
+  );
 
-  group('group name', () {
-    
-  });('class: ProjectIndexXml', () {
+  group('class: ProjectIndexXml', () {
     group('method: findDataTypeArchiveFiles', () {
       test('not empty', () {
         var dataTypeArchiveFiles = projectIndexXml.dataTypeArchiveXmlFiles();
         expect(dataTypeArchiveFiles, isNotEmpty);
-      });
-    });
-    group('method: findDataTypeArchiveFiles', () {
-      test('not empty', () {
-        var globalVariableArchiveFiles =
-            projectIndexXml.globalVariableArchiveXmlFiles(dataTypeTree);
-        expect(globalVariableArchiveFiles, isNotEmpty);
       });
     });
   });

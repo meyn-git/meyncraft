@@ -17,8 +17,13 @@ class SysmacProjectDetails {
     required this.plcName,
     required this.version,
   });
-}
 
+  bool get isComplete =>
+      site != null &&
+      electricPanel != null &&
+      plcName != null &&
+      version != null;
+}
 
 class Site {
   /// Each known processing plant has a unique [number] (also called a Meyn layout number)
@@ -128,7 +133,9 @@ class SysmacProjectVersion {
               char('-') &
               _intParser &
               char('-') &
-              (letter() & (letter() | digit() | char('-') | char('_').star()).flatten())
+              (letter() &
+                      (letter() | digit() | char('-') | char('_').star())
+                          .flatten())
                   .optional())
           .map(
             (values) => SysmacProjectVersion(
@@ -141,6 +148,7 @@ class SysmacProjectVersion {
   SysmacProjectVersion({
     required this.standardVersion,
     required this.customerVersion,
+
     /// a comment for any program that is not installed. e.g.:
     /// * toBeInstalled
     /// * toBeCompleted
