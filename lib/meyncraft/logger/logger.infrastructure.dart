@@ -13,6 +13,11 @@ class Logger extends ChangeNotifier {
     _logs.add(message);
     notifyListeners();
   }
+
+  void warning(String message) {
+    _logs.add('warning: $message');
+    notifyListeners();
+  }
 }
 
 Logger logger = GetIt.I<Logger>();

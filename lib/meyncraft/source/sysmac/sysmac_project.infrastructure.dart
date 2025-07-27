@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import 'package:collection/collection.dart';
+import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
+import 'package:meyncraft/meyncraft/source/sysmac/detail/detail.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/event/event.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
@@ -32,93 +35,25 @@ class SysmacProjectFile {}
 
 class SysmacProjectFactory {
   //TODO make async
-  SysmacProject create(String sysmacProjectFilePath) {
-    var sysmacProjectArchive = SysmacProjectArchive(sysmacProjectFilePath);
+  SysmacProject create(File file) {
+    var sysmacProjectArchive = SysmacProjectArchive(file);
     var dataTypeTree = DataTypeTreeFactory().create(sysmacProjectArchive);
     var globalVariableService = GlobalVariableService(
       sysmacProjectArchive,
       dataTypeTree,
     );
-
-    var parsedFileName = _parseFileName(sysmacProjectFilePath);
-    var site = _createSite(parsedFileName);
-    var electricPanel = _createElectricPanel(parsedFileName);
-    var sysmacProjectVersion = _createSysmacProjectVersion(parsedFileName);
+    var details=createDetails(file);
     var eventService = EventService(globalVariableService);
     return SysmacProject(
-      archive: sysmacProjectArchive,
-      site: site,
-      electricPanel: electricPanel,
-      sysmacProjectVersion: sysmacProjectVersion,
+      details: details,
       dataTypeTree: dataTypeTree,
       globalVariableService: globalVariableService,
       eventService: eventService,
     );
   }
 
-  Site _createSite(List<dynamic> parsedFileName) {
-    int siteNumber = parsedFileName[1] as int;
-    return Site(siteNumber);
-  }
-
-  ElectricPanel _createElectricPanel(List<dynamic> parsedFileName) {
-    int number = parsedFileName[3] as int;
-    String name = parsedFileName[5] as String;
-    return ElectricPanel(number: number, name: name);
-  }
-
-  List<dynamic> _parseFileName(String sysmacProjectFilePath) {
-    var result = _fileNameParser.parse(sysmacProjectFilePath);
-    if (result.isFailure) {
-      try {
-        result.value;
-      } on Exception catch (e) {
-        throw Exception('Incorrect file name: "$sysmacProjectFilePath". $e');
-      }
-    }
-    return result.value;
-  }
-
-  SysmacProjectVersion _createSysmacProjectVersion(List parsedFileName) =>
-      SysmacProjectVersion(
-        standardVersion: parsedFileName[7] as int,
-        customerVersion: parsedFileName[9] as int,
-        notInstalledComment: parsedFileName[10],
-      );
+ 
 }
-
-var _pathSeparatorParser = char('\\') | char('/');
-
-var _pathParser =
-    (any().starGreedy(_pathSeparatorParser) & _pathSeparatorParser)
-        .flatten()
-        .optional();
-
-var _numberParser = digit().plus().flatten().trim().map(int.parse);
-
-var _deParser = stringIgnoreCase('de');
-
-var _dashParser = char('-');
-
-var _panelNameParser = any().plusLazy(_dashParser).flatten();
-
-var _versionSuffixParser = any().starLazy(_extensionParser).flatten();
-
-var _extensionParser = stringIgnoreCase('.smc2').end();
-
-var _fileNameParser =
-    _pathParser &
-    _numberParser &
-    _deParser &
-    _numberParser &
-    _dashParser.optional() &
-    _panelNameParser &
-    _dashParser &
-    _numberParser &
-    _dashParser &
-    _numberParser &
-    _versionSuffixParser &
-    _extensionParser;
 
 /// Represents a physical Sysmac project file,
 /// which is actually a zip [Archive] containing [ArchiveFile]s
@@ -127,9 +62,7 @@ class SysmacProjectArchive {
   late final File file;
   late ProjectIndexXml projectIndexXml;
 
-  SysmacProjectArchive(String sysmacProjectFilePath) {
-    _validateNotEmpty(sysmacProjectFilePath);
-    file = File(sysmacProjectFilePath);
+  SysmacProjectArchive(File file) {
     _validateExtension(file);
     _validateExists(file);
     Archive archive = readArchive(file);
@@ -154,11 +87,6 @@ class SysmacProjectArchive {
     }
   }
 
-  void _validateNotEmpty(String sysmacProjectFilePath) {
-    if (sysmacProjectFilePath.trim().isEmpty) {
-      throw ArgumentError('may not be empty', 'sysmacProjectFilePath');
-    }
-  }
 
   Archive readArchive(File file) {
     final bytes = file.readAsBytesSync();

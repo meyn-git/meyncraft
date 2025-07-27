@@ -23,7 +23,7 @@ void writeJMobileTagsFile(SysmacProject sysmacProject) {
 }
 
 File createOutputFile(SysmacProject sysmacProject, String suffix) {
-  var sysmacFile = sysmacProject.archive.file;
+  var sysmacFile = sysmacProject.details.projectFile;
   var directory = sysmacFile.parent.path;
   var filename = sysmacFile.uri.pathSegments.last;
   var nameWithoutExtension = filename.split('.').first;

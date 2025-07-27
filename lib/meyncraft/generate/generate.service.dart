@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:meyncraft/meyncraft/generate/sysmac/event_array_code_file.service.dart';
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/events_file.service.dart';
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/tags_file.service.dart';
@@ -7,8 +9,8 @@ import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.infrastructure.
 void generate(String sysmacProjectFilePath) {
   try {
     logger.info('Reading: $sysmacProjectFilePath');
-
-    var sysmacProject = SysmacProjectFactory().create(sysmacProjectFilePath);
+    var file = File(sysmacProjectFilePath);
+    var sysmacProject = SysmacProjectFactory().create(file);
 
     writeJMobileTagsFile(sysmacProject);
     writeJMobileEventsFile(sysmacProject);
