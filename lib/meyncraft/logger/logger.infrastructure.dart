@@ -15,7 +15,7 @@ class Logger extends ChangeNotifier {
   }
 
   void warning(String message) {
-    _logs.add('warning: $message');
+    _logs.add(message);
     notifyListeners();
   }
 }

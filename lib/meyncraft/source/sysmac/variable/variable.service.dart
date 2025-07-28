@@ -1,12 +1,9 @@
 import 'dart:convert';
 
-import 'package:archive/archive.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.infrastructure.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.infrastructure.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.domain.dart';
-import 'package:xml/xml.dart';
 
 const String nameSpacePathSeparator = '\\';
 const String nameAttribute = 'Name';
@@ -36,26 +33,8 @@ class GlobalVariableService {
     return variables;
   }
 
-  @Deprecated('Use variables instead')
-  List<VariableOld> get variablesOld {
-    var projectIndexXml = sysmacProjectArchive.projectIndexXml;
-
-    var archiveXmlFiles = projectIndexXml.globalVariableArchiveXmlFiles(
-      dataTypeTree,
-    );
-
-    List<VariableOld> variables = [];
-    for (var variableArchiveXmlFile in archiveXmlFiles) {
-      variables.addAll(variableArchiveXmlFile.toVariables());
-    }
-    return variables;
-  }
-
-  List<VariableOld> findVariablesByName(String nameToFind) =>
-      variablesOld.where((variable) => variable.name == nameToFind).toList();
-
-  List<VariableOld> findVariablesWithEventGlobalName() =>
-      findVariablesByName(eventGlobalVariableName);
+  List<Variable> findVariablesByName(String nameToFind) =>
+      variables.where((variable) => variable.name == nameToFind).toList();
 
   Variable createVariable(
     Map<String, String> attributes,
@@ -109,69 +88,6 @@ List<Map<String, String>> parseSlwdData(String input) {
   }
 
   return entities;
-}
-
-/// Represents an [ArchiveXml] with information of some [VariableOld]s within a given [nameSpacePath]
-class GlobalVariableArchiveXmlFile extends ArchiveXml {
-  final DataTypeTree dataTypeTree;
-  final String nameSpacePath;
-  final BaseTypeFactory _baseTypeFactory = BaseTypeFactory();
-  final DataTypeReferenceFactory dataTypeReferenceFactory =
-      DataTypeReferenceFactory();
-
-  GlobalVariableArchiveXmlFile.fromArchiveFile({
-    required this.dataTypeTree,
-    required this.nameSpacePath,
-    required ArchiveFile archiveFile,
-  }) : super.fromArchiveFile(archiveFile);
-
-  GlobalVariableArchiveXmlFile.fromXml({
-    required this.dataTypeTree,
-    required this.nameSpacePath,
-    required String xml,
-  }) : super.fromXml(xml);
-
-  List<VariableOld> toVariables() {
-    var dataElement = xmlDocument.firstElementChild!;
-    var variableRootElement = dataElement.firstElementChild;
-    if (variableRootElement == null) {
-      return [];
-    }
-    return variableRootElement.children
-        .where((node) => isVariableElement(node))
-        .map((node) => _createVariable(node))
-        .toList();
-  }
-
-  VariableOld _createVariable(XmlNode variableElement) {
-    String name = variableElement.getAttribute(nameAttribute)!;
-    String baseTypeExpression = variableElement.getAttribute(
-      dataTypeNameAttribute,
-    )!;
-    BaseType baseType = _baseTypeFactory
-        .createFromExpressionIncludingCustomTypes(
-          baseTypeExpression,
-          dataTypeTree,
-        );
-    String comment = variableElement.getAttribute(commentAttribute)!;
-    var variable = VariableOld(
-      name: name,
-      baseType: baseType,
-      comment: comment,
-    );
-
-    // recursively creating children
-    var children = variableElement.children
-        .where((node) => isVariableElement(node))
-        .map((node) => _createVariable(node))
-        .toList();
-    variable.children.addAll(children);
-
-    return variable;
-  }
-
-  bool isVariableElement(XmlNode node) =>
-      node is XmlElement && node.name.local == 'Variable';
 }
 
 class Variable {

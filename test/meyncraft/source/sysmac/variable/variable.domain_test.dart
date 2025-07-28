@@ -30,12 +30,11 @@ void main() {
       });
     });
     group('method: findVariablesWithEventsGlobalName', () {
-      var results = variableService.findVariablesWithEventGlobalName();
+      var results = variableService.findVariablesByName('EventGlobal');
       test('contains one variable with $eventGlobalVariableName', () {
         expect(results, hasLength(1));
         expect(results[0].name, eventGlobalVariableName);
         expect(results[0].baseType, isA<DataTypeReference>());
-        expect(results[0].children.isNotEmpty, true);
         expect(
           (results[0].baseType as DataTypeReference).dataType.baseType,
           isA<Struct>(),

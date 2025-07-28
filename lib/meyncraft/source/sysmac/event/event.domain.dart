@@ -100,8 +100,6 @@ class EventNode {
       ? comment.trim()
       : [parentCommentPath, comment.trim()].join('-');
 
-  final ComponentCodeParser componentCodeParser = ComponentCodeParser();
-
   List<Event> createEvents(
     Counter counter, {
     String parentNamePath = '',

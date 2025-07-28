@@ -2,13 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:collection/collection.dart';
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/detail/detail.service.dart';
+import 'package:meyncraft/meyncraft/source/sysmac/identity/identity.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/event/event.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
-import 'package:petitparser/petitparser.dart';
 import 'package:xml/xml.dart';
 
 import 'data_type/data_type.infrastructure.dart';
@@ -42,7 +39,7 @@ class SysmacProjectFactory {
       sysmacProjectArchive,
       dataTypeTree,
     );
-    var details = createDetails(file);
+    var details = createIdentity(file);
     var eventService = EventService(globalVariableService);
     return SysmacProject(
       details: details,

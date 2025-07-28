@@ -5,6 +5,13 @@
             "type": "dart",
             "request": "launch",
             "program": "lib\\main.dart"
+        },
+        {
+            "name": "Flutter (lib\\main.dart with args)",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib\\main.dart",
+            "args": ["test\\1176DE02-Evisceration-008.smc2"]
         }
     ]
 }
