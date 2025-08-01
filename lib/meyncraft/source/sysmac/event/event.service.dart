@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
 

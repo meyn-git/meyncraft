@@ -2,37 +2,18 @@
 
 import 'dart:io';
 
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
-// TODO remove?
-// void writeSysmacEventArrayCodeFile(
-//     SysmacProject sysmacProject, List<Event> events) {
-//   var code = StringBuffer();
-
-//   code.writeln(
-//       '// The EventGlobal is copied to EventGlobalArray for more efficient communication.');
-//   code.writeln(
-//       '// This code was generated on 2025-07-17 with sysmac_generator.');
-//   code.writeln(
-//       '// For more information see: https://github.com/nils-ten-hoeve/sysmac_generator');
-//   for (var event in events) {
-//     code.writeln('EventGlobalArray[${event.number}]:=${event.namePath};');
-//   }
-//   var outputFile = createOutputFile(sysmacProject, '-SysmacEventArray.txt');
-//   outputFile.createSync();
-//   outputFile.writeAsStringSync(code.toString());
-//   print('Created: ${outputFile.path} (${events.length} events)');
-// }
 
 //TODO make async
-void writeJMobileEventsFile(SysmacProject sysmacProject) {
+Future<void> writeJMobileEventsFile(SysmacProject sysmacProject) async {
   var events = sysmacProject.eventService.events;
   String formattedXml = createFormattedEventsXml(events);
   var outputFile = createOutputFile(sysmacProject, '-JMobileEvents.xml');
-  outputFile.createSync();
-  outputFile.writeAsStringSync(formattedXml);
+  await outputFile.create();
+  await outputFile.writeAsString(formattedXml);
   logger.info('Created: ${outputFile.path}');
 }
 

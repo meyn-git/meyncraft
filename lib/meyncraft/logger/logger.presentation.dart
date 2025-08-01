@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 
 class LogView extends StatefulWidget {
   const LogView({super.key});

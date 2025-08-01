@@ -2,13 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/identity/identity.service.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/event/event.service.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
 import 'package:xml/xml.dart';
 
-import 'data_type/data_type.infrastructure.dart';
 import 'project_index.infrastructure.dart';
 
 /// A [SysmacProjectFile] is an exported
@@ -30,41 +25,25 @@ import 'project_index.infrastructure.dart';
 /// * &lt;not installed reason&gt;= optional text explaining why this version is not the latest version at the customer.
 class SysmacProjectFile {}
 
-class SysmacProjectFactory {
-  //TODO make async
-  SysmacProject create(File file) {
-    var sysmacProjectArchive = SysmacProjectArchive(file);
-    var dataTypeTree = DataTypeTreeFactory().create(sysmacProjectArchive);
-    var globalVariableService = GlobalVariableService(
-      sysmacProjectArchive,
-      dataTypeTree,
-    );
-    var details = createIdentity(file);
-    var eventService = EventService(globalVariableService);
-    return SysmacProject(
-      details: details,
-      dataTypeTree: dataTypeTree,
-      globalVariableService: globalVariableService,
-      eventService: eventService,
-    );
-  }
-}
-
 /// Represents a physical Sysmac project file,
 /// which is actually a zip [Archive] containing [ArchiveFile]s
 class SysmacProjectArchive {
   static String extension = 'smc2';
-  late final File file;
-  late ProjectIndexXml projectIndexXml;
+  final Archive archive;
+  final File file;
+  final ProjectIndexXml projectIndexXml;
 
-  SysmacProjectArchive(File file) {
+  SysmacProjectArchive._(this.file, this.archive)
+    : projectIndexXml = ProjectIndexXml(archive);
+
+  static create(File file) async {
     _validateExtension(file);
     _validateExists(file);
-    Archive archive = readArchive(file);
-    projectIndexXml = ProjectIndexXml(archive);
+    var archive = await readArchive(file);
+    return SysmacProjectArchive._(file, archive);
   }
 
-  void _validateExtension(File file) {
+  static void _validateExtension(File file) {
     if (!file.path.toLowerCase().endsWith(".$extension")) {
       throw ArgumentError(
         "does not end with .$extension extension",
@@ -73,7 +52,7 @@ class SysmacProjectArchive {
     }
   }
 
-  void _validateExists(File file) {
+  static void _validateExists(File file) {
     if (!file.existsSync()) {
       throw ArgumentError(
         'does not point to a existing Sysmac project file',
@@ -82,8 +61,8 @@ class SysmacProjectArchive {
     }
   }
 
-  Archive readArchive(File file) {
-    final bytes = file.readAsBytesSync();
+  static Future<Archive> readArchive(File file) async {
+    final bytes = await file.readAsBytes();
     return ZipDecoder().decodeBytes(bytes);
   }
 }

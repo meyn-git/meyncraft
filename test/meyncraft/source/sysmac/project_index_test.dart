@@ -6,9 +6,9 @@ import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.infrastructure.
 
 import '../../../test_resource.dart';
 
-void main() {
+Future<void> main() async {
   File file = SysmacProjectTestResource().file;
-  var sysmacProjectArchive = SysmacProjectArchive(file);
+  var sysmacProjectArchive = await SysmacProjectArchive.create(file);
   ProjectIndexXml projectIndexXml = sysmacProjectArchive.projectIndexXml;
 
   group('class: ProjectIndexXml', () {

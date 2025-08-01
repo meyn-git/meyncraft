@@ -1,7 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:meyncraft/meyncraft/generate/generate.service.dart';
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/logger/logger.presentation.dart';
 import 'package:meyncraft/meyncraft/theme.presentation.dart';
 
@@ -25,7 +25,7 @@ class _MeynCraftState extends State<MeynCraft> {
     if (sysmacProjectFilePath == null) {
       return;
     }
-    generate(sysmacProjectFilePath);
+    await generate(sysmacProjectFilePath);
   }
 
   Future<String?> _getSysmacProjectFilePath() async {
@@ -50,7 +50,6 @@ class _MeynCraftState extends State<MeynCraft> {
     }
 
     final file = result.files.single;
-    logger.info('Selected file: ${file.path}');
     return file.path!;
   }
 

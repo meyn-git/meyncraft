@@ -3,11 +3,13 @@
 A template engine to create Meyn Control System files using templates.
 
 ## Installation:
-* Download and run the meyncraft installer from: https://raw.githubusercontent.com/meyn-git/meyncraft/refs/heads/main/installer/meyncraft.msix
+* Download the meyncraft installer from: https://raw.githubusercontent.com/meyn-git/meyncraft/refs/heads/main/installer/meyncraft.msix
+* You will need to set the installer to allow the signature: https://www.youtube.com/watch?v=s40bCNnFUgg
+* Run the installer
 
 ## Xor-JMobile tags
 MeynCraft creates Xor-JMobile touch screen tags from a Omron Sysmac file.:
-* All global variables that ar published will be converted to Xor-JMobile tags
+* All global variables that are published will be converted to Xor-JMobile tags
 * If will create a tag for each variable or data type that is (an array of) a base type (e.g. a boolean or int)
 * The generated tags are stored in an xml file so that it can be imported by JMobile:
   * Open a JMobile project
@@ -25,23 +27,23 @@ MeynCraft creates Xor-JMobile touch screen events from a Omron Sysmac file.:
   * Open the tags window from the left menu Configuration\Alarms
   * Click on the "import alarms button" in the toolbar
   * Select the generated *JMobileEvents.xml file
-* You can add additional information to the comments to create the events:
+* You can add additional information to the variable or structure comments to create the events:
   * No Acknowledgement needed: [noAck]<br>
     Events need to be acknowledged by default. Add [noAck] to the comments if an event is only informational and therefore does not have to be acknowledged by the operator.
-  * Skipping component code column numbers: [cc=+2]<br>
-    An events is generated for each array value. 
+  * Skipping component code column numbers: [ccc=+2]<br>
+    An event is generated for each array value. 
     e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q7 Motor overload tripped" will generate the following alarms:
     * 20Q7 Motor overload tripped
     * 20Q8 Motor overload tripped
     * 21Q1 Motor overload tripped
 
-    Add [cc=+2] if the components codes skip columns. e.g.: 
-    * [cc=+2] the next component code will be 2 columns higher
-    * [cc=+3] the next component code will be 3 columns higher
-    * [cc=+4] the next component code will be 4 columns higher
+    Add [ccc=+2] if the components codes skip columns. e.g.: 
+    * [ccc=+2] the next component code will be 2 columns higher
+    * [ccc=+3] the next component code will be 3 columns higher
+    * [ccc=+4] the next component code will be 4 columns higher
     * etc
 
-    e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q5 [cc=+4] Motor overload tripped" will generate the following alarms:
+    e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q5 [ccc=+4] Motor overload tripped" will generate the following alarms:
     * 20Q5 Motor overload tripped
     * 21Q1 Motor overload tripped
     * 21Q5 Motor overload tripped
@@ -77,7 +79,7 @@ Priority definition:
 | Info        | I            | 9     | All events that are not an error, such as information for the operator.     | When a stop button is pressed, or external stop is activated.                               |
 
 ## Sysmac event array
-MeynCraft creates structured text code to copy EventGlobal variable to the EventGlobalArray variable by reading an Omron Sysmac file. This is needed for more efficient communication send event status to Xor-JMobile touch screens or MeynConnect.
+MeynCraft creates structured text code to copy EventGlobal variable to the EventGlobalArray variable by reading an Omron Sysmac file. This is needed for more efficient communication with Xor-JMobile touch screens or MeynConnect.
 * Copy past the generated code from the generated *SysmacEventArray.txt into the Sysmac project: POUs\Programs\Global\HMIControl
 * Note that structured text blocks are limited to 1000 lines. Its good practice to do 500 booleans per ST block (e.g. 0-499, 500-999 etc)
 * Note that the array size of the EventGlobalArray size must be big enough for the amount of events.

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/data_type.dart';
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
@@ -11,14 +11,14 @@ import 'package:xml/xml.dart';
 /// creates an xml file with [XorTag]s generated from a Sysmac project file
 /// to be imported by JMobile
 /// TODO make async
-void writeJMobileTagsFile(SysmacProject sysmacProject) {
+Future<void> writeJMobileTagsFile(SysmacProject sysmacProject) async {
   var variables = sysmacProject.globalVariableService.variables;
   List<XorTag> tags = createTags(variables);
   logger.info('Found ${tags.length} Xor-JMobile tags');
   String formattedXml = createFormattedTagsXml(tags);
   var outputFile = createOutputFile(sysmacProject, '-JMobileTags.xml');
-  outputFile.createSync();
-  outputFile.writeAsStringSync(formattedXml);
+  await outputFile.create();
+  await outputFile.writeAsString(formattedXml);
   logger.info('Created: ${outputFile.path})');
 }
 

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.infrastructure.dart';
 
@@ -11,11 +11,11 @@ import '../../../test_resource.dart';
 void main() {
   GetIt.I.registerSingleton<Logger>(Logger());
 
-  group('class: $SysmacProjectFactory', () {
-    group('constructor', () {
+  group('class: $SysmacProject', () async {
+    group('create() method', () {
       test('path without extension should throw error', () {
         expect(
-          () => SysmacProjectFactory().create(File('sysmacProjectFile')),
+          () async => await SysmacProject.create(File('sysmacProjectFile')),
           throwsA(
             predicate(
               (e) =>
@@ -27,7 +27,7 @@ void main() {
       });
       test('path that does not exist should throw error', () {
         expect(
-          () => SysmacProjectFactory().create(
+          () async => await SysmacProject.create(
             File('sysmacProjectFile.${SysmacProjectArchive.extension}'),
           ),
           throwsA(
@@ -40,17 +40,17 @@ void main() {
           ),
         );
       });
-      test('Successful creation using a correct path', () {
+      test('Successful creation using a correct path', () async {
         File file = SysmacProjectTestResource().file;
         expect(
-          SysmacProjectFactory().create(file).toString(),
+          (await SysmacProject.create(file)).toString(),
           'Instance of \'$SysmacProject\'',
         );
       });
     });
 
     File file = SysmacProjectTestResource().file;
-    var sysmacProjectFile = SysmacProjectFactory().create(file);
+    var sysmacProjectFile = await SysmacProject.create(file);
 
     group('property: dataTypeTree', () {
       test('finds populated dataTypeTree', () {

@@ -3,27 +3,17 @@ import 'dart:io';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 
-Future<void> writeSysmacEventArrayCodeFile(SysmacProject sysmacProject) async {
+Future<void> writeSysmacEventFile(SysmacProject sysmacProject) async {
   var events = sysmacProject.eventService.events;
 
   var code = StringBuffer();
-  code.writeln(
-    '// The EventGlobal variable is copied to the EventGlobalArray variable.',
-  );
-  code.writeln(
-    '// This is needed for more efficient event communication with HMIs and MeynConnect.',
-  );
-  code.writeln(
-    '// This code was generated with MeynCraft on ${DateTime.now()}.',
-  );
-  code.writeln(
-    '// For more information see: https://github.com/meyn-git/meyncraft (scroll down for documentation)',
-  );
   for (var event in events) {
-    code.writeln('EventGlobalArray[${event.number}]:=${event.namePath};');
+    code.writeln(
+      '${event.number},${event.namePath},${event.componentCodes.join(' ')},${event.message},${event.priority.name},${event.acknowledgeRequired}',
+    );
   }
 
-  var outputFile = createOutputFile(sysmacProject, '-SysmacEventArray.txt');
+  var outputFile = createOutputFile(sysmacProject, '-SysmacEvents.csv');
   await outputFile.create();
   await outputFile.writeAsString(code.toString());
 

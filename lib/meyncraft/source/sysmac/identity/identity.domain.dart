@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:meyncraft/meyncraft/source/sysmac/identity/identity.service.dart';
 import 'package:petitparser/petitparser.dart';
 import 'package:recase/recase.dart';
 
@@ -113,16 +114,14 @@ class SysmacProjectVersion {
       (_intParser &
               char('-') &
               _intParser &
-              char('-') &
-              (letter() &
-                      (letter() | digit() | char('-') | char('_').star())
-                          .flatten())
-                  .optional())
+              ((char('-') & nameParser).map(
+                ((values) => values[1]),
+              )).optional())
           .map(
             (values) => SysmacProjectVersion(
               standardVersion: values[0],
               customerVersion: values[2],
-              installComment: values[4],
+              installComment: values[3],
             ),
           );
 

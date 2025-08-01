@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.infrastructure.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.infrastructure.dart';
+import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 
 import '../../../../test_resource.dart';
 
@@ -64,7 +64,7 @@ const String xml = """<?xml version="1.0" encoding="utf-8"?>
 </DataType>
 </data>""";
 
-void main() {
+Future<void> main() async {
   GetIt.I.registerSingleton<Logger>(Logger());
   var dataTypes = DataTypeArchiveXmlFile.fromXml(
     nameSpacePath: 'Test\\NameSpace',
@@ -94,7 +94,7 @@ void main() {
   });
 
   File file = SysmacProjectTestResource().file;
-  var sysmacProject = SysmacProjectFactory().create(file);
+  var sysmacProject = await SysmacProject.create(file);
   var dataTypeTree = sysmacProject.dataTypeTree;
 
   group('class: DataTypeTree', () {

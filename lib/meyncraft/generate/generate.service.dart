@@ -1,20 +1,23 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyncraft/generate/sysmac/event_array_code_file.service.dart';
+import 'package:meyncraft/meyncraft/generate/sysmac/event_file.service.dart';
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/events_file.service.dart';
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/tags_file.service.dart';
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.infrastructure.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 
-void generate(String sysmacProjectFilePath) {
+Future<void> generate(String sysmacProjectFilePath) async {
   try {
     logger.info('Reading: $sysmacProjectFilePath');
     var file = File(sysmacProjectFilePath);
-    var sysmacProject = SysmacProjectFactory().create(file);
+    var sysmacProject = await SysmacProject.create(file);
 
-    writeJMobileTagsFile(sysmacProject);
-    writeJMobileEventsFile(sysmacProject);
-    writeSysmacEventArrayCodeFile(sysmacProject);
+    await writeJMobileTagsFile(sysmacProject);
+    await writeJMobileEventsFile(sysmacProject);
+    await writeSysmacEventArrayCodeFile(sysmacProject);
+    //for debugging:
+    await writeSysmacEventFile(sysmacProject);
   } catch (e, s) {
     logger.info('Error while generating files for $sysmacProjectFilePath:');
     logger.info(e.toString());

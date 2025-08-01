@@ -1,7 +1,8 @@
-import 'package:collection/collection.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/event/event_component_code.domain.dart';
+import 'package:meyncraft/meyncraft/source/sysmac/event/comment_attribute.domain.dart';
+import 'package:meyncraft/meyncraft/source/sysmac/event/component_code.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
 import 'package:petitparser/petitparser.dart';
 
@@ -98,7 +99,7 @@ class EventNode {
   String createCommentPath(String parentCommentPath) =>
       parentCommentPath.isEmpty
       ? comment.trim()
-      : [parentCommentPath, comment.trim()].join('-');
+      : [parentCommentPath, _uppercaseFirstLetter(comment.trim())].join('-');
 
   List<Event> createEvents(
     Counter counter, {
@@ -112,10 +113,20 @@ class EventNode {
       }
       var namePaths = createNamePaths(parentNamePath);
       var commentPath = createCommentPath(parentCommentPath);
-      var componentCodes = getComponentCodes(commentPath);
-      var acknowledgeNeeded = !noAcknowledgeNeeded(commentPath);
-      var priority = EventPriority.valueOf(commentPath);
+      var conditionalAppends =
+          ConditionalAppendCommentAttribute.attributesFromCommentPath(
+            commentPath,
+          );
+      var acknowledgeNeeded = !NoAcknowledgeCommentAttribute.valueOf(
+        commentPath,
+      );
+      var priority = EventPriorityCommentAttribute.valueOf(commentPath);
       for (var namePath in namePaths) {
+        var componentCodes = getComponentCodes(
+          namePath: namePath,
+          commentPath: commentPath,
+          conditionalAppends: conditionalAppends,
+        );
         var arrayValues = createArrayValues(namePath);
         var message = createMessage(commentPath, componentCodes, arrayValues);
         var event = Event(
@@ -185,32 +196,20 @@ class EventNode {
           '',
         )
         .replaceAll(
-          RegExp(r'\[arrayNr\]', caseSensitive: false),
-          arrayValues.lastOrNull?.lastOrNull?.toString() ?? '',
+          ArrayNumberCommentAttribute.parser,
+          ArrayNumberCommentAttribute.valueOf(arrayValues),
         )
         .replaceAll(commentAttributes, '')
         // remove all leading dashes
         .replaceAll(RegExp(r'^(-\s*)+'), '')
+        // remove all unneeded characters
         .replaceAll(' : ', ':')
         .replaceAll(' :', ':')
         .replaceAll(': ', ':')
-        .replaceAll('  ', '')
+        .replaceAll('  ', ' ')
+        .replaceAll('--', '-')
+        .replaceAll(', message instead of alarm event', '')
         .trim();
-  }
-
-  bool noAcknowledgeNeeded(String commentPath) {
-    String comment = commentPath.trim().toLowerCase();
-    return comment.contains('[noack]') ||
-        // TODO add [noAck][prio=m] in Equipment\MtrModule\sEvent library structure comment and remove following line
-        comment.endsWith('stop time out') ||
-        // TODO add [noAck][prio=i] in Safety\sEventInDualChannel\Reset library structure comment and remove following line
-        comment.contains('-reset request') ||
-        // TODO add [noAck][prio=i] in Safety\sEventInDualChannel\Activated library structure comment and remove following line
-        comment.contains('-activated') ||
-        // TODO add [noAck][prio=i] in Cm\StartStopCtrl\sEvent library structure comment and remove following line
-        comment.contains('start request start/stop') ||
-        // TODO add [noAck][prio=i] in Cm\StartStopCtrl\sEvent library structure comment and remove following line
-        comment.contains('start request satellite panel');
   }
 
   /// creates a list of array values for this node.
@@ -260,14 +259,31 @@ class EventNode {
     ];
   }
 
-  List<ComponentCode> getComponentCodes(String commentPath) =>
-      componentCodeParser
-          .allMatches(commentPath, overlapping: false)
-          .whereType<ComponentCode>()
-          .toList();
+  List<ComponentCode> getComponentCodes({
+    required String namePath,
+    required String commentPath,
+    required Iterable<ConditionalAppendCommentAttribute> conditionalAppends,
+  }) {
+    var componentCodes = componentCodeParser
+        .allMatches(
+          commentPath.replaceAll(commentAttributes, ''),
+          overlapping: false,
+        )
+        .whereType<ComponentCode>()
+        .toList();
+
+    var toAppend = ConditionalAppendCommentAttribute.componentsForNamePath(
+      conditionalAppends,
+      namePath,
+    );
+    if (conditionalAppends.isNotEmpty) {
+      logger.info('!!!$conditionalAppends');
+    }
+    return [...componentCodes, ...toAppend];
+  }
 
   int getColumnNumberToAdd(String commentPath) {
-    final matches = NextComponentCodeCommentAttribute.parser.allMatches(
+    final matches = ComponentCodeColumnCommentAttribute.parser.allMatches(
       commentPath,
       overlapping: true,
     );
@@ -279,7 +295,7 @@ class EventNode {
   }
 
   /// override the letters of the component code based on the comment path.
-  /// TODO do this with a CommentAttribute e.g. [S] or [Q]
+  /// TODO do this with a CommentAttribute e.g. [ccl=S] or [ccl=Q]
   String getComponentCodeLetters(
     String commentPath,
     ComponentCode componentCode,
@@ -294,6 +310,13 @@ class EventNode {
       return 'Q';
     }
     return componentCode.letters;
+  }
+
+  String _uppercaseFirstLetter(String text) {
+    if (text.isEmpty) {
+      return text;
+    }
+    return text.substring(0, 1).toUpperCase() + text.substring(1);
   }
 }
 
@@ -381,68 +404,4 @@ enum EventPriority {
     required this.description,
     required this.example,
   });
-
-  /// finds [prio=l] [PRIO=mL] [PRIO=M] etc.
-  static RegExp get regExp => RegExp(
-    '\\[prio=(${values.map((v) => v.abbreviation).join('|')})\\]',
-    caseSensitive: false,
-  );
-
-  static EventPriority valueOf(String comments) {
-    final matches = regExp.allMatches(comments);
-    if (matches.isEmpty) {
-      return medium;
-    }
-    final abbreviation = matches.first.group(1)!.trim().toUpperCase();
-    for (var value in values) {
-      if (value.abbreviation == abbreviation) {
-        return value;
-      }
-    }
-    return medium;
-  }
-}
-
-// TODO
-// /// a CommentAttribute is a piece of text in a [Variable] or [DataType] comment
-// /// that provides additional information about the event.
-// /// It is surrounded by square brackets and is not visible in the event message.
-// /// Example: [noAck] or [prio=M] or [cc=+2]
-// abstract class CommentAttribute<T> {
-
-//   Parser<CommentAttribute> get parser;
-
-//   T get value;
-// }
-
-// class NoAckCommentAttribute extends CommentAttribute<bool> {
-//   @override
-//   Parser<CommentAttribute> get parser => stringIgnoreCase('[noack]').map((_) => this);
-//   @override
-//   bool get value => true;
-// }
-
-// class PrioCommentAttribute extends CommentAttribute<EventPriority> {
-//   @override
-//   final EventPriority value;
-
-//   PrioCommentAttribute(this.value);
-
-//   @override
-//   Parser<CommentAttribute> get parser =>
-//       EventPriority.regExp.map((match) => PrioCommentAttribute(
-//           EventPriority.valueOf(match.group(0) ?? '')));
-
-// }
-
-class NextComponentCodeCommentAttribute {
-  final int numberOfColumnsToAdd;
-
-  NextComponentCodeCommentAttribute(this.numberOfColumnsToAdd);
-
-  static Parser<NextComponentCodeCommentAttribute> parser =
-      (stringIgnoreCase('[cc=') &
-              (char('+').optional() & digit().plus()).flatten().map(int.parse) &
-              char(']'))
-          .map((values) => NextComponentCodeCommentAttribute(values[1]));
 }

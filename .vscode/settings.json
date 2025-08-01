@@ -1,6 +1,16 @@
 {
     "cSpell.words": [
+        "Acked",
+        "arrayindex",
+        "arraysize",
         "BESTURINGSTECHNIEK",
+        "Deskinner",
+        "elmax",
+        "elmin",
+        "Ethercat",
+        "ETIP",
+        "eumax",
+        "eumin",
         "Eviseration",
         "jmobile",
         "Meyn",
@@ -13,6 +23,8 @@
         "recase",
         "Slwd",
         "swld",
-        "sysmac"
+        "sysmac",
+        "TAGLOCATOR",
+        "useractions"
     ]
 }

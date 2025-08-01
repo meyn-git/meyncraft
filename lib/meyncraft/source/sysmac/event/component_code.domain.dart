@@ -12,6 +12,8 @@ import 'package:petitparser/petitparser.dart';
 ///   * 100=[pageNumber]
 ///   * U=[letters]
 ///   * 3.1=[columnNumber]
+
+/// TODO add String? node e.g. Ethercat node 1, ot IO Link node 20
 class ComponentCode {
   final Site? site;
   final ElectricPanel? electricPanel;
@@ -86,7 +88,7 @@ class ComponentCode {
 
 final Parser<int> _pageNumberParser = digit().plus().flatten().map(int.parse);
 
-final Parser<String> _lettersParser = letter()
+final Parser<String> _lettersParser = (letter() | char('_'))
     .repeat(1, 4)
     .flatten()
     .map((String value) => value.toUpperCase());

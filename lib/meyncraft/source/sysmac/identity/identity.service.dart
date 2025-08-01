@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:meyncraft/meyncraft/logger/logger.infrastructure.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/identity/identity.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
