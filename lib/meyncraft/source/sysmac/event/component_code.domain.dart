@@ -13,7 +13,7 @@ import 'package:petitparser/petitparser.dart';
 ///   * U=[letters]
 ///   * 3.1=[columnNumber]
 
-/// TODO add String? node e.g. Ethercat node 1, ot IO Link node 20
+/// TODO add String? plcAddress (so we can remove all node numbers from the comments)
 class ComponentCode {
   final Site? site;
   final ElectricPanel? electricPanel;
@@ -42,8 +42,8 @@ class ComponentCode {
   final ColumNumber columnNumber;
 
   ComponentCode({
-    required this.site,
-    required this.electricPanel,
+    this.site,
+    this.electricPanel,
     required this.pageNumber,
     required String letters,
     required this.columnNumber,
@@ -67,6 +67,20 @@ class ComponentCode {
       pageNumber.hashCode ^
       letters.hashCode ^
       columnNumber.hashCode;
+
+  ComponentCode copyWith({
+    Site? site,
+    ElectricPanel? electricPanel,
+    int? pageNumber,
+    String? letters,
+    ColumNumber? columnNumber,
+  }) => ComponentCode(
+    site: site ?? this.site,
+    electricPanel: electricPanel ?? this.electricPanel,
+    pageNumber: pageNumber ?? this.pageNumber,
+    letters: (letters ?? this.letters).toUpperCase(),
+    columnNumber: columnNumber ?? this.columnNumber,
+  );
 
   @override
   String toString() => _code;

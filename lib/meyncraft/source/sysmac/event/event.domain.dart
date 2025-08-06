@@ -14,7 +14,6 @@ class Event {
   final List<ComponentCode> componentCodes;
   final EventPriority priority;
   final bool acknowledgeRequired;
-  final List<List<int>> arrayValues;
 
   Event({
     required this.number,
@@ -24,7 +23,6 @@ class Event {
     this.componentCodes = const <ComponentCode>[],
     required this.priority,
     required this.acknowledgeRequired,
-    required this.arrayValues,
   });
 
   String get componentCodesAndMessage =>
@@ -113,35 +111,20 @@ class EventNode {
       }
       var namePaths = createNamePaths(parentNamePath);
       var commentPath = createCommentPath(parentCommentPath);
-      var conditionalAppends =
-          ConditionalAppendCommentAttribute.attributesFromCommentPath(
-            commentPath,
-          );
-      var acknowledgeNeeded = !NoAcknowledgeCommentAttribute.valueOf(
-        commentPath,
-      );
-      var priority = EventPriorityCommentAttribute.valueOf(commentPath);
       for (var namePath in namePaths) {
-        var componentCodes = getComponentCodes(
-          namePath: namePath,
-          commentPath: commentPath,
-          conditionalAppends: conditionalAppends,
-        );
-        var arrayValues = createArrayValues(namePath);
-        var message = createMessage(commentPath, componentCodes, arrayValues);
+        var eventValues = createEventValues(namePath, commentPath);
+        var acknowledgeNeeded = AcknowledgeAttribute.acknowledge(eventValues);
+        var priority = PriorityAttribute.priority(eventValues);
+        var componentCodes = findComponentCodes(namePath, eventValues);
+        var message = createMessage(eventValues);
         var event = Event(
           number: counter.next(),
           namePath: namePath,
           group: createGroupName(namePath),
-          componentCodes: updateComponentCodes(
-            commentPath,
-            componentCodes,
-            arrayValues,
-          ),
+          componentCodes: componentCodes,
           message: message,
           priority: priority,
           acknowledgeRequired: acknowledgeNeeded,
-          arrayValues: arrayValues,
         );
         events.add(event);
       }
@@ -184,22 +167,12 @@ class EventNode {
   }
 
   /// normalizes the commentPath to a message.
-  String createMessage(
-    String commentPath,
-    List<ComponentCode> componentCodes,
-    List<List<int>> arrayValues,
-  ) {
-    return commentPath
-        // remove all component codes
-        .replaceAll(
-          RegExp(componentCodes.map((cc) => cc.createCode()).join('|')),
-          '',
-        )
-        .replaceAll(
-          ArrayNumberCommentAttribute.parser,
-          ArrayNumberCommentAttribute.valueOf(arrayValues),
-        )
-        .replaceAll(commentAttributes, '')
+  String createMessage(List eventValues) {
+    var rawMessage = eventValues
+        .where((v) => v is String || v is num)
+        .map((v) => v.toString())
+        .join();
+    return rawMessage
         // remove all leading dashes
         .replaceAll(RegExp(r'^(-\s*)+'), '')
         // remove all unneeded characters
@@ -212,86 +185,25 @@ class EventNode {
         .trim();
   }
 
-  /// creates a list of array values for this node.
-  /// e.g. for EventGlobal.Plucker[1],Motor[3,4].MtrProt returns [[1], [3, 4]]
-  List<List<int>> createArrayValues(String namePath) {
-    final regex = RegExp(r'\[(.*?)\]');
-    final matches = regex.allMatches(namePath);
-    return matches.map((match) {
-      final content = match.group(1);
-      if (content == null || content.isEmpty) return <int>[];
-      return content.split(',').map((e) => int.parse(e.trim())).toList();
-    }).toList();
-  }
-
-  List<ComponentCode> updateComponentCodes(
-    String commentPath,
-    List<ComponentCode> componentCodes,
-    List<List<int>> arrayValues,
-  ) {
-    if (componentCodes.isEmpty ||
-        arrayValues.isEmpty ||
-        componentCodes.length > 1) {
-      return componentCodes;
+  List<ComponentCode> findComponentCodes(String namePath, List eventValues) {
+    var componentCodes = eventValues.whereType<ComponentCode>();
+    var columnAttribute = eventValues
+        .whereType<ComponentCodeAddColumnsAttribute>()
+        .lastOrNull;
+    var lettersAttribute = eventValues
+        .whereType<ComponentCodeOverrideLettersAttribute>()
+        .lastOrNull;
+    var result = <ComponentCode>[];
+    for (var componentCode in componentCodes) {
+      if (columnAttribute != null) {
+        componentCode = columnAttribute.componentCode(componentCode, namePath);
+      }
+      if (lettersAttribute != null) {
+        componentCode = lettersAttribute.componentCode(componentCode);
+      }
+      result.add(componentCode);
     }
-
-    /// calculate the component code when an array is used
-    var componentCode = componentCodes.first;
-
-    var columnNumberToAdd = getColumnNumberToAdd(commentPath);
-    var arrayValue =
-        arrayValues.last.last; // We assume the last array will start with 1
-    var unlimitedColumnNumber =
-        componentCode.columnNumber.value + (arrayValue - 1) * columnNumberToAdd;
-    var columnNumber = ColumNumber((unlimitedColumnNumber - 1) % 8 + 1);
-    var pageNumber =
-        componentCode.pageNumber + ((unlimitedColumnNumber - 1) ~/ 8);
-    var letters = getComponentCodeLetters(commentPath, componentCode);
-
-    return [
-      ComponentCode(
-        site: componentCode.site,
-        electricPanel: componentCode.electricPanel,
-        pageNumber: pageNumber,
-        letters: letters,
-        columnNumber: columnNumber,
-      ),
-    ];
-  }
-
-  List<ComponentCode> getComponentCodes({
-    required String namePath,
-    required String commentPath,
-    required Iterable<ConditionalAppendCommentAttribute> conditionalAppends,
-  }) {
-    var componentCodes = componentCodeParser
-        .allMatches(
-          commentPath.replaceAll(commentAttributes, ''),
-          overlapping: false,
-        )
-        .whereType<ComponentCode>()
-        .toList();
-
-    var toAppend = ConditionalAppendCommentAttribute.componentsForNamePath(
-      conditionalAppends,
-      namePath,
-    );
-    if (conditionalAppends.isNotEmpty) {
-      logger.info('!!!$conditionalAppends');
-    }
-    return [...componentCodes, ...toAppend];
-  }
-
-  int getColumnNumberToAdd(String commentPath) {
-    final matches = ComponentCodeColumnCommentAttribute.parser.allMatches(
-      commentPath,
-      overlapping: true,
-    );
-    if (matches.isEmpty) {
-      return 1; // Default value if no match is found
-    } else {
-      return matches.first.numberOfColumnsToAdd;
-    }
+    return result;
   }
 
   /// override the letters of the component code based on the comment path.
@@ -318,16 +230,132 @@ class EventNode {
     }
     return text.substring(0, 1).toUpperCase() + text.substring(1);
   }
+
+  /// FIXME: This is temporarily until MeynCraft is common good 
+  /// and the standard libraries contain ComponentCodeLettersAttributes', 
+  /// then this List can be removed
+  List<CommentAttribute> conditionalAttributes = [
+    // TODO add [ccl=S] in Cm\MtrCtrl\sEventDol and Cm\MtrCtrl\sEventVfd library structure comments and remove following line
+    ConditionalAttribute('*.MtrSw', [
+      ComponentCodeOverrideLettersAttribute('S'),
+    ]),
+    // TODO add [ccl=Q] in Cm\MtrCtrl\sEventDol and Cm\MtrCtrl\sEventVfd library structure comments and remove following line
+    ConditionalAttribute('*.MtrProt', [
+      ComponentCodeOverrideLettersAttribute('Q'),
+    ]),
+    // TODO add [ccl=M] in Cm\MtrCtrl\sEventDol library structure comments and remove following lines
+    ConditionalAttribute('*.NotRunning', [
+      ComponentCodeOverrideLettersAttribute('M'),
+    ]),
+    ConditionalAttribute('*.NotStopped', [
+      ComponentCodeOverrideLettersAttribute('M'),
+    ]),
+    ConditionalAttribute('*.Interlocked', [
+      ComponentCodeOverrideLettersAttribute('M'),
+    ]),
+    // TODO add [ccl=U] in Cm\MtrCtrl\sEventVfd library structure comments and remove following lines
+    // following lines are commented because fuses als have .Tripped but must stay F
+    // ConditionalAttribute('*.Tripped', [
+    //   ComponentCodeOverrideLettersAttribute('U'),
+    // ]),
+    ConditionalAttribute('*.DriveOff', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.DriveWarning', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.Low10V', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.MtrEtrOverTmp', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.TorqueLimit', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.OverCurr', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.GroundFault', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.ShortCircuit', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.SafeStop', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.FeedbackMonitor', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+    ConditionalAttribute('*.TrackingErr', [
+      ComponentCodeOverrideLettersAttribute('U'),
+    ]),
+
+    // TODO add [noAck] in Equipment\*Module\sEvent library structure comment and remove following line
+    ConditionalAttribute('*.StopTimeOut', [AcknowledgeAttribute(false)]),
+    // TODO add [noAck][prio=info] in Safety\sEventInDualChannel\Reset library structure comment and remove following line
+    ConditionalAttribute('*.RstReq', [
+      AcknowledgeAttribute(false),
+      PriorityAttribute(EventPriority.info),
+    ]),
+    // TODO add [noAck][prio=info] in Safety\sEventInDualChannel\Activated library structure comment and remove following line
+    ConditionalAttribute('*.Active', [
+      AcknowledgeAttribute(false),
+      PriorityAttribute(EventPriority.info),
+    ]),
+    ConditionalAttribute('*.ActiveWarning', [
+      AcknowledgeAttribute(false),
+      PriorityAttribute(EventPriority.info),
+    ]),
+    // TODO add [noAck][prio=info] in Cm\StartStopCtrl\sEvent library structure comment and remove following line
+    ConditionalAttribute('*.StopBox*', [
+      AcknowledgeAttribute(false),
+      PriorityAttribute(EventPriority.info),
+    ]),
+  ];
+
+  List createEventValues(String namePath, String commentPath) {
+    var result = commentPathParser.parse(commentPath);
+    var parsedValues = result is Failure
+        ? [conditionalAttributes]
+        : [...conditionalAttributes, ...result.value];
+    var values = replaceEventValues(namePath, parsedValues);
+    var unknownAttributes = values.whereType<UnknownAttribute>();
+    if (unknownAttributes.isNotEmpty) {
+      logger.warning(
+        'Unknown attributes found in event "$namePath" with commentPath "$commentPath": $unknownAttributes',
+      );
+    }
+    return values;
+  }
+
+  List replaceEventValues(String namePath, Iterable parsedValues) {
+    var values = [];
+    for (var parsedValue in parsedValues) {
+      if (parsedValue is Replaceable) {
+        var newValue = parsedValue.replacementValue(namePath);
+        var newValues = newValue is Iterable ? newValue : [newValue];
+        values.addAll(replaceEventValues(namePath, newValues));
+      } else {
+        values.add(parsedValue);
+      }
+    }
+    return values;
+  }
 }
 
-/// commentAttributes is information in [Variable] or [DataType] comments that can be used to generate events.
-/// TODO crate a CommentAttribute class and extend all CommentAttributes extend it. It needs to have a parser and description.  The description needs to be imported as documentation
-/// \[.*?\] matches:
-/// \[ — a literal opening bracket
-/// .*? — any characters (non-greedy)
-/// \] — a literal closing bracket
-final RegExp commentAttributes = RegExp(r'\[.*?\]');
-
+/// Priority definition:
+/// | Name        | Abbreviation | Level | Description                                                                 | Example                                                                                      |
+/// |-------------|--------------|-------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+/// | Fatal       | F            | 1     | A fatal problem that prevents the system from working (fatal for system).   | An EtherCAT error, an important fuse of the control system, missing IO cards, critical IO card errors, etc. |
+/// | Critical    | C            | 2     | A critical problem that stops the system.                                   | An emergency stop, a critical motor tripped, low hydraulic level, etc.                      |
+/// | High        | H            | 3     | A problem with major consequences, but system keeps running.                | Direct action is needed, e.g.: an important motor tripped, etc.                             |
+/// | Medium High | MH           | 4     | A problem with moderate consequences.                                       | Urgent action is required.                                                                  |
+/// | Medium      | M            | 5     | A problem with some consequences.                                           | Action within 5 minutes is required, e.g. when a low temperature is detected.               |
+/// | Medium Low  | ML           | 6     | A problem with minor consequences.                                          | Action within 15 minutes is required.                                                       |
+/// | Low         | L            | 7     | A problem with almost no consequences.                                      | Eventually action is required, e.g. a tripped plucker motor.                                |
+/// | Info        | I            | 9     | All events that are not an error, such as information for the operator.     | When a stop button is pressed, or external stop is activated.                               |
 enum EventPriority {
   fatal(
     name: 'Fatal',

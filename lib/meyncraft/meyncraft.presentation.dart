@@ -39,7 +39,9 @@ class _MeynCraftState extends State<MeynCraft> {
 
   Future<String?> _openFilePicker() async {
     final result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Select a Omron Sysmac Project file to generate from',
+      lockParentWindow: true,
+      dialogTitle:
+          'MeynCraft - Select a Omron Sysmac Project file to generate from',
       type: FileType.custom,
       allowedExtensions: ['smc2'],
       allowMultiple: false,

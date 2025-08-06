@@ -9,7 +9,7 @@ Future<void> writeSysmacEventFile(SysmacProject sysmacProject) async {
   var code = StringBuffer();
   for (var event in events) {
     code.writeln(
-      '${event.number},${event.namePath},${event.componentCodes.join(' ')},${event.message},${event.priority.name},${event.acknowledgeRequired}',
+      '${event.number},${event.namePath},${event.group},${event.componentCodes.join(' ')},${event.message},${event.priority.name},${event.acknowledgeRequired}',
     );
   }
 

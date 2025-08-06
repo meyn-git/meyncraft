@@ -11,7 +11,7 @@ import '../../../test_resource.dart';
 void main() {
   GetIt.I.registerSingleton<Logger>(Logger());
 
-  group('class: $SysmacProject', () async {
+  group('class: $SysmacProject', () {
     group('create() method', () {
       test('path without extension should throw error', () {
         expect(
@@ -48,10 +48,11 @@ void main() {
         );
       });
     });
-
-    File file = SysmacProjectTestResource().file;
-    var sysmacProjectFile = await SysmacProject.create(file);
-
+    late SysmacProject sysmacProjectFile;
+    setUp(() async {
+      late File file = SysmacProjectTestResource().file;
+      sysmacProjectFile = await SysmacProject.create(file);
+    });
     group('property: dataTypeTree', () {
       test('finds populated dataTypeTree', () {
         var dataTypeTree = sysmacProjectFile.dataTypeTree;
