@@ -187,12 +187,13 @@ class EventNode {
 
   List<ComponentCode> findComponentCodes(String namePath, List eventValues) {
     var componentCodes = eventValues.whereType<ComponentCode>();
-    var columnAttribute = eventValues
-        .whereType<ComponentCodeAddColumnsAttribute>()
-        .lastOrNull;
-    var lettersAttribute = eventValues
-        .whereType<ComponentCodeOverrideLettersAttribute>()
-        .lastOrNull;
+    var columnAttribute = ComponentCodeAddColumnsAttribute.valueOf(
+      namePath,
+      eventValues,
+    );
+    var lettersAttribute = ComponentCodeOverrideLettersAttribute.valueOf(
+      eventValues,
+    );
     var result = <ComponentCode>[];
     for (var componentCode in componentCodes) {
       if (columnAttribute != null) {
@@ -231,8 +232,14 @@ class EventNode {
     return text.substring(0, 1).toUpperCase() + text.substring(1);
   }
 
-  /// FIXME: This is temporarily until MeynCraft is common good 
-  /// and the standard libraries contain ComponentCodeLettersAttributes', 
+  List<CommentAttribute> defaultAttributes = [
+    PriorityAttribute(EventPriority.medium),
+    AcknowledgeAttribute(true),
+    ComponentCodeAddColumnsAttribute(1),
+  ];
+
+  /// FIXME: This is temporarily until MeynCraft is common good
+  /// and the standard libraries contain ComponentCodeLettersAttributes',
   /// then this List can be removed
   List<CommentAttribute> conditionalAttributes = [
     // TODO add [ccl=S] in Cm\MtrCtrl\sEventDol and Cm\MtrCtrl\sEventVfd library structure comments and remove following line
@@ -250,9 +257,10 @@ class EventNode {
     ConditionalAttribute('*.NotStopped', [
       ComponentCodeOverrideLettersAttribute('M'),
     ]),
-    ConditionalAttribute('*.Interlocked', [
-      ComponentCodeOverrideLettersAttribute('M'),
-    ]),
+    // following lines are commented because *.Interlocked is used be several structures
+    // ConditionalAttribute('*.Interlocked', [
+    //   ComponentCodeOverrideLettersAttribute('M'),
+    // ]),
     // TODO add [ccl=U] in Cm\MtrCtrl\sEventVfd library structure comments and remove following lines
     // following lines are commented because fuses als have .Tripped but must stay F
     // ConditionalAttribute('*.Tripped', [
@@ -317,28 +325,29 @@ class EventNode {
 
   List createEventValues(String namePath, String commentPath) {
     var result = commentPathParser.parse(commentPath);
-    var parsedValues = result is Failure
-        ? [conditionalAttributes]
+    var values = result is Failure
+        ? [...conditionalAttributes]
         : [...conditionalAttributes, ...result.value];
-    var values = replaceEventValues(namePath, parsedValues);
-    var unknownAttributes = values.whereType<UnknownAttribute>();
+    var eventValues = replaceEventValues(namePath, values);
+    var unknownAttributes = eventValues.whereType<UnknownAttribute>();
     if (unknownAttributes.isNotEmpty) {
       logger.warning(
         'Unknown attributes found in event "$namePath" with commentPath "$commentPath": $unknownAttributes',
       );
     }
-    return values;
+    return eventValues;
   }
 
-  List replaceEventValues(String namePath, Iterable parsedValues) {
+  /// Replaces all [Replaceable] values in the parsedValues with their replacement value.
+  List replaceEventValues(String namePath, Iterable eventValues) {
     var values = [];
-    for (var parsedValue in parsedValues) {
-      if (parsedValue is Replaceable) {
-        var newValue = parsedValue.replacementValue(namePath);
+    for (var eventValue in eventValues) {
+      if (eventValue is Replaceable) {
+        var newValue = eventValue.replacementValue(namePath);
         var newValues = newValue is Iterable ? newValue : [newValue];
         values.addAll(replaceEventValues(namePath, newValues));
       } else {
-        values.add(parsedValue);
+        values.add(eventValue);
       }
     }
     return values;

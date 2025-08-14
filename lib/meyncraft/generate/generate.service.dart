@@ -23,6 +23,5 @@ Future<void> generate(String sysmacProjectFilePath) async {
     logger.info(e.toString());
     logger.info(s.toString());
   }
-  logger.info('Finished.');
-  logger.info('Close MeynCraft and start it again to re-generate files.');
+  logger.completed=true;
 }

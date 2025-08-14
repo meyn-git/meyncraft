@@ -17,52 +17,71 @@ class _MeynCraftState extends State<MeynCraft> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _startProcessing());
-  }
-
-  Future<void> _startProcessing() async {
-    var sysmacProjectFilePath = await _getSysmacProjectFilePath();
-    if (sysmacProjectFilePath == null) {
-      return;
-    }
-    await generate(sysmacProjectFilePath);
-  }
-
-  Future<String?> _getSysmacProjectFilePath() async {
-    var sysmacProjectFilePath = widget.args.join(' ');
-    if (sysmacProjectFilePath.isEmpty) {
-      return await _openFilePicker();
-    } else {
-      return sysmacProjectFilePath;
-    }
-  }
-
-  Future<String?> _openFilePicker() async {
-    final result = await FilePicker.platform.pickFiles(
-      lockParentWindow: true,
-      dialogTitle:
-          'MeynCraft - Select a Omron Sysmac Project file to generate from',
-      type: FileType.custom,
-      allowedExtensions: ['smc2'],
-      allowMultiple: false,
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => selectSysmacFileAndGenerate(),
     );
-    if (result == null || result.files.isEmpty) {
-      logger.info('Aborted: No file selected.');
-      return null;
-    }
-
-    final file = result.files.single;
-    return file.path!;
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MeynCraft',
+      debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       theme: meynTheme(Brightness.light),
       darkTheme: meynTheme(Brightness.dark),
-      home: LogView(),
+      home: Scaffold(
+        // appBar: AppBar(
+        //   title: Text('MeynCraft'),
+        //   actions: [
+        //     IconButton(
+        //       icon: Icon(Icons.minimize),
+        //       onPressed: () => windowManager.minimize(),
+        //       tooltip: 'Minimize',
+        //     ),
+        //     //TODO Midimize when is maximized
+        //     IconButton(
+        //       icon: Icon(Icons.square_outlined),
+        //       onPressed: () => windowManager.maximize(),
+        //       tooltip: 'Maximize',
+        //     ),
+        //     IconButton(
+        //       icon: Icon(Icons.close),
+        //       onPressed: () => windowManager.close(),
+        //       tooltip: 'Close',
+        //     ),
+        //   ],
+        // ),
+        body: LogView(),
+      ),
     );
   }
+}
+
+Future<void> selectSysmacFileAndGenerate() async {
+  logger.clear();
+  var sysmacProjectFilePath = await _openFilePicker();
+  if (sysmacProjectFilePath == null) {
+    logger.completed = true;
+    return;
+  }
+  await generate(sysmacProjectFilePath);
+}
+
+Future<String?> _openFilePicker() async {
+  final result = await FilePicker.platform.pickFiles(
+    lockParentWindow: true,
+    dialogTitle:
+        'MeynCraft - Select a Omron Sysmac Project file to generate from',
+    type: FileType.custom,
+    allowedExtensions: ['smc2'],
+    allowMultiple: false,
+  );
+  if (result == null || result.files.isEmpty) {
+    logger.info('Aborted: No file selected.');
+    return null;
+  }
+
+  final file = result.files.single;
+  return file.path!;
 }

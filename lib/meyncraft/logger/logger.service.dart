@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 /// TODO support hyperlinks in logs
 /// TODO support colors in logs
 class Logger extends ChangeNotifier {
+  bool _completed = false;
   final List<String> _logs = [];
 
   List<String> get logs => _logs;
@@ -16,6 +17,21 @@ class Logger extends ChangeNotifier {
 
   void warning(String message) {
     _logs.add(message);
+    notifyListeners();
+  }
+
+   set completed(bool value) {
+    if (_completed == value || value==false) return;
+    _completed = true;
+    _logs.add('Completed');
+    notifyListeners();
+  }
+
+  bool get completed => _completed;
+
+  void clear() {
+    _logs.clear();
+    _completed = false;
     notifyListeners();
   }
 }

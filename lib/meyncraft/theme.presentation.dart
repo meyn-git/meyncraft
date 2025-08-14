@@ -27,7 +27,7 @@ ThemeData meynTheme(Brightness brightness) =>
       ),
     ).copyWith(
       appBarTheme: AppBarTheme(
-        backgroundColor: meynPrimary, // Use your primary color here
+        backgroundColor: Colors.black, // Use your primary color here
         foregroundColor: Colors.white, // Optional: sets text/icon color
       ),
     );

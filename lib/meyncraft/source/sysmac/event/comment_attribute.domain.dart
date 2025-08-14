@@ -33,12 +33,25 @@ final Parser<List> commentPathParser =
 
 /// converts [...] texts to [CommentAttribute]s
 Parser<CommentAttribute> commentAttributeParser =
-    (char('[') & (any().plusLazy(char(']')).flatten().trim()) & char(']')).map(
+    (char('[') & _innerCommentAttributeParser & char(']')).map(
       (values) => convertToCommentAttribute(values[1]),
     );
 
+Parser<String> _innerCommentAttributeParser =
+    ((char('[') & _anythingUntilEndParser & char(']')).flatten() | any()).plusLazy(char(']')).flatten().trim();
+
+Parser<String> _anythingUntilEndParser =
+    any().plusLazy(char(']')).flatten().trim();
+
+
+Parser<String> endCommentAttributeParser =
+    (char('[') & (any().plusLazy(char(']')).flatten().trim()) & char(']')).flatten();
+
 /// converts an expression (the text between []) to a [CommentAttribute]
 CommentAttribute convertToCommentAttribute(String expression) {
+  if (expression.contains('306S1')) {
+    print(expression);
+  }
   for (var parser in commentAttributeParsers) {
     var result = parser.parse(expression);
     if (result is Success) {
@@ -67,7 +80,7 @@ class NameEqualsValueParser<T extends CommentAttribute>
 
   static Parser<String> valueParser = any().star().flatten();
 
-  static Parser<String> nameParser = any().starGreedy(char('=')).flatten();
+  static Parser<String> nameParser = any().starLazy(char('=')).flatten();
 
   @override
   Parser<T> copy() => NameEqualsValueParser(nameValueConverter);
@@ -156,10 +169,10 @@ enum ArrayIndexType { first, last }
 /// * 20Q7 Motor 1 overload tripped
 /// * 20Q8 Motor 2 overload tripped
 /// * 21Q1 Motor 3 overload tripped
-/// 
+///
 /// The expression defines which array value from the name path will be used
 /// e.g. namePath=plucker[2,5].cabinet[1].row[3]
-/// 
+///
 /// then:
 /// * array(first)   or array(0) or array(last-3) returns 2
 /// * array(first+1) or array(1) or array(last-2) returns 5
@@ -313,7 +326,7 @@ class ComponentCodeAddColumnsAttribute implements CommentAttribute {
     var newUnboundedColumnNumber =
         changeDecimalsTo(componentCode.columnNumber.value, 0.5) +
         ((arrayValue - 1) * changeDecimalsTo(numberOfColumnsToAdd, 0.5));
-    var pagesToAdd = newUnboundedColumnNumber ~/ numberOfColumnsOnPage;
+    var pagesToAdd = (newUnboundedColumnNumber-1) ~/ numberOfColumnsOnPage;
     var newPageNumber = componentCode.pageNumber + pagesToAdd;
     var newColumnNumber = changeDecimalsTo(
       newUnboundedColumnNumber - (pagesToAdd * numberOfColumnsOnPage),
@@ -334,10 +347,23 @@ class ComponentCodeAddColumnsAttribute implements CommentAttribute {
     }
     return value;
   }
+
+  static ComponentCodeAddColumnsAttribute? valueOf(
+    String namePath,
+    List eventValues,
+  ) {
+    if (!namePath.contains('[')) {
+      return null;
+    }
+    return eventValues
+            .whereType<ComponentCodeAddColumnsAttribute>()
+            .lastOrNull ??
+        ComponentCodeAddColumnsAttribute(1);
+  }
 }
 
-/// Overrides [ComponentCode.letters] 
-/// e.g.: if the comment is "20Q5 [ccl=S] Motor switched off" 
+/// Overrides [ComponentCode.letters]
+/// e.g.: if the comment is "20Q5 [ccl=S] Motor switched off"
 /// then the event will be generated with component code "20S1 Motor switched off"
 class ComponentCodeOverrideLettersAttribute implements CommentAttribute {
   static Parser<ComponentCodeOverrideLettersAttribute> parser =
@@ -365,6 +391,9 @@ class ComponentCodeOverrideLettersAttribute implements CommentAttribute {
 
   ComponentCode componentCode(ComponentCode componentCode) =>
       componentCode.copyWith(letters: componentLetters);
+
+  static ComponentCodeOverrideLettersAttribute? valueOf(List eventValues) =>
+      eventValues.whereType<ComponentCodeOverrideLettersAttribute>().lastOrNull;
 }
 
 /// You can conditionally add information to an event based on the name path of the event.
@@ -386,6 +415,10 @@ class ConditionalAttribute implements CommentAttribute, Replaceable {
     required String name,
     required String value,
   }) {
+    // we do not care about the name because it is an expression 
+    // and will be validated when calling createNamePathValidator() 
+    
+
     var result = commentPathParser.parse(value.trim());
     if (result is Failure) {
       throw Exception('Invalid value: $result');
@@ -419,5 +452,3 @@ class ConditionalAttribute implements CommentAttribute, Replaceable {
     return [];
   }
 }
-
-
