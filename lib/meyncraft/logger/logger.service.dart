@@ -20,8 +20,8 @@ class Logger extends ChangeNotifier {
     notifyListeners();
   }
 
-   set completed(bool value) {
-    if (_completed == value || value==false) return;
+  set completed(bool value) {
+    if (_completed == value || value == false) return;
     _completed = true;
     _logs.add('Completed');
     notifyListeners();

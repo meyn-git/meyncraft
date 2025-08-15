@@ -175,6 +175,10 @@ class EventNode {
     return rawMessage
         // remove all leading dashes
         .replaceAll(RegExp(r'^(-\s*)+'), '')
+        // remove all trailing dashes
+        .replaceAll(RegExp(r'(-\s*)+$'), '')
+        // remove all spaces before or after dashes
+        .replaceAll(RegExp(r'(\s*-\s*)'), '-')
         // remove all unneeded characters
         .replaceAll(' : ', ':')
         .replaceAll(' :', ':')
@@ -194,6 +198,7 @@ class EventNode {
     var lettersAttribute = ComponentCodeOverrideLettersAttribute.valueOf(
       eventValues,
     );
+    var pageAttribute = ComponentCodeAddPageAttribute.valueOf(eventValues);
     var result = <ComponentCode>[];
     for (var componentCode in componentCodes) {
       if (columnAttribute != null) {
@@ -201,6 +206,9 @@ class EventNode {
       }
       if (lettersAttribute != null) {
         componentCode = lettersAttribute.componentCode(componentCode);
+      }
+      if (pageAttribute != null) {
+        componentCode = pageAttribute.componentCode(componentCode);
       }
       result.add(componentCode);
     }

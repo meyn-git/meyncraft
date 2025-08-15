@@ -30,7 +30,7 @@ MeynCraft creates Xor-JMobile touch screen events from a Omron Sysmac file.:
 * You can add additional information to the variable or structure comments to create the events:
   * No Acknowledgement needed: [noAck]<br>
     Events need to be acknowledged by default. Add [noAck] to the comments if an event is only informational and therefore does not have to be acknowledged by the operator.
-  * Skipping component code column numbers: [ccc=+2]<br>
+  * Adding columns to a component code: [ccc=+x]<br>
     An event is generated for each array value. 
     e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q7 Motor overload tripped" will generate the following alarms:
     * 20Q7 Motor overload tripped
@@ -47,6 +47,9 @@ MeynCraft creates Xor-JMobile touch screen events from a Omron Sysmac file.:
     * 20Q5 Motor overload tripped
     * 21Q1 Motor overload tripped
     * 21Q5 Motor overload tripped
+  * Adding pages to a component code: [ccp=+x]<br>
+    e.g. comment: "20Q7 Motor overload tripped [ccp=+10]" will generate the following alarm:"30Q7 Motor overload tripped"
+    This could be handy when you have an equipment module that is repeated every x pages in the electrical diagram.
   * Using the current array number: [arrayNr]<br>
     An events is generated for each array value. 
     e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q7 Motor overload tripped" will generate the following alarms:
@@ -54,8 +57,8 @@ MeynCraft creates Xor-JMobile touch screen events from a Omron Sysmac file.:
     * 20Q8 Motor overload tripped
     * 21Q1 Motor overload tripped
     
-    Add [arrayNr] if you need the array number in the event message: 
-    e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q7 Motor[arrayNr] overload tripped" will generate the following alarms:
+    Add [array(last)] if you need the array number in the event message: 
+    e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q7 Motor[array(last)] overload tripped" will generate the following alarms:
     * 20Q7 Motor1 overload tripped
     * 20Q8 Motor2 overload tripped
     * 21Q1 Motor3 overload tripped

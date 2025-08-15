@@ -23,5 +23,5 @@ Future<void> generate(String sysmacProjectFilePath) async {
     logger.info(e.toString());
     logger.info(s.toString());
   }
-  logger.completed=true;
+  logger.completed = true;
 }

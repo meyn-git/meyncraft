@@ -38,20 +38,22 @@ Parser<CommentAttribute> commentAttributeParser =
     );
 
 Parser<String> _innerCommentAttributeParser =
-    ((char('[') & _anythingUntilEndParser & char(']')).flatten() | any()).plusLazy(char(']')).flatten().trim();
+    ((char('[') & _anythingUntilEndParser & char(']')).flatten() | any())
+        .plusLazy(char(']'))
+        .flatten()
+        .trim();
 
-Parser<String> _anythingUntilEndParser =
-    any().plusLazy(char(']')).flatten().trim();
-
+Parser<String> _anythingUntilEndParser = any()
+    .plusLazy(char(']'))
+    .flatten()
+    .trim();
 
 Parser<String> endCommentAttributeParser =
-    (char('[') & (any().plusLazy(char(']')).flatten().trim()) & char(']')).flatten();
+    (char('[') & (any().plusLazy(char(']')).flatten().trim()) & char(']'))
+        .flatten();
 
 /// converts an expression (the text between []) to a [CommentAttribute]
 CommentAttribute convertToCommentAttribute(String expression) {
-  if (expression.contains('306S1')) {
-    print(expression);
-  }
   for (var parser in commentAttributeParsers) {
     var result = parser.parse(expression);
     if (result is Success) {
@@ -66,6 +68,7 @@ final commentAttributeParsers = <Parser<CommentAttribute>>[
   ArrayAttribute.parser,
   PriorityAttribute.parser,
   ComponentCodeAddColumnsAttribute.parser,
+  ComponentCodeAddPageAttribute.parser,
   ComponentCodeOverrideLettersAttribute.parser,
   ConditionalAttribute.parser,
 ];
@@ -326,7 +329,7 @@ class ComponentCodeAddColumnsAttribute implements CommentAttribute {
     var newUnboundedColumnNumber =
         changeDecimalsTo(componentCode.columnNumber.value, 0.5) +
         ((arrayValue - 1) * changeDecimalsTo(numberOfColumnsToAdd, 0.5));
-    var pagesToAdd = (newUnboundedColumnNumber-1) ~/ numberOfColumnsOnPage;
+    var pagesToAdd = (newUnboundedColumnNumber - 1) ~/ numberOfColumnsOnPage;
     var newPageNumber = componentCode.pageNumber + pagesToAdd;
     var newColumnNumber = changeDecimalsTo(
       newUnboundedColumnNumber - (pagesToAdd * numberOfColumnsOnPage),
@@ -360,6 +363,36 @@ class ComponentCodeAddColumnsAttribute implements CommentAttribute {
             .lastOrNull ??
         ComponentCodeAddColumnsAttribute(1);
   }
+}
+
+/// You can add page numbers to a component code.
+/// e.g. comment: "20Q7 Motor overload tripped [ccp=+10]" will generate the following alarm:"30Q7 Motor overload tripped"
+/// This could be handy when you have an equipment module that is repeated every x pages in the electrical diagram.
+class ComponentCodeAddPageAttribute implements CommentAttribute {
+  static Parser<ComponentCodeAddPageAttribute> parser =
+      NameEqualsValueParser<ComponentCodeAddPageAttribute>(nameValueConverter);
+
+  final int numberOfPagesToAdd;
+  ComponentCodeAddPageAttribute(this.numberOfPagesToAdd);
+  static ComponentCodeAddPageAttribute nameValueConverter({
+    required String name,
+    required String value,
+  }) {
+    if (name.trim().toLowerCase() != 'ccp') {
+      throw Exception('invalid name');
+    }
+    var numberOfPagesToAdd = int.parse(value.trim());
+    return ComponentCodeAddPageAttribute(numberOfPagesToAdd);
+  }
+
+  static const int numberOfColumnsOnPage = 8;
+  ComponentCode componentCode(ComponentCode componentCode) {
+    var newPageNumber = componentCode.pageNumber + numberOfPagesToAdd;
+    return componentCode.copyWith(pageNumber: newPageNumber);
+  }
+
+  static ComponentCodeAddPageAttribute? valueOf(List eventValues) =>
+      eventValues.whereType<ComponentCodeAddPageAttribute>().lastOrNull;
 }
 
 /// Overrides [ComponentCode.letters]
@@ -415,9 +448,8 @@ class ConditionalAttribute implements CommentAttribute, Replaceable {
     required String name,
     required String value,
   }) {
-    // we do not care about the name because it is an expression 
-    // and will be validated when calling createNamePathValidator() 
-    
+    // we do not care about the name because it is an expression
+    // and will be validated when calling createNamePathValidator()
 
     var result = commentPathParser.parse(value.trim());
     if (result is Failure) {

@@ -46,8 +46,7 @@ class _LogViewState extends State<LogView> {
                 ),
               ),
             ),
-            if (logger.completed)
-              RestartButtonBar(),
+            if (logger.completed) RestartButtonBar(),
           ],
         ),
       ),
@@ -56,9 +55,7 @@ class _LogViewState extends State<LogView> {
 }
 
 class RestartButtonBar extends StatelessWidget {
-  const RestartButtonBar({
-    super.key,
-  });
+  const RestartButtonBar({super.key});
 
   @override
   Widget build(BuildContext context) {
