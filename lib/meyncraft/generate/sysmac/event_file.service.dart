@@ -19,7 +19,7 @@ Future<void> writeSysmacEventFile(SysmacProject sysmacProject) async {
 
   logger.info('Created: ${outputFile.path}');
   logger.info(
-    '  A file that can be opened with MS-Excel to quickly check the generated events',
+    '     A file that can be opened with MS-Excel to quickly check the generated events',
   );
 }
 

@@ -1,5 +1,4 @@
 import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
-import 'package:recase/recase.dart';
 import 'package:xml/xml.dart';
 
 String createNowInSysmacXmlFormat() =>
@@ -151,87 +150,37 @@ class Variable2 extends XmlElement {
          [
            if (comment != null) Documentation(comment),
            if (networkPublish != NetworkPublish.doNotPublish)
-             AddData(
-               Data(
-                 GlobalVariableAdditionalProperties(
-                   XmlAttribute(
-                     XmlName('networkPublish'),
-                     networkPublish.name.pascalCase,
-                   ),
-                 ),
-               ),
-             ),
+             _createNetworkPublishElement(networkPublish),
            Type(variableType),
            if (address != null) Address(address),
-
-           // TODO
-           // <Documentation xsi:type="SimpleText">global_Variable1 Comment</Documentation>
-           // <AddData>
-           //   <Data name="https://www.ia.omron.com/Smc IEC61131_10_Ed1_0_SmcExt1_0_Spc1_0.xsd" handleUnknown="discard">
-           //     <smcext:VariableComment>
-           //       <smcext:Text id="2">global_Var1 SubComment (Comment2)</smcext:Text>
-           //     </smcext:VariableComment>
-           //   </Data>
-           // </AddData>
-           // <Type>
-           //   <TypeName>BOOL</TypeName>
-           // </Type>
-           // <Address address="%d4" />
-           //
-           // OR
-           //
-           //   <AddData>
-           //   <Data name="https://www.ia.omron.com/Smc IEC61131_10_Ed1_0_SmcExt1_0_Spc1_0.xsd" handleUnknown="discard">
-           //     <smcext:GlobalVariableAdditionalProperties networkPublish="Input" />
-           //   </Data>
-           //   <Data name="https://www.ia.omron.com/Smc IEC61131_10_Ed1_0_SmcExt1_0_Spc1_0.xsd" handleUnknown="discard">
-           //     <smcext:VariableComment>
-           //       <smcext:ElementComment element="[0]">
-           //         <smcext:Text id="1">global_Variable2[0] Comment</smcext:Text>
-           //       </smcext:ElementComment>
-           //     </smcext:VariableComment>
-           //   </Data>
-           // </AddData>
-           // <Type>
-           //   <TypeName>ARRAY[0..10] OF Bool</TypeName>
-           // </Type>
-           //
-           // OR
-           //
-           //    <AddData>
-           //   <Data name="https://www.ia.omron.com/Smc IEC61131_10_Ed1_0_SmcExt1_0_Spc1_0.xsd" handleUnknown="discard">
-           //     <smcext:GlobalVariableAdditionalProperties networkPublish="PublishOnly" />
-           //   </Data>
-           // </AddData>
-           // <Type>
-           //   <TypeName>BYTE</TypeName>
-           // </Type>
-           // <InitialValue>
-           //   <SimpleValue value="16#0" />
-           // </InitialValue>
-           //
-           // OR
-           //
-           // <AddData>
-           //   <Data name="https://www.ia.omron.com/Smc IEC61131_10_Ed1_0_SmcExt1_0_Spc1_0.xsd" handleUnknown="discard">
-           //     <smcext:GlobalVariableAdditionalProperties networkPublish="Output" />
-           //   </Data>
-           //   <Data name="https://www.ia.omron.com/Smc IEC61131_10_Ed1_0_SmcExt1_0_Spc1_0.xsd" handleUnknown="discard">
-           //     <smcext:VariableComment>
-           //       <smcext:ElementComment element="Structure1_Member1">
-           //         <smcext:Text id="1">global_Variable4 Structuer1_Member1 Comment</smcext:Text>
-           //       </smcext:ElementComment>
-           //     </smcext:VariableComment>
-           //   </Data>
-           // </AddData>
-           // <Type>
-           //   <TypeName>Structure1</TypeName>
-           // </Type>
-           // <InitialValue>
-           //   <SimpleValue value="(Structure1_Member1 := True)" />
-           // </InitialValue>
          ],
        );
+
+  static AddData _createNetworkPublishElement(NetworkPublish networkPublish) {
+    return AddData(
+      Data(
+        GlobalVariableAdditionalProperties(
+          XmlAttribute(
+            XmlName('networkPublish'),
+            _createNetworkPublishValue(networkPublish),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static String _createNetworkPublishValue(NetworkPublish networkPublish) {
+    switch (networkPublish) {
+      case NetworkPublish.publicationOnly:
+        return 'PublishOnly';
+      case NetworkPublish.input:
+        return 'Input';
+      case NetworkPublish.output:
+        return 'Output';
+      default:
+        throw Exception('Unknown value: ${networkPublish.name}');
+    }
+  }
 
   Variable2 copyAsReference() =>
       Variable2(variableName: variableName, variableType: variableType);

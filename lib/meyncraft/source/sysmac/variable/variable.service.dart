@@ -108,7 +108,7 @@ class Variable {
 }
 
 enum NetworkPublish {
-  publishOnly,
+  publicationOnly,
   doNotPublish,
   input,
   output;

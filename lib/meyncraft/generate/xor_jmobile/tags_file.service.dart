@@ -19,17 +19,19 @@ Future<void> writeJMobileTagsFile(SysmacProject sysmacProject) async {
   await outputFile.create();
   await outputFile.writeAsString(formattedXml);
   logger.info('Created: ${outputFile.path})');
-  logger.info('  You can import the tags in JMobile:');
-  logger.info('  * Open an existing JMobile project');
-  logger.info('  * Open the tags window from the left menu Configuration\Tags');
+  logger.info('     You can import the tags in JMobile:');
+  logger.info('     * Open an existing JMobile project');
   logger.info(
-    '  * Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list',
+    '     * Open the tags window from the left menu Configuration \\ Tags',
   );
-  logger.info('  * Click on the "import dictionary button" in the toolbar');
   logger.info(
-    '  * Select the "Tag editor exported xml" row from the import dialog and click ok',
+    '     * Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list',
   );
-  logger.info('  * Select the generated ${outputFile.path} file');
+  logger.info('     * Click on the "import dictionary button" in the toolbar');
+  logger.info(
+    '     * Select the "Tag editor exported xml" row from the import dialog and click ok',
+  );
+  logger.info('     * Select the generated ${outputFile.path} file');
 }
 
 File createOutputFile(SysmacProject sysmacProject, String suffix) {
@@ -57,7 +59,7 @@ String createFormattedTagsXml(List<XorTag> tags) {
 
 List<XorTag> createTags(List<Variable> variables) {
   var publicVariables = variables
-      .where((v) => v.networkPublish == NetworkPublish.publishOnly)
+      .where((v) => v.networkPublish == NetworkPublish.publicationOnly)
       .toList();
   var tags = <XorTag>[];
   for (var variable in publicVariables) {

@@ -36,10 +36,10 @@ Future<void> writeSysmacEventArrayXmlImportFile(
 
   logger.info('Created: ${outputFile.path}');
   logger.info(
-    '  Import this file in Sysmac with tools\\IEC 61131-10 XML\\Import',
+    '     Import this file in Sysmac with Menu \\ Tools \\ IEC 61131-10 XML \\ Import',
   );
   logger.info(
-    '  Then move the sections in program "$_programName" to the end of section "Global\\EventHandling"',
+    '     Then move the sections in program "$_programName" to the end of section "Global\\EventHandling"',
   );
 }
 
@@ -52,7 +52,7 @@ GlobalVariable _createEventGlobalArrayVariable(
         'ARRAY[1..${sysmacProject.eventService.events.length}] OF BOOL',
     comment:
         'This array is a copy from EventGlobal and is needed for efficient communication with XOR-HMIs or MeynConnect',
-    networkPublish: NetworkPublish.publishOnly,
+    networkPublish: NetworkPublish.publicationOnly,
   ),
 );
 
