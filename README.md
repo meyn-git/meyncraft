@@ -24,7 +24,7 @@ MeynCraft creates Xor-JMobile touch screen events from a Omron Sysmac file.:
 * It uses the comments of the EventGlobal variable and its structure and some additional logic
 * The generated events are stored in an xml file so that it can be imported by JMobile:
   * Open a JMobile project
-  * Open the tags window from the left menu Configuration\Alarms
+  * Open the events window from the left menu Configuration\Alarms
   * Click on the "import alarms button" in the toolbar
   * Select the generated *JMobileEvents.xml file
 * You can add additional information to the variable or structure comments to create the events:

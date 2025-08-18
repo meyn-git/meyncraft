@@ -1,33 +1,114 @@
 import 'dart:io';
 
+import 'package:meyncraft/meyncraft/generate/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
+import 'package:xml/xml.dart';
 
-Future<void> writeSysmacEventArrayCodeFile(SysmacProject sysmacProject) async {
-  var events = sysmacProject.eventService.events;
+Future<void> writeSysmacEventArrayXmlImportFile(
+  SysmacProject sysmacProject,
+) async {
+  var pouInfo = SmcExtPouInfo(
+    author: 'MeynCraft code generator',
+    //TODO would be nice if we would use the MeynCraft version by reading the pubspec.yaml file
+    version: '1.0.0',
+  );
+  List<LadderSection> sections = _createSections(sysmacProject);
+  var eventGlobalVariable = _createEventGlobalVariable();
+  var eventGlobalArrayVariable = _createEventGlobalArrayVariable(sysmacProject);
+  var mainBody = MainBody.ladderSection(sections);
+  var program = Program(_programName, pouInfo, [
+    eventGlobalVariable,
+    eventGlobalArrayVariable,
+  ], mainBody);
+  var project = Project([program], [eventGlobalArrayVariable]);
+  var xmlString = project.toXmlString(
+    pretty: true,
+    indent: '  ',
+    preserveWhitespace: (node) =>
+        node is XmlElement && ['ST', 'Content'].contains(node.name.local),
+  );
 
-  var code = StringBuffer();
-  code.writeln(
-    '// The EventGlobal variable is copied to the EventGlobalArray variable.',
-  );
-  code.writeln(
-    '// This is needed for more efficient event communication with HMIs and MeynConnect.',
-  );
-  code.writeln(
-    '// This code was generated with MeynCraft on ${DateTime.now()}.',
-  );
-  code.writeln(
-    '// For more information see: https://github.com/meyn-git/meyncraft (scroll down for documentation)',
-  );
-  for (var event in events) {
-    code.writeln('EventGlobalArray[${event.number}]:=${event.namePath};');
-  }
-
-  var outputFile = createOutputFile(sysmacProject, '-SysmacEventArray.txt');
+  var outputFile = createOutputFile(sysmacProject, '-SysmacEventArray.xml');
   await outputFile.create();
-  await outputFile.writeAsString(code.toString());
+  await outputFile.writeAsString(xmlString);
 
   logger.info('Created: ${outputFile.path}');
+  logger.info(
+    '  Import this file in Sysmac with tools\\IEC 61131-10 XML\\Import',
+  );
+  logger.info(
+    '  Then move the sections in program "$_programName" to the end of section "Global\\EventHandling"',
+  );
+}
+
+GlobalVariable _createEventGlobalArrayVariable(
+  SysmacProject sysmacProject,
+) => GlobalVariable(
+  Variable2(
+    variableName: eventGlobalArrayName,
+    variableType:
+        'ARRAY[1..${sysmacProject.eventService.events.length}] OF BOOL',
+    comment:
+        'This array is a copy from EventGlobal and is needed for efficient communication with XOR-HMIs or MeynConnect',
+    networkPublish: NetworkPublish.publishOnly,
+  ),
+);
+
+///only needed as reference
+GlobalVariable _createEventGlobalVariable() => GlobalVariable(
+  Variable2(variableName: eventGlobalName, variableType: 'sEvent'),
+);
+
+const eventGlobalName = 'EventGlobal';
+const eventGlobalArrayName = 'EventGlobalArray';
+
+String _programName = 'GeneratedByMeynCraft';
+
+List<LadderSection> _createSections(SysmacProject sysmacProject) {
+  var rungs = <Rung>[];
+  var events = sysmacProject.eventService.events;
+  var code = StringBuffer();
+  var rungNr = 0;
+  for (var event in events) {
+    code.writeln('$eventGlobalArrayName[${event.number}]:=${event.namePath};');
+    if (event.number % 1000 == 0 || event == events.last) {
+      rungNr++;
+      rungs.add(
+        Rung.structuredText(
+          comment: _createComment(rungNr),
+          evaluationOrder: rungNr,
+          structuredText: code.toString().replaceFirst(RegExp(r'\n$'), ''),
+        ),
+      );
+      code = StringBuffer();
+    }
+  }
+
+  return [
+    LadderSection(name: 'EventGlobalToArray', evaluationOrder: 1, rungs: rungs),
+  ];
+}
+
+String _createComment(int rungNr) {
+  if (rungNr == 1) {
+    var comment = StringBuffer();
+    comment.writeln(
+      'The EventGlobal variable is copied to the EventGlobalArray variable.',
+    );
+    comment.writeln(
+      'This is needed for more efficient event communication with HMIs and MeynConnect.\n',
+    );
+    comment.writeln(
+      'This code was generated with MeynCraft on ${createNowInSysmacXmlFormat()}.',
+    );
+    comment.write(
+      'For more information see: https://github.com/meyn-git/meyncraft (scroll down for documentation)',
+    );
+    return comment.toString();
+  }
+  return 'EventGlobalArray[${(rungNr - 1) * 1000 + 1}-${(rungNr - 1) * 1000 + 999}]';
 }
 
 File createOutputFile(SysmacProject sysmacProject, String suffix) {

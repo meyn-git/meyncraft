@@ -15,6 +15,13 @@ Future<void> writeJMobileEventsFile(SysmacProject sysmacProject) async {
   await outputFile.create();
   await outputFile.writeAsString(formattedXml);
   logger.info('Created: ${outputFile.path}');
+  logger.info('  You can import the events in J-Mobile:');
+  logger.info('  * Open an existing JMobile project');
+  logger.info(
+    '  * Open the events window from the left menu Configuration\Alarms',
+  );
+  logger.info('  * Click on the "import alarms button" in the toolbar');
+  logger.info('  * Select the generated ${outputFile.path} file');
 }
 
 File createOutputFile(SysmacProject sysmacProject, String suffix) {

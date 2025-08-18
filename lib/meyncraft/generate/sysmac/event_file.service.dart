@@ -18,6 +18,9 @@ Future<void> writeSysmacEventFile(SysmacProject sysmacProject) async {
   await outputFile.writeAsString(code.toString());
 
   logger.info('Created: ${outputFile.path}');
+  logger.info(
+    '  A file that can be opened with MS-Excel to quickly check the generated events',
+  );
 }
 
 File createOutputFile(SysmacProject sysmacProject, String suffix) {
