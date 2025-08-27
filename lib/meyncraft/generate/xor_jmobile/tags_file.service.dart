@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/data_type.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.domain.dart';
+import 'package:meyncraft/meyncraft/source/sysmac/project_index.infrastructure.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
 import 'package:xml/xml.dart';
@@ -64,10 +66,13 @@ List<XorTag> createTags(List<Variable> variables) {
   var tags = <XorTag>[];
   for (var variable in publicVariables) {
     var tagNode = XorTagNode.fromVariable(variable);
-    tags.addAll(tagNode.createTags());
+    tags.addAll(tagNode.createTags(skipRules: [skipMeynConnect, skipVetInsp]));
   }
   return tags;
 }
+
+bool skipMeynConnect(String namePath) => namePath.startsWith(RegExp(r'L\d_'));
+bool skipVetInsp(String namePath) => namePath.contains('VET');
 
 /// Represents a tag (reference to some variable in the PLC) for a Xor HMI touch screen
 /// So that it can be imported by JMobile (IDE of Xor HMI)
@@ -174,47 +179,69 @@ class XorTagNode {
       baseType = dataType.baseType,
       children = createChildren(dataType.baseType);
 
-  static List<XorTagNode> createChildren(BaseType baseType) =>
-      baseType is DataTypeReference
-      ? baseType.dataType.children
-            .map((c) => c as DataType)
-            .map((child) => XorTagNode.fromDataType(child))
-            .toList()
-      : [];
+  static List<XorTagNode> createChildren(BaseType baseType) {
+    if (baseType is DataTypeReference) {
+      return baseType.dataType.children
+          .map((c) => c as DataType)
+          .map((child) => XorTagNode.fromDataType(child))
+          .toList();
+    }
+    // baseType has no children
+    return [];
+  }
 
-  static bool skip(BaseType baseType) =>
+  static bool isNoTag(BaseType baseType) =>
       baseType is EnumChild ||
       baseType is UnknownBaseType ||
       baseType is DataTypeReference;
 
-  List<XorTag> createTags([String parentNamePath = '']) {
-    var tags = <XorTag>[];
-    if (children.isEmpty) {
-      if (skip(baseType)) {
+  List<XorTag> createTags({
+    String parentNamePath = '',
+    List<bool Function(String namePath)> skipRules = const [],
+  }) {
+    if (baseType is DataTypeReference &&
+        (baseType as DataTypeReference).dataType.baseType is EnumParent) {
+      return [XorTag(createNamePath(parentNamePath), XorEnum())];
+    }
+    String namePath = createNamePath(parentNamePath);
+    if (isLeafNode) {
+      if (isNoTag(baseType) || skipRules.any((rule) => rule(namePath))) {
         return [];
       }
-
       // an exception on the rule to reduce the number of tags:
       if (singleArrayRootNode(parentNamePath, baseType)) {
+        //FIXME remove when no longer used:
+        //if (isOneDimensionalArray) {
         // create a single XorTag for the whole array so that
         // we do not have to make tags for each individual array value.
         // This reduces the number of tags significantly
         return [
-          XorTag(name, XorDataType.findCompatibleTypeWithSingleArray(baseType)),
+          XorTag(
+            namePath,
+            XorDataType.findCompatibleTypeWithOneDimensionalArray(baseType),
+          ),
         ];
       }
       var namePaths = createNamePaths(parentNamePath);
       var xorDataType = XorDataType.findCompatibleType(baseType);
-      tags.addAll(namePaths.map((namePath) => XorTag(namePath, xorDataType)));
+      return namePaths
+          .map((namePath) => XorTag(namePath, xorDataType))
+          .toList();
     } else {
+      var tags = <XorTag>[];
       var namePaths = createNamePaths(parentNamePath);
       for (var namePath in namePaths) {
         for (var child in children) {
-          tags.addAll(child.createTags(createNamePath(namePath)));
+          if (child.name == 'Unit') {
+            print('Debug: $child');
+          }
+          tags.addAll(
+            child.createTags(parentNamePath: namePath, skipRules: skipRules),
+          );
         }
       }
+      return tags;
     }
-    return tags;
   }
 
   /// creates a name path of this node.
@@ -238,4 +265,7 @@ class XorTagNode {
   /// an exception on the rule: to reduce the number of tags
   bool singleArrayRootNode(String preceedingPath, BaseType baseType) =>
       preceedingPath.isEmpty && baseType.arrayRanges.length == 1;
+
+  bool get isLeafNode => children.isEmpty;
+  bool get isOneDimensionalArray => baseType.arrayRanges.length == 1;
 }

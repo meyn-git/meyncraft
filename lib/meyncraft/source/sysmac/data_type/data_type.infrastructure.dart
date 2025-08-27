@@ -112,7 +112,6 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
         .map((node) => _createDataType(node))
         .toList();
     dataType.children.addAll(children);
-
     return dataType;
   }
 

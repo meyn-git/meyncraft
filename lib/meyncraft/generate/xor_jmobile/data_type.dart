@@ -72,15 +72,28 @@ abstract class XorDataType {
     );
   }
 
-  static XorDataType findCompatibleTypeWithSingleArray(BaseType baseType) {
+  static XorDataType findCompatibleTypeWithOneDimensionalArray(
+    BaseType baseType,
+  ) {
     var compatibleType = findCompatibleType(baseType);
-    return XorSingleArray(compatibleType, baseType.arrayRanges.first);
+    return XorOneDimensionalArray(compatibleType, baseType.arrayRanges.first);
   }
 }
 
-/// Wraps a [XorDataType] and overrides the arraySize  fields to make it a single array
-class XorSingleArray extends XorDataType {
-  XorSingleArray(XorDataType compatibleType, ArrayRange arrayRange)
+class XorEnum extends XorDataType {
+  XorEnum()
+    : super(
+        xorTypeName: 'int',
+        iecTypeName: 'DINT',
+        comparableOmronTypes: [EnumParent],
+        min: '-32768',
+        max: '32767',
+      );
+}
+
+/// Wraps a [XorDataType] and overrides the arraySize  fields to make it a one dimensional array
+class XorOneDimensionalArray extends XorDataType {
+  XorOneDimensionalArray(XorDataType compatibleType, ArrayRange arrayRange)
     : super(
         xorTypeName: '${compatibleType.xorTypeName} []',
         iecTypeName: compatibleType.xorTypeName,

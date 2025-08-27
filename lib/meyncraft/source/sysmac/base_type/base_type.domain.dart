@@ -3,8 +3,11 @@ import 'package:fluent_regex/fluent_regex.dart';
 
 import '../data_type/data_type.domain.dart';
 
-/// A [BaseType] is used in a [DataType] and refers to an internal type within
-/// (Sysmac)[https://industrial.omron.eu/en/products/sysmac-platform]
+/// In Omron (Sysmac Studio)[https://industrial.omron.eu/en/products/sysmac-platform],
+/// a [BaseType] refers to the fundamental data type used
+/// to define variables, structures, arrays, enums and other elements in a PLC program.
+/// These are the building blocks for (more complex) data types and are essential
+/// for memory allocation, data manipulation, and interfacing with hardware.
 abstract class BaseType {
   final arrayRanges = ArrayRanges();
 
@@ -117,13 +120,6 @@ class DataTypeReference extends BaseType {
     this.arrayRanges.clear();
     this.arrayRanges.addAll(arrayRanges);
   }
-
-  /// not showing data type in to String because the DataType is shown
-  /// See: [DataType.children]
-  // @override
-  // String toString() {
-  //   return super.toString() + '{$dataType}';
-  // }
 }
 
 class UnknownBaseType extends BaseType {

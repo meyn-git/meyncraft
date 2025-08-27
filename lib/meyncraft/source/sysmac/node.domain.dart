@@ -20,20 +20,27 @@ abstract class Node<T extends Node<T>> {
   /// Tries to find a child using a list of [namesToFind]
   /// Returns this when [namesToFind] is empty.
   /// Returns null when a name can't be found.
+  /// Note that the search is case insensitive because
+  /// Sysmac does not seem to ignore casing for [DataType] names.
   Node? findNamePath(List<String> namesToFind) {
     if (namesToFind.isEmpty) {
       return this;
     }
-    var childNameToFind = namesToFind.first;
+    var childNameToFind = namesToFind.first.toLowerCase();
     Node? foundChild = children.firstWhereOrNull(
-      (child) => child.name == childNameToFind,
+      (child) => child.name.toLowerCase() == childNameToFind,
     );
+    if (foundChild == null) {
+      // not found
+      return null;
+    }
     if (namesToFind.length == 1) {
+      // found the full path
       return foundChild;
     }
-    //try to find rest of the names
-    namesToFind.removeAt(0);
-    return foundChild?.findNamePath(namesToFind);
+    //try to find recursively
+    var remainingNames = namesToFind.sublist(1);
+    return foundChild.findNamePath(remainingNames);
   }
 
   Node? findNamePathString(String pathToFind) =>
@@ -99,24 +106,3 @@ class LeafNode<T extends Node<T>> extends Node<T> {
   @override
   List<T> get children => [];
 }
-
-//
-// class NameSpaceWithTypeAndComment<T extends Node<T>> {
-//   BaseType baseType;
-//   final String comment;
-//
-//   NameSpaceWithTypeAndComment({
-//     required String name,
-//     required this.baseType,
-//     required this.comment,
-//   }) : super(name);
-//
-//   @override
-//   List<Node<T>> get children {
-//     if (baseType is DataTypeReference) {
-//       return (baseType as DataTypeReference).dataType.children;
-//     } else {
-//       return super.children;
-//     }
-//   }
-// }

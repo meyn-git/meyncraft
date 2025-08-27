@@ -24,6 +24,8 @@ class _LogViewState extends State<LogView> {
 
   void _onLogUpdate() => setState(() {});
 
+  final ScrollController _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,10 +36,12 @@ class _LogViewState extends State<LogView> {
               child: Container(
                 padding: EdgeInsets.all(8),
                 child: Scrollbar(
+                  controller: _scrollController,
                   child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: logger.logs.length,
                     itemBuilder: (context, index) {
-                      return Text(
+                      return SelectableText(
                         logger.logs[index],
                         style: TextStyle(fontFamily: 'monospace'),
                       );

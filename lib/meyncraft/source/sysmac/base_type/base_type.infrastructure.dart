@@ -4,7 +4,14 @@ import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dar
 import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.domain.dart';
 
 class BaseTypeFactory {
-  BaseTypeSubFactories baseTypeSubFactories = BaseTypeSubFactories();
+  final List<BaseTypeSubFactory> baseTypeSubFactories = [
+    ArrayFactory(),
+    StructFactory(),
+    EnumParentFactory(),
+    ...NxTypeFactories(),
+    ...VbTypeFactories(),
+    UnknownBaseTypeFactory(),
+  ];
 
   BaseType createFromExpression(String typeExpression) {
     var factory = baseTypeSubFactories.firstWhere(
@@ -26,6 +33,9 @@ class BaseTypeFactory {
           arrayRanges: baseType.arrayRanges,
         );
       }
+      // logger.warning(
+      //   'Could not find base type for expression: $typeExpression',
+      // );
       //Note that the baseType could still be UnknownBaseType
     }
     return baseType;
@@ -36,18 +46,6 @@ abstract class BaseTypeSubFactory {
   RegExp get regex;
 
   BaseType create(String expression);
-}
-
-class BaseTypeSubFactories extends DelegatingList<BaseTypeSubFactory> {
-  BaseTypeSubFactories()
-    : super([
-        ArrayFactory(),
-        StructFactory(),
-        EnumParentFactory(),
-        ...NxTypeFactories(),
-        ...VbTypeFactories(),
-        UnknownBaseTypeFactory(),
-      ]);
 }
 
 class UnknownBaseTypeFactory extends BaseTypeSubFactory {
@@ -206,7 +204,7 @@ class ArrayFactory extends BaseTypeSubFactory {
               FluentRegex()
                   .letter(quantity: Quantity.oneTime())
                   .characterSet(
-                    CharacterSet().addLetters().addLiterals('\\'),
+                    CharacterSet().addLetters().addDigits().addLiterals(r'\_'),
                     Quantity.oneOrMoreTimes(),
                   ),
               type: GroupType.captureNamed(typeName),
