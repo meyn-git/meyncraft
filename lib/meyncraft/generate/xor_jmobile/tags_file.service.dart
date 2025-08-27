@@ -1,11 +1,9 @@
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/data_type.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/project_index.infrastructure.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
 import 'package:xml/xml.dart';
@@ -232,9 +230,6 @@ class XorTagNode {
       var namePaths = createNamePaths(parentNamePath);
       for (var namePath in namePaths) {
         for (var child in children) {
-          if (child.name == 'Unit') {
-            print('Debug: $child');
-          }
           tags.addAll(
             child.createTags(parentNamePath: namePath, skipRules: skipRules),
           );

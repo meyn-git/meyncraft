@@ -7,7 +7,6 @@ import 'package:meyncraft/meyncraft/source/sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
-//TODO make async
 Future<void> writeJMobileEventsFile(SysmacProject sysmacProject) async {
   var events = sysmacProject.eventService.events;
   String formattedXml = createFormattedEventsXml(events);

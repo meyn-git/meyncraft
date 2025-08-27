@@ -30,30 +30,7 @@ class _MeynCraftState extends State<MeynCraft> {
       themeMode: ThemeMode.system,
       theme: meynTheme(Brightness.light),
       darkTheme: meynTheme(Brightness.dark),
-      home: Scaffold(
-        // appBar: AppBar(
-        //   title: Text('MeynCraft'),
-        //   actions: [
-        //     IconButton(
-        //       icon: Icon(Icons.minimize),
-        //       onPressed: () => windowManager.minimize(),
-        //       tooltip: 'Minimize',
-        //     ),
-        //     //TODO Midimize when is maximized
-        //     IconButton(
-        //       icon: Icon(Icons.square_outlined),
-        //       onPressed: () => windowManager.maximize(),
-        //       tooltip: 'Maximize',
-        //     ),
-        //     IconButton(
-        //       icon: Icon(Icons.close),
-        //       onPressed: () => windowManager.close(),
-        //       tooltip: 'Close',
-        //     ),
-        //   ],
-        // ),
-        body: LogView(),
-      ),
+      home: Scaffold(body: LogView()),
     );
   }
 }
