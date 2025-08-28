@@ -28,6 +28,7 @@ class _LogViewState extends State<LogView> {
 
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context);
     return Scaffold(
       body: Expanded(
         child: Column(
@@ -39,11 +40,15 @@ class _LogViewState extends State<LogView> {
                   controller: _scrollController,
                   child: ListView.builder(
                     controller: _scrollController,
-                    itemCount: logger.logs.length,
+                    itemCount: logger.messages.length,
                     itemBuilder: (context, index) {
                       return SelectableText(
-                        logger.logs[index],
-                        style: TextStyle(fontFamily: 'monospace'),
+                        logger.messages[index].text,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          color: logger.messages[index].messageType
+                              .colorFunction(theme),
+                        ),
                       );
                     },
                   ),
