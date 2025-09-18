@@ -162,6 +162,7 @@ class XorTag {
   ]);
 }
 
+///TODO investigate if we can use DataTypeBase.findPaths instead of using XorTagNode.
 class XorTagNode {
   final String name;
   final BaseType baseType;
@@ -208,11 +209,6 @@ class XorTagNode {
       }
       // an exception on the rule to reduce the number of tags:
       if (singleArrayRootNode(parentNamePath, baseType)) {
-        //FIXME remove when no longer used:
-        //if (isOneDimensionalArray) {
-        // create a single XorTag for the whole array so that
-        // we do not have to make tags for each individual array value.
-        // This reduces the number of tags significantly
         return [
           XorTag(
             namePath,

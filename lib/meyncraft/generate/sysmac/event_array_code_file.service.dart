@@ -18,10 +18,12 @@ Future<void> writeSysmacEventArrayXmlImportFile(
   var eventGlobalVariable = _createEventGlobalVariable();
   var eventGlobalArrayVariable = _createEventGlobalArrayVariable(sysmacProject);
   var mainBody = MainBody.ladderSection(sections);
-  var program = Program(_programName, pouInfo, [
-    eventGlobalVariable,
-    eventGlobalArrayVariable,
-  ], mainBody);
+  var program = Program(
+    name: _programName,
+    pouInfo: pouInfo,
+    globalVariables: [eventGlobalVariable, eventGlobalArrayVariable],
+    mainBody: mainBody,
+  );
   var project = Project([program], [eventGlobalArrayVariable]);
   var xmlString = project.toXmlString(
     pretty: true,

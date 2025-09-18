@@ -42,6 +42,7 @@ class Counter {
   }
 }
 
+///TODO investigate if we can use DataTypeBase.findPaths instead of using EventNode.
 /// Used to creates Events from [Variable] and [DataType]
 class EventNode {
   final String name;

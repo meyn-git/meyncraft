@@ -63,6 +63,24 @@ class ArrayRanges extends DelegatingList<ArrayRange> {
     }
     return result;
   }
+
+  String toTypeExpression() {
+    if (isEmpty) {
+      return '';
+    }
+    var expression = StringBuffer();
+    expression.write('ARRAY[');
+    for (var arrayRange in this) {
+      if (expression.length > 6) {
+        expression.write(', ');
+      }
+      expression.write(arrayRange.min);
+      expression.write('..');
+      expression.write(arrayRange.max);
+    }
+    expression.write('] OF ');
+    return expression.toString();
+  }
 }
 
 class ArrayRange {
@@ -112,10 +130,12 @@ class ArrayRange {
 /// A [BaseType] that refers to an existing [DataType]:
 class DataTypeReference extends BaseType {
   final DataType dataType;
+  final String namePathWithBackSlashes;
 
   DataTypeReference({
     required this.dataType,
     required ArrayRanges arrayRanges,
+    required this.namePathWithBackSlashes,
   }) {
     this.arrayRanges.clear();
     this.arrayRanges.addAll(arrayRanges);

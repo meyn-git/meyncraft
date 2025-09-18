@@ -11,6 +11,70 @@ abstract class DataTypeBase extends Node<DataTypeBase> {
   final String comment;
 
   DataTypeBase(super.name, [this.comment = '']);
+
+  List<DataTypeBasePaths> findPaths(
+    DataTypeBaseFilter includeFilter, {
+    bool forEachArrayValue = true,
+    List<String>? parentNamePath,
+    List<String>? parentCommentPath,
+  }) {
+    var results = <DataTypeBasePaths>[];
+    var commentPath = <String>[...parentCommentPath ?? [], comment];
+    var namePaths = _createNamePaths(forEachArrayValue, parentNamePath ?? []);
+    if (includeFilter(this)) {
+      for (var namePath in namePaths) {
+        results.add(
+          DataTypeBasePaths(
+            dataTypeBase: this,
+            namePath: namePath,
+            commentPath: commentPath,
+          ),
+        );
+      }
+    }
+    for (var child in children) {
+      for (var namePath in namePaths) {
+        results.addAll(
+          child.findPaths(
+            includeFilter,
+            forEachArrayValue: forEachArrayValue,
+            parentNamePath: namePath,
+            parentCommentPath: commentPath,
+          ),
+        );
+      }
+    }
+    return results;
+  }
+
+  List<List<String>> _createNamePaths(
+    bool forEachArrayValue,
+    List<String> parentNamePath,
+  ) {
+    var namePath = [...parentNamePath, name];
+    if (!forEachArrayValue) {
+      return [namePath];
+    }
+    var arrayValues = _arrayValues();
+    if (arrayValues.isEmpty) {
+      return [namePath];
+    }
+    return arrayValues
+        .map(
+          (a) => [
+            for (var i = 0; i < namePath.length; i++)
+              i < (namePath.length - 1) ? namePath[i] : namePath[i] + a,
+          ],
+        )
+        .toList();
+  }
+
+  List<String> _arrayValues() {
+    if (this is DataType) {
+      return (this as DataType).baseType.arrayRanges.toStringList();
+    }
+    return [];
+  }
 }
 
 class NameSpace extends DataTypeBase {
@@ -46,4 +110,18 @@ class DataType extends DataTypeBase {
     }
     return string;
   }
+}
+
+typedef DataTypeBaseFilter = bool Function(DataTypeBase dataTypeBase);
+
+class DataTypeBasePaths {
+  final List<String> namePath;
+  final List<String> commentPath;
+  final DataTypeBase dataTypeBase;
+
+  DataTypeBasePaths({
+    required this.dataTypeBase,
+    required this.namePath,
+    required this.commentPath,
+  });
 }

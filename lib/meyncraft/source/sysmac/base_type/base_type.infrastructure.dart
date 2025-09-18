@@ -31,6 +31,7 @@ class BaseTypeFactory {
         return DataTypeReference(
           dataType: dataType as DataType,
           arrayRanges: baseType.arrayRanges,
+          namePathWithBackSlashes: typeExpression,
         );
       }
       // logger.warning(
