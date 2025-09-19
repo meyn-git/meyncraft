@@ -19,7 +19,7 @@ Future<void> writeSysmacEventArrayXmlImportFile(
   var eventGlobalArrayVariable = _createEventGlobalArrayVariable(sysmacProject);
   var mainBody = MainBody.ladderSection(sections);
   var program = Program(
-    name: _programName,
+    programName: _programName,
     pouInfo: pouInfo,
     globalVariables: [eventGlobalVariable, eventGlobalArrayVariable],
     mainBody: mainBody,

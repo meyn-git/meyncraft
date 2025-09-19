@@ -14,35 +14,8 @@ Future<void> writeUnitInterfaceXmlImportFile(
   var outputFile = createOutputFile(sysmacProject, '-SysmacUnitInterface.xml');
   logger.info('Creating: ${outputFile.path}');
 
-  var pouInfo = SmcExtPouInfo(
-    author: 'MeynCraft code generator',
-    //TODO would be nice if we would use the MeynCraft version by reading the pubspec.yaml file
-    version: '1.0.0',
-  );
-
-  VariableMember? interfaceGlobalVar = _findGlobalVariable(
-    sysmacProject,
-    interfaceGlobalVariableName,
-  );
-  if (interfaceGlobalVar == null) return;
-  VariableMember? configGlobalVar = _findGlobalVariable(
-    sysmacProject,
-    configGlobalVariableName,
-  );
-  if (configGlobalVar == null) return;
-
-  var units = _createUnits(interfaceGlobalVar, configGlobalVar);
-
-  List<LadderSection> sections = _createSections(units);
-  var mainBody = MainBody.ladderSection(sections);
-  var program = Program(
-    name: _programName,
-    pouInfo: pouInfo,
-    globalVariables: _createGlobalVariables(),
-    internalVariables: _createInternalVariables(units),
-    mainBody: mainBody,
-  );
-  var project = Project([program], []);
+  var programs = createPrograms(sysmacProject);
+  var project = Project(programs, []);
   var xmlString = project.toXmlString(
     pretty: true,
     indent: '  ',
@@ -57,15 +30,54 @@ Future<void> writeUnitInterfaceXmlImportFile(
     '    Import this file in Sysmac with Menu \\ Tools \\ IEC 61131-10 XML \\ Import',
   );
   logger.info(
-    '    Then move the sections in program "$_programName" to the end of section "Global\\EventHandling"',
+    '    This will create or override the following sections ${programs.map((p) => p.programName).join(', ')} '
+    'to the corresponding existing programs',
   );
 }
 
-List<Variable2> _createInternalVariables(List<Unit> units) {
+List<Program> createPrograms(SysmacProject sysmacProject) {
+  VariableMember? interfaceGlobalVar = _findGlobalVariable(
+    sysmacProject,
+    interfaceGlobalVariableName,
+  );
+  if (interfaceGlobalVar == null) return [];
+  VariableMember? configGlobalVar = _findGlobalVariable(
+    sysmacProject,
+    configGlobalVariableName,
+  );
+  if (configGlobalVar == null) return [];
+
+  var units = _createUnits(interfaceGlobalVar, configGlobalVar);
+
+  return units.map((u) => _createProgram(u)).toList();
+}
+
+Program _createProgram(Unit unit) {
+  List<LadderSection> sections = _createSections(unit);
+  var mainBody = MainBody.ladderSection(sections);
+  var programName = 'GeneratedByMeynCraft_${unit.name}';
+  return Program(
+    programName: programName,
+    pouInfo: _createPouInfo(),
+    globalVariables: _createGlobalVariables(),
+    internalVariables: _createInternalVariables(unit),
+    mainBody: mainBody,
+  );
+}
+
+SmcExtPouInfo _createPouInfo() {
+  return SmcExtPouInfo(
+    author: 'MeynCraft code generator',
+    //TODO would be nice if we would use the MeynCraft version by reading the pubspec.yaml file
+    version: '1.0.0',
+  );
+}
+
+List<Variable2> _createInternalVariables(Unit unit) {
   return [
     Variable2(variableName: 'StartWarningDone', variableType: 'BOOL'),
     Variable2(variableName: 'StartWarningExecuteDone', variableType: 'BOOL'),
-    ..._createEquipmentFunctionBlockVariables(units),
+    ..._createInternalUnitVariables(unit),
   ];
 }
 
@@ -156,14 +168,21 @@ List<Unit> _createUnits(
   return units;
 }
 
-List<Variable2> _createEquipmentFunctionBlockVariables(List<Unit> units) {
-  List<Equipment> allEquipment = units
-      .expand<Equipment>((unit) => unit.equipments)
-      .toList();
-  var dataTypeBases = allEquipment
+List<Variable2> _createInternalUnitVariables(Unit unit) {
+  var variables = <Variable2>[];
+
+  variables.add(
+    Variable2(
+      variableName: 'NOP',
+      variableType: 'BOOL',
+      comment: 'No operation (does nothing)',
+    ),
+  );
+
+  var dataTypeBases = unit.equipments
       .map((e) => e.interfaceGlobalMember.dataTypeBase)
       .toSet();
-  return dataTypeBases
+  var functionBlockVars = dataTypeBases
       .map(
         (DataTypeBase d) => Variable2(
           variableName: 'fb${d.name}EqInterface',
@@ -171,7 +190,26 @@ List<Variable2> _createEquipmentFunctionBlockVariables(List<Unit> units) {
         ),
       )
       .toList();
+  variables.addAll(functionBlockVars);
+  variables.add(
+    Variable2(
+      variableName: eqStartedVarName,
+      variableType: 'Unit\\${unit.name}\\sEquipment',
+    ),
+  );
+  variables.add(
+    Variable2(
+      variableName: eqAlarmVarName,
+      variableType: 'Unit\\${unit.name}\\sEquipment',
+    ),
+  );
+
+  return variables;
 }
+
+const eqStartedVarName = 'EqStarted';
+
+const eqAlarmVarName = 'EqAlarm';
 
 ArrayRanges _arrayRanges(DataTypeBase dataTypeBase) {
   if (dataTypeBase is DataType) {
@@ -182,39 +220,32 @@ ArrayRanges _arrayRanges(DataTypeBase dataTypeBase) {
 
 const String fbUnitInterfaceType = 'fbUnitInterface';
 
-String _programName = 'GeneratedByMeynCraft';
-
-List<LadderSection> _createSections(List<Unit> units) {
+List<LadderSection> _createSections(Unit unit) {
   var ladderSections = <LadderSection>[];
-  for (var unit in units) {
-    var rungs = <Rung>[];
-    var rungNr = 0;
-    rungs.add(Rung.comment(rungNr++, _generatedComment()));
-    rungs.add(Rung.comment(rungNr++, _unitInterfaceComment));
-    rungs.add(Rung.comment(rungNr++, 'Monitor Start ready')); //TODO
-    rungs.add(Rung.comment(rungNr++, 'Monitor Error')); //TODO
-    rungs.add(createResetAllCmdSetAllScRung(rungNr++, unit));
-    rungs.add(createSummarizeRung(rungNr++, unit));
-    rungs.add(Rung.comment(rungNr++, _equipmentInterfaceComment));
-    for (var equipment in unit.equipments) {
-      for (var arrayValue in equipment.arrayValues) {
-        var rung = createEquipmentInterfaceRung(
-          rungNr++,
-          unit,
-          equipment,
-          arrayValue,
-        );
-        rungs.add(rung);
-      }
+  var rungs = <Rung>[];
+  var rungNr = 0;
+  rungs.add(Rung.comment(rungNr++, _generatedComment()));
+  rungs.add(Rung.comment(rungNr++, _unitInterfaceComment));
+  rungs.add(createEqStartedMonitorRung(rungNr++, unit));
+  rungs.add(createEqAlarmMonitorRung(rungNr++, unit));
+  rungs.add(createResetAllCmdSetAllScRung(rungNr++, unit));
+  rungs.add(createSummarizeRung(rungNr++, unit));
+  rungs.add(Rung.comment(rungNr++, _equipmentInterfaceComment));
+  for (var equipment in unit.equipments) {
+    for (var arrayValue in equipment.arrayValues) {
+      var rung = createEquipmentInterfaceRung(
+        rungNr++,
+        unit,
+        equipment,
+        arrayValue,
+      );
+      rungs.add(rung);
     }
-    ladderSections.add(
-      LadderSection(
-        name: '${unit.name}UnitInterfaces',
-        evaluationOrder: 1,
-        rungs: rungs,
-      ),
-    );
   }
+  ladderSections.add(
+    LadderSection(name: 'UnitInterface', evaluationOrder: 1, rungs: rungs),
+  );
+
   return ladderSections;
 }
 
@@ -230,6 +261,95 @@ String _generatedComment() =>
     '#THIS CODE WAS GENERATED WITH MEYNCRAFT!\n'
     'Date: ${createNowInSysmacXmlFormat()}.\n'
     'More information: https://github.com/meyn-git/meyncraft (scroll down for documentation)';
+
+Rung createEqStartedMonitorRung(int rungNr, Unit unit) {
+  int connectionPointId = 1;
+  var variableNames = _createVariableNames(eqStartedVarName, unit.equipments);
+  return Rung(
+    rungNr,
+    'Monitor if equipment started (for debugging).\n'
+    'A unit may potentially keep until all equipment report as started before progressing to the PackML execute state',
+    [
+      LadderObject.leftPowerRail([ConnectionPointOut(connectionPointId)]),
+      for (int i = 0; i < variableNames.length; i++)
+        LadderObject.contact(
+          variableNames[i],
+          null,
+          ConnectionPointIn([(i % 5 == 0) ? 1 : connectionPointId]),
+          ConnectionPointOut(++connectionPointId),
+        ),
+      LadderObject.coil(
+        'NOP',
+        null,
+        ConnectionPointIn(_coilConnectionPoints(connectionPointId)),
+        ConnectionPointOut(++connectionPointId),
+      ),
+
+      LadderObject.rightPowerRail([
+        ConnectionPointIn([connectionPointId]),
+      ]),
+    ],
+  );
+}
+
+List<String> _createVariableNames(String preFix, List<Equipment> equipments) {
+  var variableNames = <String>[];
+  for (var equipment in equipments) {
+    for (var arrayValue in equipment.arrayValues) {
+      variableNames.add('$preFix.${equipment.name}$arrayValue');
+    }
+  }
+  return variableNames;
+}
+
+Rung createEqAlarmMonitorRung(int rungNr, Unit unit) {
+  int connectionPointId = 1;
+  var variableNames = _createVariableNames(eqAlarmVarName, unit.equipments);
+  return Rung(
+    rungNr,
+    'Monitor if equipment is in alarm (for debugging)\n'
+    'An equipment module can request a unit to stop or abort when '
+    'it has an critical alarm.',
+    [
+      LadderObject.leftPowerRail([ConnectionPointOut(connectionPointId)]),
+      for (int i = 0; i < variableNames.length; i++)
+        LadderObject.contact(
+          variableNames[i],
+          null,
+          ConnectionPointIn([(i % 5 == 0) ? 1 : connectionPointId]),
+          ConnectionPointOut(++connectionPointId),
+        ),
+      LadderObject.coil(
+        'NOP',
+        null,
+        ConnectionPointIn(_coilConnectionPoints(connectionPointId)),
+        ConnectionPointOut(++connectionPointId),
+      ),
+
+      LadderObject.rightPowerRail([
+        ConnectionPointIn([connectionPointId]),
+      ]),
+    ],
+  );
+}
+
+List<int> _coilConnectionPoints(int connectionPointId) {
+  if (connectionPointId < 6) {
+    return [connectionPointId];
+  }
+
+  List<int> result = [];
+  for (int i = 6; i <= connectionPointId; i += 5) {
+    result.add(i);
+  }
+
+  // Ensure the final number is included if it's not already
+  if (result.last != connectionPointId) {
+    result.add(connectionPointId);
+  }
+
+  return result;
+}
 
 Rung createResetAllCmdSetAllScRung(int rungNr, Unit unit) {
   var functionBlockWithSourcesAndSinks = FunctionBlockWithSourcesAndSinks(
@@ -333,13 +453,19 @@ Rung createEquipmentInterfaceRung(
       FunctionLink(variableName: 'False', functionVariableName: 'iReset'),
       FunctionLink(
         variableName: 'False',
-        functionVariableName: 'iEventSuppress',
+        functionVariableName: 'iEventsSuppress',
       ),
     ],
     [
-      FunctionLink(variableName: '', functionVariableName: 'oAlarm'),
+      FunctionLink(
+        variableName: '$eqAlarmVarName.${equipment.name}$array',
+        functionVariableName: 'oAlarm',
+      ),
       FunctionLink(variableName: '', functionVariableName: 'oWarning'),
-      FunctionLink(variableName: '', functionVariableName: 'oStarted'),
+      FunctionLink(
+        variableName: '$eqStartedVarName.${equipment.name}$array',
+        functionVariableName: 'oStarted',
+      ),
       FunctionLink(
         variableName: '',
         functionVariableName: 'oEquipmentPackMLMode',
