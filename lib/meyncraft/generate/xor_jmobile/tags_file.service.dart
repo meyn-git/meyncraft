@@ -1,11 +1,12 @@
 import 'dart:io';
 
+import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/data_type.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:xml/xml.dart';
 
 /// creates an xml file with [XorTag]s generated from a Sysmac project file

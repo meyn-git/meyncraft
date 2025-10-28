@@ -1,9 +1,8 @@
 import 'dart:io';
 
-import 'package:meyncraft/meyncraft/generate/sysmac/iec61131_10/iec61131_10.dart';
+import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
 Future<void> writeSysmacEventArrayXmlImportFile(
@@ -51,7 +50,7 @@ GlobalVariable _createEventGlobalArrayVariable(
   Variable2(
     variableName: eventGlobalArrayName,
     variableType:
-        'ARRAY[1..${sysmacProject.eventService.events.length}] OF BOOL',
+        'ARRAY[0..${sysmacProject.eventService.events.length}] OF BOOL',
     comment:
         'This array is a copy from EventGlobal and is needed for efficient communication with XOR-HMIs or MeynConnect',
     networkPublish: NetworkPublish.publicationOnly,

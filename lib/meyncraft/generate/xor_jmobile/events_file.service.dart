@@ -3,8 +3,8 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/event/event.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/meyn/event/event.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
 Future<void> writeJMobileEventsFile(SysmacProject sysmacProject) async {

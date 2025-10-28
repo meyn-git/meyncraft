@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:meyncraft/meyncraft/generate/sysmac/iec61131_10/iec61131_10.dart';
+import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/sysmac_project.domain.dart';
-import 'package:meyncraft/meyncraft/source/sysmac/variable/variable.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
-Future<void> writeUnitInterfaceXmlImportFile(
+Future<void> writeSysmacUnitInterfaceXmlImportFile(
   SysmacProject sysmacProject,
 ) async {
   var outputFile = createOutputFile(sysmacProject, '-SysmacUnitInterface.xml');
@@ -30,25 +30,13 @@ Future<void> writeUnitInterfaceXmlImportFile(
     '    Import this file in Sysmac with Menu \\ Tools \\ IEC 61131-10 XML \\ Import',
   );
   logger.info(
-    '    This will create or override the following sections ${programs.map((p) => p.programName).join(', ')} '
+    '    Then move the UnitInterface sections in program "GeneratedByMeynCraft_<Unit Name>"'
     'to the corresponding existing programs',
   );
 }
 
 List<Program> createPrograms(SysmacProject sysmacProject) {
-  VariableMember? interfaceGlobalVar = _findGlobalVariable(
-    sysmacProject,
-    interfaceGlobalVariableName,
-  );
-  if (interfaceGlobalVar == null) return [];
-  VariableMember? configGlobalVar = _findGlobalVariable(
-    sysmacProject,
-    configGlobalVariableName,
-  );
-  if (configGlobalVar == null) return [];
-
-  var units = _createUnits(interfaceGlobalVar, configGlobalVar);
-
+  var units = findMeynUnitsAndEquipments(sysmacProject);
   return units.map((u) => _createProgram(u)).toList();
 }
 
@@ -59,7 +47,7 @@ Program _createProgram(Unit unit) {
   return Program(
     programName: programName,
     pouInfo: _createPouInfo(),
-    globalVariables: _createGlobalVariables(),
+    globalVariables: _createGlobalVariables(unit),
     internalVariables: _createInternalVariables(unit),
     mainBody: mainBody,
   );
@@ -81,92 +69,20 @@ List<Variable2> _createInternalVariables(Unit unit) {
   ];
 }
 
-List<GlobalVariable> _createGlobalVariables() => <GlobalVariable>[
+List<GlobalVariable> _createGlobalVariables(Unit unit) => <GlobalVariable>[
   GlobalVariable(
     Variable2(variableName: 'InterfaceGlobal', variableType: 'sInterface'),
   ),
   GlobalVariable(
     Variable2(variableName: 'ConfigGlobal', variableType: 'sConfig'),
   ),
+  GlobalVariable(
+    Variable2(
+      variableName: unitStartAllowedVariableName(unit),
+      variableType: 'BOOL',
+    ),
+  ),
 ];
-
-List<Unit> _createUnits(
-  VariableMember interfaceGlobalVar,
-  VariableMember configGlobalVar,
-) {
-  List<VariableMember> unitInterfaces = interfaceGlobalVar.find(
-    _unitInterfacesToEquipmentsFilter,
-  );
-  if (unitInterfaces.isEmpty) {
-    logger.warning(
-      '    Could not find any unit interfaces in the ${interfaceGlobalVar.expression} variable',
-    );
-  }
-  logger.info('    Found: ${unitInterfaces.length} unit interfaces');
-  List<VariableMember> equipmentInterfaces = interfaceGlobalVar.find(
-    _equipmentInterfacesToUnitFilter,
-  );
-  var equipmentInterfacesWithoutUnit = [...equipmentInterfaces];
-  if (unitInterfaces.isEmpty) {
-    logger.warning(
-      '    Could not find any equipment interfaces in the ${interfaceGlobalVar.expression} variable',
-    );
-  }
-  logger.info('    Found: ${equipmentInterfaces.length} equipment interfaces');
-
-  var units = <Unit>[];
-  for (var unitInterface in unitInterfaces) {
-    var unitName = unitInterface.namePath.last;
-    var unitConfigs = configGlobalVar.find(
-      (d) => _configMemberForUnitFilter(d, unitName),
-    );
-    if (unitConfigs.length != 1) {
-      logger.warning(
-        '    Expected variable ${configGlobalVar.expression} to have a member for unit $unitName',
-      );
-      break;
-    }
-    var unitConfig = unitConfigs.first;
-    var equipments = <Equipment>[];
-    for (var equipmentInterface in equipmentInterfaces) {
-      var nameToFind = '${equipmentInterface.namePath.last}Present';
-      var equipmentPresentConfigs = unitConfig.find(
-        (d) => d.name == nameToFind && d is DataType && d.baseType is NxBool,
-      );
-      if (equipmentPresentConfigs.isNotEmpty) {
-        equipments.add(
-          Equipment(
-            interfaceGlobalMember: equipmentInterface,
-            configGlobalPresentMember: equipmentPresentConfigs.first,
-          ),
-        );
-        equipmentInterfacesWithoutUnit.remove(equipmentInterface);
-      }
-    }
-    if (equipments.isEmpty) {
-      logger.warning(
-        '    Expected variable ${unitConfig.expression} to have EquipmentPresent booleans',
-      );
-    }
-    var unit = Unit(
-      interfaceGlobalMember: unitInterface,
-      configGlobalMember: unitConfigs.first,
-      equipments: equipments,
-    );
-    units.add(unit);
-  }
-
-  for (var equipmentInterfaceWithoutUnit in equipmentInterfacesWithoutUnit) {
-    logger.warning(
-      '    Could not find a ${configGlobalVar.expression}.<UnitName>.'
-      '${equipmentInterfaceWithoutUnit.namePath.last}Present as '
-      '${_arrayRanges(equipmentInterfaceWithoutUnit.dataTypeBase).toTypeExpression()}BOOL'
-      ', and therefor could not generate code to link it to a Unit!',
-    );
-  }
-
-  return units;
-}
 
 List<Variable2> _createInternalUnitVariables(Unit unit) {
   var variables = <Variable2>[];
@@ -186,7 +102,7 @@ List<Variable2> _createInternalUnitVariables(Unit unit) {
       .map(
         (DataTypeBase d) => Variable2(
           variableName: 'fb${d.name}EqInterface',
-          variableType: '${_arrayRanges(d).toTypeExpression()}fbUnitInterface',
+          variableType: '${arrayRanges(d).toTypeExpression()}fbUnitInterface',
         ),
       )
       .toList();
@@ -211,13 +127,6 @@ const eqStartedVarName = 'EqStarted';
 
 const eqAlarmVarName = 'EqAlarm';
 
-ArrayRanges _arrayRanges(DataTypeBase dataTypeBase) {
-  if (dataTypeBase is DataType) {
-    return (dataTypeBase).baseType.arrayRanges;
-  }
-  return ArrayRanges();
-}
-
 const String fbUnitInterfaceType = 'fbUnitInterface';
 
 List<LadderSection> _createSections(Unit unit) {
@@ -226,6 +135,7 @@ List<LadderSection> _createSections(Unit unit) {
   var rungNr = 0;
   rungs.add(Rung.comment(rungNr++, _generatedComment()));
   rungs.add(Rung.comment(rungNr++, _unitInterfaceComment));
+  rungs.add(createUnitStartAllowedRung(rungNr++, unit));
   rungs.add(createEqStartedMonitorRung(rungNr++, unit));
   rungs.add(createEqAlarmMonitorRung(rungNr++, unit));
   rungs.add(createResetAllCmdSetAllScRung(rungNr++, unit));
@@ -261,6 +171,24 @@ String _generatedComment() =>
     '#THIS CODE WAS GENERATED WITH MEYNCRAFT!\n'
     'Date: ${createNowInSysmacXmlFormat()}.\n'
     'More information: https://github.com/meyn-git/meyncraft (scroll down for documentation)';
+
+Rung createUnitStartAllowedRung(int rungNr, Unit unit) {
+  var variables = <String>[];
+  for (var equipment in unit.equipments) {
+    for (var arrayValue in equipment.arrayValues) {
+      variables.add('EqStarted.${equipment.name}$arrayValue');
+    }
+  }
+  var structuredText =
+      '${unitStartAllowedVariableName(unit)}:=\n    ${variables.join(' AND\n    ')};';
+  return Rung.structuredText(
+    evaluationOrder: rungNr,
+    structuredText: structuredText,
+    comment: 'Start condition for unit',
+  );
+}
+
+String unitStartAllowedVariableName(Unit unit) => '${unit.name}StartAllowed';
 
 Rung createEqStartedMonitorRung(int rungNr, Unit unit) {
   int connectionPointId = 1;
@@ -487,31 +415,6 @@ Rung createEquipmentInterfaceRung(
   ]);
 }
 
-const String interfaceGlobalVariableName = 'InterfaceGlobal';
-const String configGlobalVariableName = 'ConfigGlobal';
-
-VariableMember? _findGlobalVariable(
-  SysmacProject sysmacProject,
-  String nameToFind,
-) {
-  var variables = sysmacProject.globalVariableService.variables.where(
-    (v) => v.name == nameToFind,
-  );
-  if (variables.length != 1) {
-    logger.warning(
-      '  Expected the sysmac project to have 1 global variable of name "$nameToFind"',
-    );
-    return null;
-  }
-  var variable = variables.first;
-  var variableType = variable.baseType;
-  if (variableType is! DataTypeReference) {
-    logger.warning('Expected "$nameToFind" to be a DataType');
-    return null;
-  }
-  return VariableMember(variable, variableType.dataType, []);
-}
-
 File createOutputFile(SysmacProject sysmacProject, String suffix) {
   var sysmacFile = sysmacProject.details.projectFile;
   var directory = sysmacFile.parent.path;
@@ -521,114 +424,4 @@ File createOutputFile(SysmacProject sysmacProject, String suffix) {
       '$directory${Platform.pathSeparator}$nameWithoutExtension$suffix';
   var outputFile = File(outputPath);
   return outputFile;
-}
-
-bool _unitInterfacesToEquipmentsFilter(DataTypeBase base) =>
-    base is DataType &&
-    (base.baseType) is DataTypeReference &&
-    (base.baseType as DataTypeReference).dataType.children.any(
-      (c) => _matches(c, name: 'PackML', type: r'Generic\Unit\sPackML'),
-    );
-
-bool _equipmentInterfacesToUnitFilter(DataTypeBase base) =>
-    base is DataType &&
-    (base.baseType) is DataTypeReference &&
-    (base.baseType as DataTypeReference).dataType.children.any(
-      (c) => _matches(c, name: 'Unit', type: r'Generic\Equipment\sInterface'),
-    ) &&
-    (base.baseType as DataTypeReference).dataType.children.any(
-      (c) => _matches(c, name: 'PackML', type: r'Generic\Equipment\sPackML'),
-    );
-
-bool _configMemberForUnitFilter(DataTypeBase base, String unitName) =>
-    base is DataType && base.name == unitName;
-
-bool _matches(
-  DataTypeBase base, {
-  required String name,
-  required String type,
-}) =>
-    base.name == name &&
-    base is DataType &&
-    base.baseType is DataTypeReference &&
-    (base.baseType as DataTypeReference).namePathWithBackSlashes
-            .toLowerCase() ==
-        type.toLowerCase();
-
-class Unit {
-  /// the member inside the InterfaceGlobal variable
-  /// that represents the unit interface to one or more equipments
-  final VariableMember interfaceGlobalMember;
-
-  /// the member inside the ConfigGlobal variable
-  /// that represents the unit configuration
-  final VariableMember configGlobalMember;
-  final List<Equipment> equipments;
-
-  Unit({
-    required this.interfaceGlobalMember,
-    required this.configGlobalMember,
-    required this.equipments,
-  });
-
-  late final String name = interfaceGlobalMember.namePath.last;
-}
-
-class Equipment {
-  /// the member inside the InterfaceGlobal variable
-  /// that represents the equipment interface with a unit
-  final VariableMember interfaceGlobalMember;
-
-  /// the member inside the ConfigGlobal variable
-  /// that represents a boolean whether this equipment is present
-  final VariableMember configGlobalPresentMember;
-
-  late final String name = interfaceGlobalMember.namePath.last;
-
-  Equipment({
-    required this.interfaceGlobalMember,
-    required this.configGlobalPresentMember,
-  });
-
-  late final List<String> arrayValues = _arrayValues();
-
-  ArrayRanges _arrayRanges() {
-    var dataTypeBase = interfaceGlobalMember.dataTypeBase;
-    if (dataTypeBase is DataType) {
-      return dataTypeBase.baseType.arrayRanges;
-    }
-    return ArrayRanges();
-  }
-
-  List<String> _arrayValues() {
-    var arrayRanges = _arrayRanges();
-    if (arrayRanges.isEmpty) {
-      return [''];
-    }
-    return arrayRanges.toStringList();
-  }
-}
-
-/// contains information of a member somewhere in a [variable]
-class VariableMember {
-  final Variable variable;
-  final DataTypeBase dataTypeBase;
-  final List<String> namePath;
-
-  VariableMember(this.variable, this.dataTypeBase, List<String> namePath)
-    : namePath = [variable.name, ...namePath];
-
-  late final String expression = namePath.join('.');
-
-  List<VariableMember> find(bool Function(DataTypeBase base) filter) {
-    var paths = dataTypeBase.findPaths(filter, forEachArrayValue: false);
-    return paths
-        .map(
-          (p) => VariableMember(variable, p.dataTypeBase, [
-            ...namePath.skip(1),
-            ...p.namePath.skip(1),
-          ]),
-        )
-        .toList();
-  }
 }

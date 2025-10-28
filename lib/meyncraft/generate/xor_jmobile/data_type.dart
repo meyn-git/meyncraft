@@ -1,4 +1,4 @@
-import 'package:meyncraft/meyncraft/source/sysmac/base_type/base_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 
 /// | Memory Space         | NX/NJ Data Type  | NA Data Type     | JMobile        | JMobile Limits               |
 /// |----------------------|------------------|------------------|----------------|------------------------------|
