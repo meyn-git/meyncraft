@@ -1,0 +1,1 @@
+enum CodeType { ladder, structuredText }

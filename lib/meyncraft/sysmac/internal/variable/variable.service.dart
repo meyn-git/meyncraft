@@ -29,11 +29,9 @@ class GlobalVariableService {
     var variableArchiveFile = projectIndexXml.globalVariableArchiveFile();
     var variableData = utf8.decode(variableArchiveFile.content);
     var entities = parseSlwdData(variableData);
-    var variables = <Variable>[];
-    for (var entity in entities) {
-      var variable = createVariable(entity, dataTypeTree);
-      variables.add(variable);
-    }
+    var variables = entities
+        .map((e) => createVariable(e, dataTypeTree))
+        .toList();
     return variables;
   }
 

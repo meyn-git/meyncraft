@@ -73,12 +73,12 @@ abstract class ArchiveXml {
   final XmlDocument xmlDocument;
 
   ArchiveXml.fromArchiveFile(ArchiveFile archiveFile)
-    : this.fromXml(_convertContentToUtf8(archiveFile));
+    : this.fromXml(convertContentToUtf8(archiveFile));
 
   ArchiveXml.fromXml(String xml) : xmlDocument = XmlDocument.parse(xml);
+}
 
-  static String _convertContentToUtf8(ArchiveFile archiveFile) {
-    var content = archiveFile.content;
-    return utf8.decode(content);
-  }
+String convertContentToUtf8(ArchiveFile archiveFile) {
+  var content = archiveFile.content;
+  return utf8.decode(content);
 }

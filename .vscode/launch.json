@@ -15,11 +15,6 @@
                 "test\\1176DE02-Evisceration-008.smc2"
             ]
         },
-        {
-            "name": "Flutter (lib\\meyncraft\\source\\sysmac\\project_index_test.dart)",
-            "type": "dart",
-            "request": "launch",
-            "program": "lib\\meyncraft\\source\\sysmac\\project_index_test.dart"
-        }
+      
     ]
 }

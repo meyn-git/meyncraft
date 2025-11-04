@@ -113,7 +113,7 @@ String _createComment(int rungNr) {
 }
 
 File createOutputFile(SysmacProject sysmacProject, String suffix) {
-  var sysmacFile = sysmacProject.details.projectFile;
+  var sysmacFile = sysmacProject.identity.projectFile;
   var directory = sysmacFile.parent.path;
   var filename = sysmacFile.uri.pathSegments.last;
   var nameWithoutExtension = filename.split('.').first;
