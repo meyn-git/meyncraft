@@ -14,8 +14,6 @@ List<Library> createLibraries(
   var libraryElements = getFilteredDescendingElements(
     deviceElement,
     include: isLibraryElement,
-    // exclude: (e) =>
-    //     isNestedLibraryElement(rootElement: deviceElement, element: e),
   );
 
   var libraries = libraryElements
