@@ -1,9 +1,7 @@
-import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function/function.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function/function.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function_block/function_block.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function_block/function_block.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';

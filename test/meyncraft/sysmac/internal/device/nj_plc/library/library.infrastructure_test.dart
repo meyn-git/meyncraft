@@ -63,7 +63,7 @@ void main() {
         'nested library in second library should be Library with correct properties',
         () {
           var secondLibrary = libraries[1];
-          var nestedLibrary = secondLibrary.libraries.first!;
+          var nestedLibrary = secondLibrary.libraries.first;
           nestedLibrary.name.should.be('OmronLib_PackML30_V2_0');
           nestedLibrary.libraries.length.should.be(0);
           nestedLibrary.programs.length.should.be(0);
