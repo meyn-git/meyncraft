@@ -6,7 +6,6 @@ import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.d
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/unit_equipment/unit_equipment.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/unit_equipment/unit_equipment.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
 Future<void> writeSysmacUnitInterfaceXmlImportFile(
