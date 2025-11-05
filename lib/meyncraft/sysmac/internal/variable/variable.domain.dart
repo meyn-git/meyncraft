@@ -31,6 +31,7 @@ class Variable {
   final BaseType baseType;
   // optional IO address where variable is linked
   final String? at;
+  final VariableDirection? direction;
 
   Variable({
     required this.name,
@@ -38,10 +39,20 @@ class Variable {
     required this.networkPublish,
     required this.baseType,
     this.at,
+    this.direction,
   });
 }
 
-enum VariableGroup { global, internal, external, unknown }
+enum VariableGroup {
+  global,
+  internal,
+  external,
+  unknown,
+  functionInOut,
+  functionReturn,
+}
+
+enum VariableDirection { in$, out, inOut }
 
 /// contains information of a member somewhere in a [variable]
 class VariableMember {

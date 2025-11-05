@@ -63,6 +63,9 @@ void main() {
             firstFunction.should.beOfType<StructuredTextFunction>();
             firstFunction.name.should.be('fEncRevTrigger');
             firstFunction.codeType.should.be(CodeType.structuredText);
+            firstFunction.internalVariables.length.should.be(0);
+            firstFunction.externalVariables.length.should.be(0);
+            firstFunction.inOutVariables.length.should.be(3);
             (firstFunction as StructuredTextFunction).structuredText.should
                 .startWith('(* Header');
           },
@@ -82,6 +85,9 @@ void main() {
             lastFunction.should.beOfType<StructuredTextFunction>();
             lastFunction.name.should.be('fBannerStatusLight');
             lastFunction.codeType.should.be(CodeType.structuredText);
+            lastFunction.internalVariables.length.should.be(11);
+            lastFunction.externalVariables.length.should.be(0);
+            lastFunction.inOutVariables.length.should.be(5);
             (lastFunction as StructuredTextFunction).structuredText.should
                 .endWith('oOutputData02[1] := OutputData1[0];');
           },
@@ -131,6 +137,9 @@ void main() {
             firstFunction.should.beOfType<StructuredTextFunction>();
             firstFunction.name.should.be('fActualValueReal');
             firstFunction.codeType.should.be(CodeType.structuredText);
+            firstFunction.internalVariables.length.should.be(1);
+            firstFunction.externalVariables.length.should.be(0);
+            firstFunction.inOutVariables.length.should.be(5);
             (firstFunction as StructuredTextFunction).structuredText.should
                 .startWith('(* Header');
           },
@@ -150,6 +159,9 @@ void main() {
             lastFunction.should.beOfType<StructuredTextFunction>();
             lastFunction.name.should.be('TIME_TO_REAL');
             lastFunction.codeType.should.be(CodeType.structuredText);
+            lastFunction.internalVariables.length.should.be(0);
+            lastFunction.externalVariables.length.should.be(0);
+            lastFunction.inOutVariables.length.should.be(3);
             (lastFunction as StructuredTextFunction).structuredText.should
                 .endWith('ENO := TRUE;');
           },

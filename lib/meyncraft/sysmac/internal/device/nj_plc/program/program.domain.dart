@@ -17,9 +17,9 @@ class LadderProgram extends DelegatingList<LadderSection> implements Program {
 
   LadderProgram({
     required this.name,
-    required List<LadderSection> ladderSections,
-    required this.externalVariables,
     required this.internalVariables,
+    required this.externalVariables,
+    required List<LadderSection> ladderSections,
   }) : super(ladderSections);
 
   @override
@@ -39,9 +39,9 @@ class StructuredTextProgram implements Program {
   final String structuredText;
   StructuredTextProgram({
     required this.name,
-    required this.structuredText,
-    required this.externalVariables,
     required this.internalVariables,
+    required this.externalVariables,
+    required this.structuredText,
   });
 
   @override

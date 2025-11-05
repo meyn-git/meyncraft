@@ -159,7 +159,7 @@ void main() {
             (lastProgram as StructuredTextProgram).name.should.be('Test');
             (lastProgram as StructuredTextProgram).structuredText.should
                 .endWith('numer:=1+1;');
-                lastProgram.internalVariables.length.should.be(1);
+            lastProgram.internalVariables.length.should.be(1);
             lastProgram.externalVariables.length.should.be(0);
           },
         );

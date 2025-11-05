@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.domain.dart';
@@ -80,6 +79,8 @@ LadderProgram createLadderProgram(
     sysmacProject.dataTypeTree,
     variablesElement.getAttribute(idAttribute)!,
   );
+  var internalVariables = variableGroups[VariableGroup.internal] ?? [];
+  var externalVariables = variableGroups[VariableGroup.external] ?? [];
 
   var pouBodyElements = entities.where(
     (e) => e.getAttribute(typeAttribute) == 'PouBody',
@@ -93,8 +94,8 @@ LadderProgram createLadderProgram(
   return LadderProgram(
     name: name,
     ladderSections: ladderSections,
-    internalVariables: variableGroups[VariableGroup.internal]!,
-    externalVariables: variableGroups[VariableGroup.external]!,
+    internalVariables: internalVariables,
+    externalVariables: externalVariables,
   );
 }
 
@@ -114,6 +115,8 @@ StructuredTextProgram? createStructuredTextProgram(
     sysmacProject.dataTypeTree,
     variablesElement.getAttribute(idAttribute)!,
   );
+  var internalVariables = variableGroups[VariableGroup.internal] ?? [];
+  var externalVariables = variableGroups[VariableGroup.external] ?? [];
 
   var pouBodyElement = entities.firstWhere(
     (e) => e.getAttribute(typeAttribute) == 'PouBody',
@@ -125,11 +128,12 @@ StructuredTextProgram? createStructuredTextProgram(
     return null;
   }
   var structuredText = createStructuredText(archiveFile);
+
   return StructuredTextProgram(
     name: name,
     structuredText: structuredText,
-    internalVariables: variableGroups[VariableGroup.internal]!,
-    externalVariables: variableGroups[VariableGroup.external]!,
+    internalVariables: internalVariables,
+    externalVariables: externalVariables,
   );
 }
 

@@ -66,9 +66,17 @@ VariableGroup toVariableGroup(Group group) => switch (group.name) {
   'VAR_GLOBAL' => VariableGroup.global,
   'VAR' => VariableGroup.internal,
   'VAR_EXTERNAL' => VariableGroup.external,
+  'VAR_INPUT' => VariableGroup.functionInOut,
+  'RETURN' => VariableGroup.functionReturn,
   _ => VariableGroup.unknown,
 };
 
+VariableDirection? toDirection(String? name) => switch (name) {
+  'VAR_INPUT' => VariableDirection.in$,
+  'VAR_OUTPUT' => VariableDirection.out,
+  'VAR_IN_OUT' => VariableDirection.inOut,
+  _ => null,
+};
 List<Variable> toVariables(Group group, DataTypeTree dataTypeTree) => group
     .entities
     .map((attributes) => createVariable(attributes, dataTypeTree))
@@ -80,6 +88,7 @@ Variable createVariable(
 ) {
   var name = attributes['N']!;
   var comment = attributes['Com'] ?? '';
+  var direction = toDirection(attributes['G']);
   var typeExpression = attributes['D']!;
   var baseType = _baseTypeFactory.createFromExpressionIncludingCustomTypes(
     typeExpression,
@@ -94,6 +103,7 @@ Variable createVariable(
     networkPublish: networkPublish,
     baseType: baseType,
     at: at,
+    direction: direction,
   );
 }
 

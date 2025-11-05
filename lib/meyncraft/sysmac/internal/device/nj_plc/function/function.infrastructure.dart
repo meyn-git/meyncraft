@@ -3,9 +3,10 @@ import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/librar
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/structured_text.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 import 'package:xml/xml.dart';
 
 List<Function$> createFunctions(
@@ -44,17 +45,22 @@ Function$? createFunction(
   var pouBodyElement = entities.firstWhere(
     (e) => e.getAttribute(typeAttribute) == 'PouBody',
   );
-  var id = pouBodyElement.getAttribute(idAttribute)!;
 
   var subType = pouBodyElement.getAttribute(subTypeAttribute)!;
   switch (subType) {
     case 'Ladder':
-      return createLadderFunction(sysmacProject.archive, name: name, id: id);
+      return createLadderFunction(
+        sysmacProject,
+        name: name,
+        variablesElement: variablesElement,
+        pouBodyElement: pouBodyElement,
+      );
     case 'StructuredText':
       return createStructuredTextFunction(
-        sysmacProject.archive,
+        sysmacProject,
         name: name,
-        id: id,
+        variablesElement: variablesElement,
+        pouBodyElement: pouBodyElement,
       );
     case 'FBDExtended':
 
@@ -67,20 +73,54 @@ Function$? createFunction(
 }
 
 StructuredTextFunction createStructuredTextFunction(
-  SysmacProjectArchive sysmacProject, {
+  SysmacProject sysmacProject, {
   required String name,
-  required String id,
+  required XmlElement variablesElement,
+  required XmlElement pouBodyElement,
 }) {
-  var archiveFile = sysmacProject.projectIndexXml.findArchiveFile(id)!;
+  var variableGroups = createVariableGroups(
+    sysmacProject.archive,
+    sysmacProject.dataTypeTree,
+    variablesElement.getAttribute(idAttribute)!,
+  );
+  var internalVariables = variableGroups[VariableGroup.internal] ?? [];
+  var externalVariables = variableGroups[VariableGroup.external] ?? [];
+  var inOutVariables = variableGroups[VariableGroup.functionInOut] ?? [];
+
+  var id = pouBodyElement.getAttribute(idAttribute)!;
+  var archiveFile = sysmacProject.archive.projectIndexXml.findArchiveFile(id)!;
   var structuredText = createStructuredText(archiveFile);
-  return StructuredTextFunction(name: name, structuredText: structuredText);
+  return StructuredTextFunction(
+    name: name,
+    internalVariables: internalVariables,
+    externalVariables: externalVariables,
+    structuredText: structuredText,
+    inOutVariables: inOutVariables,
+  );
 }
 
 LadderFunction createLadderFunction(
-  SysmacProjectArchive sysmacProject, {
+  SysmacProject sysmacProject, {
   required String name,
-  required String id,
+  required XmlElement variablesElement,
+  required XmlElement pouBodyElement,
 }) {
-  var rungs = createRungs(sysmacProject, id);
-  return LadderFunction(name: name, rungs: rungs);
+  var variableGroups = createVariableGroups(
+    sysmacProject.archive,
+    sysmacProject.dataTypeTree,
+    variablesElement.getAttribute(idAttribute)!,
+  );
+  var internalVariables = variableGroups[VariableGroup.internal] ?? [];
+  var externalVariables = variableGroups[VariableGroup.external] ?? [];
+  var inOutVariables = variableGroups[VariableGroup.functionInOut] ?? [];
+
+  var id = pouBodyElement.getAttribute(idAttribute)!;
+  var rungs = createRungs(sysmacProject.archive, id);
+  return LadderFunction(
+    name: name,
+    internalVariables: internalVariables,
+    externalVariables: externalVariables,
+    inOutVariables: inOutVariables,
+    rungs: rungs,
+  );
 }
