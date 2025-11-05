@@ -2,8 +2,18 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/identity/identity.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/identity/identity.domain.dart';
 import 'package:petitparser/petitparser.dart';
+
+/// The Meyn Control Systems Directive  states that a [SysmacProjectFile] name should have the following format:
+/// &lt;site number&gt;DE&lt;panel number&gt;-&lt;panel name&gt;-&lt;standard version&gt;-&lt;customer version&gt;&lt;not installed reason&gt;.smc2\
+/// e.g.: 4321DE06-Evisceration-001-005-to_be_installed.smc2
+/// * &lt;site number&gt;= Meyn layout number
+/// * &lt;panel number&gt;= Unique number within site (see electrical schematic)
+/// * &lt;panel name&gt;= See official product name on web site (without line number!)
+/// * &lt;standard version&gt;= 0-...
+/// * &lt;customer version&gt;= 0-..., increases with 1 with every new version.
+/// * &lt;not installed reason&gt;= optional text explaining why this version is not the latest version at the customer.
 
 SysmacProjectIdentity createIdentity(File sysmacProjectFile) {
   var path = sysmacProjectFile.parent.path;

@@ -8,13 +8,17 @@ import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.infrastructure.dart';
 import 'internal/data_type/data_type.domain.dart';
 
-/// Represents a physical Sysmac project file,
-/// which is actually a zip [Archive] containing [ArchiveFile]s
+/// Represents a physical Sysmac project file.
+///
+/// A Sysmac Project File is an exported
+/// [Omron Sysmac project](https://automation.omron.com/en/us/products/family/sysstdio).
+/// This is a file with the *.scm file extension.
+///
+/// This file is  actually a zip [Archive] containing [ArchiveFile]s
 class SysmacProject {
   late final SysmacProjectArchive archive;
 
-  //TODO change it to a function (see createDevices)
-  late final DataTypeTree dataTypeTree = DataTypeTreeFactory().create(archive);
+  late final DataTypeTree dataTypeTree = createDataTypeTree(archive);
 
   late final List<Variable> globalVariables = createGlobalVariables(
     archive,

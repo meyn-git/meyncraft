@@ -249,24 +249,22 @@ class ArrayFactory extends BaseTypeSubFactory {
   RegExp get regex => _regex;
 }
 
-class DataTypeReferenceFactory {
-  /// Replaces all the [UnknownBaseType]s with [DataTypeReference]s
-  /// when the path can be found
-  void replaceWherePossible(DataTypeTree dataTypeTree) {
-    for (var child in dataTypeTree.descendants.whereType<DataType>()) {
-      var baseType = child.baseType;
-      if (baseType is UnknownBaseType) {
-        var dataTypeReference = _baseTypeFactory
-            .createFromExpressionIncludingCustomTypes(
-              baseType.expression,
-              dataTypeTree,
-            );
-        dataTypeReference.arrayRanges.clear();
-        dataTypeReference.arrayRanges.addAll(baseType.arrayRanges);
-        child.baseType = dataTypeReference;
-      }
+/// Replaces all the [UnknownBaseType]s with [DataTypeReference]s
+/// when the path can be found
+void replaceDataTypeReferencesWherePossible(DataTypeTree dataTypeTree) {
+  for (var child in dataTypeTree.descendants.whereType<DataType>()) {
+    var baseType = child.baseType;
+    if (baseType is UnknownBaseType) {
+      var dataTypeReference = _baseTypeFactory
+          .createFromExpressionIncludingCustomTypes(
+            baseType.expression,
+            dataTypeTree,
+          );
+      dataTypeReference.arrayRanges.clear();
+      dataTypeReference.arrayRanges.addAll(baseType.arrayRanges);
+      child.baseType = dataTypeReference;
     }
   }
-
-  final _baseTypeFactory = BaseTypeFactory();
 }
+
+final _baseTypeFactory = BaseTypeFactory();

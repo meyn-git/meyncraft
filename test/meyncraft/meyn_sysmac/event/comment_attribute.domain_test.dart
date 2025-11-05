@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/event/comment_attribute.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/event/component_code.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/event/event.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:petitparser/petitparser.dart';
 import 'package:shouldly/shouldly.dart';
 

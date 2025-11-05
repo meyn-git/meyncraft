@@ -1,4 +1,4 @@
-import 'package:meyncraft/meyncraft/sysmac/meyn/identity/identity.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/identity/identity.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// Each component has a [ComponentCode]:

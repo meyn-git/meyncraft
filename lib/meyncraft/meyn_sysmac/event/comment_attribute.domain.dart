@@ -1,7 +1,7 @@
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/event/component_code.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/event/event.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// A [CommentAttribute]s is additional information that is placed inside Sysmac variable or structure comments.

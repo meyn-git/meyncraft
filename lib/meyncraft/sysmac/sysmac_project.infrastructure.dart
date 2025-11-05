@@ -6,25 +6,6 @@ import 'package:xml/xml.dart';
 
 import 'project_index.infrastructure.dart';
 
-/// A [SysmacProjectFile] is an exported
-/// [Omron Sysmac project](https://automation.omron.com/en/us/products/family/sysstdio).
-/// This is a file with the *.scm file extension.
-///
-/// Note that you need to export the
-/// [Omron Sysmac project](https://automation.omron.com/en/us/products/family/sysstdio)
-/// before using it with [SysmacGenerator].
-///
-/// A [SysmacProjectFile] name should have the following format:\
-/// &lt;site number&gt;DE&lt;panel number&gt;-&lt;panel name&gt;-&lt;standard version&gt;-&lt;customer version&gt;&lt;not installed reason&gt;.smc2\
-/// e.g.: 4321DE06-Evisceration-001-005-to_be_installed.smc2
-/// * &lt;site number&gt;= Meyn layout number
-/// * &lt;panel number&gt;= Unique number within site (see electrical schematic)
-/// * &lt;panel name&gt;= See official product name on web site (without line number!)
-/// * &lt;standard version&gt;= 0-...
-/// * &lt;customer version&gt;= 0-..., increases with 1 with every new version.
-/// * &lt;not installed reason&gt;= optional text explaining why this version is not the latest version at the customer.
-class SysmacProjectFile {}
-
 /// Represents a physical Sysmac project file,
 /// which is actually a zip [Archive] containing [ArchiveFile]s
 class SysmacProjectArchive {

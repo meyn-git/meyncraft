@@ -13,60 +13,58 @@ const String enumValueAttribute = 'EnumValue';
 
 const String nameSpacePathSeparator = '\\';
 
-class DataTypeTreeFactory {
-  DataTypeTree create(SysmacProjectArchive sysmacProjectArchive) {
-    DataTypeTree dataTypeTree = DataTypeTree();
-    _addAndCreateChildren(sysmacProjectArchive, dataTypeTree);
-    DataTypeReferenceFactory().replaceWherePossible(dataTypeTree);
-    return dataTypeTree;
+DataTypeTree createDataTypeTree(SysmacProjectArchive sysmacProjectArchive) {
+  DataTypeTree dataTypeTree = DataTypeTree();
+  _addAndCreateChildren(sysmacProjectArchive, dataTypeTree);
+  replaceDataTypeReferencesWherePossible(dataTypeTree);
+  return dataTypeTree;
+}
+
+void _addAndCreateChildren(
+  SysmacProjectArchive sysmacProjectArchive,
+  DataTypeTree dataTypeTree,
+) {
+  var dataTypeArchiveXmlFiles = sysmacProjectArchive.projectIndexXml
+      .dataTypeArchiveXmlFiles();
+
+  for (var dataTypeArchiveXmlFile in dataTypeArchiveXmlFiles) {
+    String nameSpacePath = dataTypeArchiveXmlFile.nameSpacePath;
+    DataTypeBase nameSpace = _findOrCreateNameSpacePath(
+      dataTypeTree,
+      nameSpacePath,
+    );
+
+    var dataTypes = dataTypeArchiveXmlFile.toDataTypes();
+    nameSpace.children.addAll(dataTypes);
   }
+}
 
-  void _addAndCreateChildren(
-    SysmacProjectArchive sysmacProjectArchive,
-    DataTypeTree dataTypeTree,
-  ) {
-    var dataTypeArchiveXmlFiles = sysmacProjectArchive.projectIndexXml
-        .dataTypeArchiveXmlFiles();
-
-    for (var dataTypeArchiveXmlFile in dataTypeArchiveXmlFiles) {
-      String nameSpacePath = dataTypeArchiveXmlFile.nameSpacePath;
-      DataTypeBase nameSpace = _findOrCreateNameSpacePath(
-        dataTypeTree,
-        nameSpacePath,
-      );
-
-      var dataTypes = dataTypeArchiveXmlFile.toDataTypes();
-      nameSpace.children.addAll(dataTypes);
-    }
-  }
-
-  DataTypeBase _findOrCreateNameSpacePath(
-    DataTypeBase nameSpace,
-    String nameSpacePathToFind,
-  ) {
-    if (nameSpacePathToFind.isEmpty) {
-      // found
-      return nameSpace;
-    }
-
-    var namesToFind = nameSpacePathToFind.split(nameSpacePathSeparator);
-    String nameToFind = namesToFind.first;
-
-    for (DataTypeBase child in nameSpace.children) {
-      if (child.name == nameToFind) {
-        namesToFind.removeAt(0);
-        String remainingPathToFind = namesToFind.join(nameSpacePathSeparator);
-        return _findOrCreateNameSpacePath(child, remainingPathToFind);
-      }
-    }
-    //not found: create nameSpace tree
-    for (String nameToCreate in namesToFind) {
-      var newNameSpaceChild = NameSpace(nameToCreate);
-      nameSpace.children.add(newNameSpaceChild);
-      nameSpace = newNameSpaceChild;
-    }
+DataTypeBase _findOrCreateNameSpacePath(
+  DataTypeBase nameSpace,
+  String nameSpacePathToFind,
+) {
+  if (nameSpacePathToFind.isEmpty) {
+    // found
     return nameSpace;
   }
+
+  var namesToFind = nameSpacePathToFind.split(nameSpacePathSeparator);
+  String nameToFind = namesToFind.first;
+
+  for (DataTypeBase child in nameSpace.children) {
+    if (child.name == nameToFind) {
+      namesToFind.removeAt(0);
+      String remainingPathToFind = namesToFind.join(nameSpacePathSeparator);
+      return _findOrCreateNameSpacePath(child, remainingPathToFind);
+    }
+  }
+  //not found: create nameSpace tree
+  for (String nameToCreate in namesToFind) {
+    var newNameSpaceChild = NameSpace(nameToCreate);
+    nameSpace.children.add(newNameSpaceChild);
+    nameSpace = newNameSpaceChild;
+  }
+  return nameSpace;
 }
 
 /// Represents an [ArchiveXml] with information of some [DataType]s within a given [nameSpacePath]

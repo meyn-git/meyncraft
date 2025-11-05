@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:meyncraft/meyncraft/sysmac/meyn/identity/identity.service.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/identity/identity.service.dart';
 import 'package:petitparser/petitparser.dart';
 import 'package:recase/recase.dart';
 

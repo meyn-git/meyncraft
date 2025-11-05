@@ -7,7 +7,7 @@ import 'package:meyncraft/meyncraft/generate/sysmac/unit_interface_service.dart'
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/events_file.service.dart';
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/tags_file.service.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 
 Future<void> generate(String sysmacProjectFilePath) async {
   try {

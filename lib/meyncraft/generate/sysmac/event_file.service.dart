@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 
 Future<void> writeSysmacEventFile(MeynSysmacProject sysmacProject) async {
   var events = sysmacProject.events;

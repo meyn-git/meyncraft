@@ -1,16 +1,15 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/pack_ml/pack_ml.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.service.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/pack_ml/pack_ml.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/unit_equipment/unit_equipment.domain.dart';
 import 'package:recase/recase.dart';
 
 Future<void> writeSysmacFbCheckPackMlScFile(
   MeynSysmacProject sysmacProject,
 ) async {
-  var units = findMeynUnitsAndEquipments(sysmacProject);
+  var units = sysmacProject.units;
   for (var unit in units) {
     await createFbCheckPackMlScFile(sysmacProject, unit);
   }

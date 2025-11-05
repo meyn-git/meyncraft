@@ -12,14 +12,14 @@ import '../../../../test_resource.dart';
 void main() {
   GetIt.I.registerSingleton<Logger>(Logger());
 
-  group('createGlobalVariables(_archive, dataTypeTree) function', () {
+  group('createDataTypeTree function', () {
     late final SysmacProjectArchive sysmacProjectArchive;
     late final DataTypeTree dataTypeTree;
     setUp(() async {
       sysmacProjectArchive = await SysmacProjectArchive.create(
         SysmacProjectTestResource().file,
       );
-      dataTypeTree = DataTypeTreeFactory().create(sysmacProjectArchive);
+      dataTypeTree = createDataTypeTree(sysmacProjectArchive);
     });
 
     test('createGlobalVariables(0 should return correct result)', () {

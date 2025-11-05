@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
 Future<void> writeSysmacEventArrayXmlImportFile(

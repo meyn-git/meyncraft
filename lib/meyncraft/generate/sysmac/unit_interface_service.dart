@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.service.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/unit_equipment/unit_equipment.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/unit_equipment/unit_equipment.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
@@ -36,8 +36,8 @@ Future<void> writeSysmacUnitInterfaceXmlImportFile(
   );
 }
 
-List<Program> createPrograms(SysmacProject sysmacProject) {
-  var units = findMeynUnitsAndEquipments(sysmacProject);
+List<Program> createPrograms(MeynSysmacProject sysmacProject) {
+  var units = sysmacProject.units;
   return units.map((u) => _createProgram(u)).toList();
 }
 

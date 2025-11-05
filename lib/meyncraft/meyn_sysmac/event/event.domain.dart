@@ -1,8 +1,8 @@
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/event/comment_attribute.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/meyn/event/component_code.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
