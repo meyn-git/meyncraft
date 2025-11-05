@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.domain.dart';
@@ -46,7 +47,7 @@ Program? createProgram(SysmacProject sysmacProject, XmlElement programElement) {
       // which seems to be related to safety programs and functions
       return null;
     default:
-      print('unknown program sub type: $subType');
+      logger.warning('unknown program sub type: $subType');
       return null;
   }
 }
@@ -124,7 +125,7 @@ StructuredTextProgram? createStructuredTextProgram(
   var id = pouBodyElement.getAttribute(idAttribute)!;
   var archiveFile = sysmacProject.archive.projectIndexXml.findArchiveFile(id);
   if (archiveFile == null) {
-    print('StructuredTextProgram archive file: $id.xml not found');
+    logger.warning('StructuredTextProgram archive file: $id.xml not found');
     return null;
   }
   var structuredText = createStructuredText(archiveFile);
@@ -145,7 +146,7 @@ LadderSection? createLadderSection(
   String id = entityElement.getAttribute(idAttribute)!;
   String subType = entityElement.getAttribute(subTypeAttribute)!;
   if (subType != 'Ladder') {
-    print('Unsupported Entity sub-type: $subType');
+    logger.warning('Unsupported Entity sub-type: $subType');
     return null;
   }
   return createLadderBody(
@@ -167,7 +168,7 @@ LadderSection createLadderBody({
 List<Rung> createRungs(SysmacProjectArchive sysmacProjectArchive, String id) {
   var archiveFile = sysmacProjectArchive.projectIndexXml.findArchiveFile(id);
   if (archiveFile == null) {
-    print('Ladder program archive file: $id.xml not found');
+    logger.warning('Ladder program archive file: $id.xml not found');
     return [];
   }
   var content = convertContentToUtf8(archiveFile);
@@ -192,7 +193,7 @@ Rung createRungFromJsonMap(Map<String, dynamic> map) {
     var objectMap = object as Map<String, dynamic>;
     var ladderObject = createLadderObject(objectMap);
     if (ladderObject == null) {
-      print('Unknown ladder object type: ${objectMap['__type']}');
+      logger.warning('Unknown ladder object type: ${objectMap['__type']}');
     } else {
       ladderObjects.add(ladderObject);
     }
@@ -244,21 +245,6 @@ LadderObject createInLineStructuredText(Map<String, dynamic> map) {
   // H = height
   // EID = id
 
-  var otherEntries = Map<String, dynamic>.from(map)
-    ..remove('__type')
-    ..remove('TXT')
-    ..remove('Ix')
-    ..remove('X')
-    ..remove('Y')
-    ..remove('W')
-    ..remove('H')
-    ..remove('EID');
-
-  if (otherEntries.isNotEmpty) {
-    print(otherEntries);
-    print('!!!');
-  }
-
   return InlineStructuredText(structuredText, index: index, x: x, y: y);
 }
 
@@ -271,21 +257,6 @@ LadderObject createFunctionBlockCall(Map<String, dynamic> map) {
   var ud = map['UD'] == true;
   var parametersIn = createParameters(map['In']);
   var parametersOut = createParameters(map['Out']);
-
-  var otherEntries = Map<String, dynamic>.from(map)
-    ..remove('__type')
-    ..remove('Name')
-    ..remove('Var')
-    ..remove('Ix')
-    ..remove('X')
-    ..remove('Y')
-    ..remove('In')
-    ..remove('Out')
-    ..remove('UD');
-  if (otherEntries.isNotEmpty) {
-    print(otherEntries);
-    print('!!!');
-  }
 
   return FunctionBlockCall(
     name,
@@ -317,21 +288,6 @@ LadderObject createFunctionCall(Map<String, dynamic> map) {
   var parametersIn = createParameters(map['In']);
   var parametersOut = createParameters(map['Out']);
 
-  var otherEntries = Map<String, dynamic>.from(map)
-    ..remove('__type')
-    ..remove('Name')
-    ..remove('Ix')
-    ..remove('X')
-    ..remove('Y')
-    ..remove('In')
-    ..remove('Out')
-    ..remove('UD')
-    ..remove('PL');
-  if (otherEntries.isNotEmpty) {
-    print(otherEntries);
-    print('!!!');
-  }
-
   return FunctionCall(
     name,
     index: index,
@@ -361,7 +317,9 @@ Parameter? createParameter(Map<String, String> parameter) {
     _ => null,
   };
   if (type == null) {
-    print('Unsupported Function(Block) parameter type: ${parameter['__type']}');
+    logger.warning(
+      'Unsupported Function(Block) parameter type: ${parameter['__type']}',
+    );
     return null;
   }
   var argument = parameter['Arg']!;
@@ -390,23 +348,7 @@ Contact createContact(Map<String, dynamic> map) {
       ? EdgeDetection.down
       : EdgeDetection.none;
   var negated = map['Not'] == true;
-  var otherEntries = Map<String, dynamic>.from(map)
-    ..remove('__type')
-    ..remove('Var')
-    ..remove('Ix')
-    ..remove('X')
-    ..remove('Y')
-    ..remove('Up')
-    ..remove('Dwn')
-    ..remove('Not')
-    ..remove(
-      'Id',
-    ) // Id is likely internally used for EdgeDetection. We do not need it for now
-    ;
-  if (otherEntries.isNotEmpty) {
-    print(otherEntries);
-    print('!!!');
-  }
+
   return Contact(
     variable,
     index: index,
@@ -433,26 +375,7 @@ Coil createCoil(Map<String, dynamic> map) {
       ? ActuationMode.reset
       : ActuationMode.none;
   var negated = map['Not'] == true;
-  var otherEntries = Map<String, dynamic>.from(map)
-    ..remove('__type')
-    ..remove('Var')
-    ..remove('Ix')
-    ..remove('X')
-    ..remove('Y')
-    ..remove('Up')
-    ..remove('Dwn')
-    ..remove('S')
-    ..remove('RS')
-    ..remove('Not')
-    ..remove(
-      'Id',
-    ) // Id is likely internally used for EdgeDetection. We do not need it for now
-    ;
 
-  if (otherEntries.isNotEmpty) {
-    print(otherEntries);
-    print('!!!');
-  }
   return Coil(
     variable,
     index: index,

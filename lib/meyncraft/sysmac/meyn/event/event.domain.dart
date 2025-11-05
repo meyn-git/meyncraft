@@ -247,7 +247,7 @@ class EventNode {
     ComponentCodeAddColumnsAttribute(1),
   ];
 
-  /// FIXME: This is temporarily until MeynCraft is common good
+  /// TODO: This is temporarily until MeynCraft is common good
   /// and the standard libraries contain ComponentCodeLettersAttributes',
   /// then this List can be removed
   List<CommentAttribute> conditionalAttributes = [

@@ -1,3 +1,4 @@
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.infrastructure.dart';
@@ -67,7 +68,7 @@ FunctionBlock? createFunctionBlock(
       /// ignore safety
       return null;
     default:
-      print('Unsupported Function Block sub type: $subType');
+      logger.warning('Unsupported Function Block sub type: $subType');
       return null;
   }
 }

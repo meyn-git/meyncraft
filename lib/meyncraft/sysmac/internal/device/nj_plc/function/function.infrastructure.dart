@@ -1,3 +1,4 @@
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function/function.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrastructure.dart';
@@ -67,7 +68,7 @@ Function$? createFunction(
       /// ignore safety
       return null;
     default:
-      print('Unsupported Function sub type: $subType');
+      logger.warning('Unsupported Function sub type: $subType');
       return null;
   }
 }

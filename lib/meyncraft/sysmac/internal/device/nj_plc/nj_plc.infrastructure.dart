@@ -55,4 +55,4 @@ List<XmlElement> getFilteredDescendingElements(
   return found;
 }
 
-bool isNeverExcluded(e) => false;
+bool isNeverExcluded(_) => false;
