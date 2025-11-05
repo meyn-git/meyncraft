@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
 import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
 Future<void> writeSysmacUnitInterfaceXmlImportFile(
-  SysmacProject sysmacProject,
+  MeynSysmacProject sysmacProject,
 ) async {
   var outputFile = createOutputFile(sysmacProject, '-SysmacUnitInterface.xml');
   logger.info('Creating: ${outputFile.path}');
@@ -415,7 +416,7 @@ Rung createEquipmentInterfaceRung(
   ]);
 }
 
-File createOutputFile(SysmacProject sysmacProject, String suffix) {
+File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   var sysmacFile = sysmacProject.identity.projectFile;
   var directory = sysmacFile.parent.path;
   var filename = sysmacFile.uri.pathSegments.last;

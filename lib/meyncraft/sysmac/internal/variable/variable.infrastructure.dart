@@ -12,7 +12,6 @@ import 'package:xml/xml.dart';
 const String nameSpacePathSeparator = '\\';
 const String dataTypeNameAttribute = 'DataTypeName';
 const String commentAttribute = 'Comment';
-const String eventGlobalVariableName = 'EventGlobal';
 const String networkPublicationAttribute = 'NetworkPublication';
 
 List<Variable> createGlobalVariables(

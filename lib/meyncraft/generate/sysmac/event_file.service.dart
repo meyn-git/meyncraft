@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
 
-Future<void> writeSysmacEventFile(SysmacProject sysmacProject) async {
-  var events = sysmacProject.eventService.events;
+Future<void> writeSysmacEventFile(MeynSysmacProject sysmacProject) async {
+  var events = sysmacProject.events;
 
   var code = StringBuffer();
   for (var event in events) {
@@ -23,7 +23,7 @@ Future<void> writeSysmacEventFile(SysmacProject sysmacProject) async {
   );
 }
 
-File createOutputFile(SysmacProject sysmacProject, String suffix) {
+File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   var sysmacFile = sysmacProject.identity.projectFile;
   var directory = sysmacFile.parent.path;
   var filename = sysmacFile.uri.pathSegments.last;

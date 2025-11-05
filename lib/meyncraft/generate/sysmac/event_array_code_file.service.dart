@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
 import 'package:xml/xml.dart';
 
 Future<void> writeSysmacEventArrayXmlImportFile(
-  SysmacProject sysmacProject,
+  MeynSysmacProject sysmacProject,
 ) async {
   var pouInfo = SmcExtPouInfo(
     author: 'MeynCraft code generator',
@@ -45,12 +45,11 @@ Future<void> writeSysmacEventArrayXmlImportFile(
 }
 
 GlobalVariable _createEventGlobalArrayVariable(
-  SysmacProject sysmacProject,
+  MeynSysmacProject sysmacProject,
 ) => GlobalVariable(
   Variable2(
     variableName: eventGlobalArrayName,
-    variableType:
-        'ARRAY[0..${sysmacProject.eventService.events.length}] OF BOOL',
+    variableType: 'ARRAY[0..${sysmacProject.events.length}] OF BOOL',
     comment:
         'This array is a copy from EventGlobal and is needed for efficient communication with XOR-HMIs or MeynConnect',
     networkPublish: NetworkPublish.publicationOnly,
@@ -67,9 +66,9 @@ const eventGlobalArrayName = 'EventGlobalArray';
 
 String _programName = 'GeneratedByMeynCraft';
 
-List<LadderSection> _createSections(SysmacProject sysmacProject) {
+List<LadderSection> _createSections(MeynSysmacProject sysmacProject) {
   var rungs = <Rung>[];
-  var events = sysmacProject.eventService.events;
+  var events = sysmacProject.events;
   var code = StringBuffer();
   var rungNr = 0;
   for (var event in events) {
@@ -112,7 +111,7 @@ String _createComment(int rungNr) {
   return 'EventGlobalArray[${(rungNr - 1) * 1000 + 1}-${(rungNr - 1) * 1000 + 999}]';
 }
 
-File createOutputFile(SysmacProject sysmacProject, String suffix) {
+File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   var sysmacFile = sysmacProject.identity.projectFile;
   var directory = sysmacFile.parent.path;
   var filename = sysmacFile.uri.pathSegments.last;

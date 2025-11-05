@@ -4,11 +4,11 @@ import 'dart:io';
 
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/meyn/event/event.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
 import 'package:xml/xml.dart';
 
-Future<void> writeJMobileEventsFile(SysmacProject sysmacProject) async {
-  var events = sysmacProject.eventService.events;
+Future<void> writeJMobileEventsFile(MeynSysmacProject sysmacProject) async {
+  var events = sysmacProject.events;
   String formattedXml = createFormattedEventsXml(events);
   var outputFile = createOutputFile(sysmacProject, '-JMobileEvents.xml');
   await outputFile.create();
@@ -23,7 +23,7 @@ Future<void> writeJMobileEventsFile(SysmacProject sysmacProject) async {
   logger.info('     * Select the generated ${outputFile.path} file');
 }
 
-File createOutputFile(SysmacProject sysmacProject, String suffix) {
+File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   var sysmacFile = sysmacProject.identity.projectFile;
   var directory = sysmacFile.parent.path;
   var filename = sysmacFile.uri.pathSegments.last;

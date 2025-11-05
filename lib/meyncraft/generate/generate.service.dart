@@ -7,13 +7,13 @@ import 'package:meyncraft/meyncraft/generate/sysmac/unit_interface_service.dart'
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/events_file.service.dart';
 import 'package:meyncraft/meyncraft/generate/xor_jmobile/tags_file.service.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
 
 Future<void> generate(String sysmacProjectFilePath) async {
   try {
     logger.info('Reading: $sysmacProjectFilePath');
     var file = File(sysmacProjectFilePath);
-    var sysmacProject = await SysmacProject.create(file);
+    var sysmacProject = await MeynSysmacProject.create(file);
 
     await writeJMobileTagsFile(sysmacProject);
     await writeJMobileEventsFile(sysmacProject);

@@ -1,5 +1,5 @@
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function/function.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function_block/function_block.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function_block/function_block.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.infrastructure.dart';
@@ -13,7 +13,7 @@ NjPlc createNjPlc(SysmacProject sysmacProject, XmlElement deviceElement) {
   var libraries = createLibraries(sysmacProject, deviceElement);
   var programs = createPrograms(sysmacProject, deviceElement);
   var functions = createFunctions(sysmacProject, deviceElement);
-  var functionBlocks = <FunctionBlock>[]; //TODO
+  var functionBlocks = createFunctionBlocks(sysmacProject, deviceElement);
   return NjPlc(
     name: name,
     type: type,

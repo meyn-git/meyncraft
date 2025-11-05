@@ -1,13 +1,15 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/meyn/meyn_sysmac_project.dart';
 import 'package:meyncraft/meyncraft/sysmac/meyn/pack_ml/pack_ml.dart';
 import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:recase/recase.dart';
 
-Future<void> writeSysmacFbCheckPackMlScFile(SysmacProject sysmacProject) async {
+Future<void> writeSysmacFbCheckPackMlScFile(
+  MeynSysmacProject sysmacProject,
+) async {
   var units = findMeynUnitsAndEquipments(sysmacProject);
   for (var unit in units) {
     await createFbCheckPackMlScFile(sysmacProject, unit);
@@ -15,7 +17,7 @@ Future<void> writeSysmacFbCheckPackMlScFile(SysmacProject sysmacProject) async {
 }
 
 Future<void> createFbCheckPackMlScFile(
-  SysmacProject sysmacProject,
+  MeynSysmacProject sysmacProject,
   Unit unit,
 ) async {
   var structuredText = StringBuffer();
@@ -103,7 +105,7 @@ Future<void> createFbCheckPackMlScFile(
   );
 }
 
-File createOutputFile(SysmacProject sysmacProject, String suffix) {
+File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   var sysmacFile = sysmacProject.identity.projectFile;
   var directory = sysmacFile.parent.path;
   var filename = sysmacFile.uri.pathSegments.last;
