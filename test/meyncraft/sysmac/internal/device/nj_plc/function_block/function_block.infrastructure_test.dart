@@ -66,6 +66,9 @@ void main() {
             firstFunction.should.beOfType<StructuredTextFunctionBlock>();
             firstFunction.name.should.be('fbFFAutoTune');
             firstFunction.codeType.should.be(CodeType.structuredText);
+            firstFunction.internalVariables.length.should.be(8);
+            firstFunction.externalVariables.length.should.be(0);
+            firstFunction.inOutVariables.length.should.be(10);
             (firstFunction as StructuredTextFunctionBlock).structuredText.should
                 .startWith('(* Header');
           },
@@ -85,6 +88,9 @@ void main() {
             lastFunction.should.beOfType<StructuredTextFunctionBlock>();
             lastFunction.name.should.be('fbIoLinkMaster_v0104');
             lastFunction.codeType.should.be(CodeType.structuredText);
+            lastFunction.internalVariables.length.should.be(34);
+            lastFunction.externalVariables.length.should.be(0);
+            lastFunction.inOutVariables.length.should.be(18);
             (lastFunction as StructuredTextFunctionBlock).structuredText.should
                 .endWith('ENO := ENI;');
           },
@@ -143,6 +149,9 @@ void main() {
             firstFunction.should.beOfType<StructuredTextFunctionBlock>();
             firstFunction.name.should.be('fbAverageDint');
             firstFunction.codeType.should.be(CodeType.structuredText);
+            firstFunction.internalVariables.length.should.be(9);
+            firstFunction.externalVariables.length.should.be(0);
+            firstFunction.inOutVariables.length.should.be(8);
             (firstFunction as StructuredTextFunctionBlock).structuredText.should
                 .startWith('(* Header');
           },
@@ -162,6 +171,9 @@ void main() {
             lastFunction.should.beOfType<LadderFunctionBlock>();
             lastFunction.name.should.be('fbUnitInterface');
             lastFunction.codeType.should.be(CodeType.ladder);
+            lastFunction.internalVariables.length.should.be(1);
+            lastFunction.externalVariables.length.should.be(0);
+            lastFunction.inOutVariables.length.should.be(15);
             (lastFunction as LadderFunctionBlock).rungs.length.should.be(12);
           },
         );
