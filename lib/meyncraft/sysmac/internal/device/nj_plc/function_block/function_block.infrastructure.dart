@@ -7,7 +7,6 @@ import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dar
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 import 'package:xml/xml.dart';
 
 List<FunctionBlock> createFunctionBlocks(
