@@ -1,27 +1,26 @@
 import 'package:meyncraft/meyncraft/sysmac/internal/device/device.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
-List<Device> createDevices(SysmacProjectArchive sysmacProjectArchive) =>
-    sysmacProjectArchive.projectIndexXml.xmlDocument.descendantElements
-        .where(
-          (e) =>
-              e.name.local == entity &&
-              e.getAttribute(typeAttribute) == 'Device',
-        )
-        .map((e) => _createDevice(sysmacProjectArchive, e))
-        .whereType<Device>() // remove nulls
-        .toList();
+List<Device> createDevices(SysmacProject sysmacProject) => sysmacProject
+    .archive
+    .projectIndexXml
+    .xmlDocument
+    .descendantElements
+    .where(
+      (e) =>
+          e.name.local == entity && e.getAttribute(typeAttribute) == 'Device',
+    )
+    .map((e) => _createDevice(sysmacProject, e))
+    .whereType<Device>() // remove nulls
+    .toList();
 
-Device? _createDevice(
-  SysmacProjectArchive sysmacProjectArchive,
-  XmlElement deviceElement,
-) {
+Device? _createDevice(SysmacProject sysmacProject, XmlElement deviceElement) {
   var type = deviceElement.getAttribute(subTypeAttribute)!;
   if (type.startsWith('NJ')) {
-    return createNjPlc(sysmacProjectArchive, deviceElement);
+    return createNjPlc(sysmacProject, deviceElement);
   }
   if (type == "NES") {
     return createNesSafetyPlc(deviceElement);

@@ -4,11 +4,12 @@ import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrast
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/structured_text.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 import 'package:xml/xml.dart';
 
 List<Function$> createFunctions(
-  SysmacProjectArchive sysmacProjectArchive,
+  SysmacProject sysmacProject,
   XmlElement codeOwnerElement,
 ) {
   var functionElements = getFilteredDescendingElements(
@@ -19,7 +20,7 @@ List<Function$> createFunctions(
   );
 
   var functions = functionElements
-      .map((e) => createFunction(sysmacProjectArchive, e))
+      .map((e) => createFunction(sysmacProject, e))
       .whereType<Function$>() //remove nulls
       .toList();
 
@@ -30,7 +31,7 @@ bool isFunctionElement(XmlElement e) =>
     e.name.local == entity && e.getAttribute(typeAttribute) == 'Function';
 
 Function$? createFunction(
-  SysmacProjectArchive sysmacProject,
+  SysmacProject sysmacProject,
   XmlElement functionElement,
 ) {
   var name = functionElement.getAttribute(nameAttribute)!;
@@ -40,17 +41,21 @@ Function$? createFunction(
   var variablesElement = entities.firstWhere(
     (e) => e.getAttribute(typeAttribute) == 'Variables',
   );
-  var pouBodyElements = entities.where(
+  var pouBodyElement = entities.firstWhere(
     (e) => e.getAttribute(typeAttribute) == 'PouBody',
   );
-  var id = pouBodyElements.first.getAttribute(idAttribute)!;
+  var id = pouBodyElement.getAttribute(idAttribute)!;
 
-  var subType = pouBodyElements.first.getAttribute(subTypeAttribute)!;
+  var subType = pouBodyElement.getAttribute(subTypeAttribute)!;
   switch (subType) {
     case 'Ladder':
-      return createLadderFunction(sysmacProject, name: name, id: id);
+      return createLadderFunction(sysmacProject.archive, name: name, id: id);
     case 'StructuredText':
-      return createStructuredTextFunction(sysmacProject, name: name, id: id);
+      return createStructuredTextFunction(
+        sysmacProject.archive,
+        name: name,
+        id: id,
+      );
     case 'FBDExtended':
 
       /// ignore safety

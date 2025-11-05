@@ -12,7 +12,7 @@ import 'package:xml/xml.dart';
 /// creates an xml file with [XorTag]s generated from a Sysmac project file
 /// to be imported by JMobile
 Future<void> writeJMobileTagsFile(SysmacProject sysmacProject) async {
-  var variables = sysmacProject.globalVariableService.variables;
+  var variables = sysmacProject.globalVariables;
   List<XorTag> tags = createTags(variables);
   logger.info('Found ${tags.length} Xor-JMobile tags');
   String formattedXml = createFormattedTagsXml(tags);

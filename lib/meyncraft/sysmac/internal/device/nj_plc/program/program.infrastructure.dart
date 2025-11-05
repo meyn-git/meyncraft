@@ -1,15 +1,19 @@
 import 'dart:convert';
 
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/structured_text.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 import 'package:xml/xml.dart';
 
 List<Program> createPrograms(
-  SysmacProjectArchive sysmacProjectArchive,
+  SysmacProject sysmacProject,
   XmlElement codeOwnerElement,
 ) {
   var programElements = getFilteredDescendingElements(
@@ -20,7 +24,7 @@ List<Program> createPrograms(
   );
 
   var programs = programElements
-      .map((e) => createProgram(sysmacProjectArchive, e))
+      .map((e) => createProgram(sysmacProject, e))
       .whereType<Program>() // remove nulls
       .toList();
 
@@ -30,16 +34,13 @@ List<Program> createPrograms(
 bool isProgramElement(XmlElement e) =>
     e.name.local == entity && e.getAttribute(typeAttribute) == 'Program';
 
-Program? createProgram(
-  SysmacProjectArchive sysmacProjectArchive,
-  XmlElement programElement,
-) {
+Program? createProgram(SysmacProject sysmacProject, XmlElement programElement) {
   var subType = programElement.getAttribute(subTypeAttribute);
   switch (subType) {
     case 'MultipartLadder':
-      return createLadderProgram(sysmacProjectArchive, programElement);
+      return createLadderProgram(sysmacProject, programElement);
     case 'StructuredText':
-      return createStructuredTextProgram(sysmacProjectArchive, programElement);
+      return createStructuredTextProgram(sysmacProject, programElement);
 
     case 'FBDExtended':
       // for now ignoring  'FBDExtended'
@@ -64,7 +65,7 @@ int getElementDepth(XmlElement element) {
 }
 
 LadderProgram createLadderProgram(
-  SysmacProjectArchive sysmacProjectArchive,
+  SysmacProject sysmacProject,
   XmlElement programElement,
 ) {
   var name = programElement.getAttribute(nameAttribute)!;
@@ -74,20 +75,31 @@ LadderProgram createLadderProgram(
   var variablesElement = entities.firstWhere(
     (e) => e.getAttribute(typeAttribute) == 'Variables',
   );
+  var variableGroups = createVariableGroups(
+    sysmacProject.archive,
+    sysmacProject.dataTypeTree,
+    variablesElement.getAttribute(idAttribute)!,
+  );
+
   var pouBodyElements = entities.where(
     (e) => e.getAttribute(typeAttribute) == 'PouBody',
   );
 
   var ladderSections = pouBodyElements
-      .map((e) => createLadderSection(sysmacProjectArchive, e))
+      .map((e) => createLadderSection(sysmacProject.archive, e))
       .whereType<LadderSection>() // remove nulls
       .toList();
 
-  return LadderProgram(name, ladderSections);
+  return LadderProgram(
+    name: name,
+    ladderSections: ladderSections,
+    internalVariables: variableGroups[VariableGroup.internal]!,
+    externalVariables: variableGroups[VariableGroup.external]!,
+  );
 }
 
 StructuredTextProgram? createStructuredTextProgram(
-  SysmacProjectArchive sysmacProject,
+  SysmacProject sysmacProject,
   XmlElement programElement,
 ) {
   var name = programElement.getAttribute(nameAttribute)!;
@@ -97,17 +109,28 @@ StructuredTextProgram? createStructuredTextProgram(
   var variablesElement = entities.firstWhere(
     (e) => e.getAttribute(typeAttribute) == 'Variables',
   );
-  var pouBodyElements = entities.where(
+  var variableGroups = createVariableGroups(
+    sysmacProject.archive,
+    sysmacProject.dataTypeTree,
+    variablesElement.getAttribute(idAttribute)!,
+  );
+
+  var pouBodyElement = entities.firstWhere(
     (e) => e.getAttribute(typeAttribute) == 'PouBody',
   );
-  var id = pouBodyElements.first.getAttribute(idAttribute)!;
-  var archiveFile = sysmacProject.projectIndexXml.findArchiveFile(id);
+  var id = pouBodyElement.getAttribute(idAttribute)!;
+  var archiveFile = sysmacProject.archive.projectIndexXml.findArchiveFile(id);
   if (archiveFile == null) {
     print('StructuredTextProgram archive file: $id.xml not found');
     return null;
   }
   var structuredText = createStructuredText(archiveFile);
-  return StructuredTextProgram(name: name, structuredText: structuredText);
+  return StructuredTextProgram(
+    name: name,
+    structuredText: structuredText,
+    internalVariables: variableGroups[VariableGroup.internal]!,
+    externalVariables: variableGroups[VariableGroup.external]!,
+  );
 }
 
 LadderSection? createLadderSection(

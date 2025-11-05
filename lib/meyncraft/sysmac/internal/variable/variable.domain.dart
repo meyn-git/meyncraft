@@ -41,6 +41,8 @@ class Variable {
   });
 }
 
+enum VariableGroup { global, internal, external, unknown }
+
 /// contains information of a member somewhere in a [variable]
 class VariableMember {
   final Variable variable;

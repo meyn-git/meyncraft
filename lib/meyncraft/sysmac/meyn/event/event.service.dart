@@ -1,19 +1,19 @@
 import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/meyn/event/event.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.service.dart';
 
 class EventService {
-  final GlobalVariableService globalVariableService;
+  final List<Variable> globalVariables;
 
   static const String eventGlobalVariableName = 'EventGlobal';
 
   late final List<Event> events = _createEvents();
 
-  EventService(this.globalVariableService);
+  EventService(this.globalVariables);
 
   List<Event> _createEvents() {
-    var eventGlobal = globalVariableService.variables.firstWhereOrNull(
+    var eventGlobal = globalVariables.firstWhereOrNull(
       (v) => v.name == eventGlobalVariableName,
     );
     if (eventGlobal == null) {

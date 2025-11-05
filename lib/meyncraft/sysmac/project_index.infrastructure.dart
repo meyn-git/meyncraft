@@ -24,9 +24,10 @@ const String variable = 'Variable';
 /// It can convert this [XmlDocument] to domain objects that represent
 /// more meaningful information (e.g. references to other xml files)
 class ProjectIndexXml extends ArchiveXml {
-  final Archive archive;
+  final Archive _archive;
 
-  ProjectIndexXml(this.archive) : super.fromArchiveFile(_findOemFile(archive));
+  ProjectIndexXml(this._archive)
+    : super.fromArchiveFile(_findOemFile(_archive));
 
   static ArchiveFile _findOemFile(Archive archive) => archive.firstWhere(
     (ArchiveFile archiveFile) =>
@@ -57,10 +58,6 @@ class ProjectIndexXml extends ArchiveXml {
     return dataTypeArchiveXmlFiles;
   }
 
-  List<XmlNode> _findGlobalVariableEntities() => xmlDocument.descendants
-      .where((node) => _isGlobalVariableEntity(node))
-      .toList();
-
   List<XmlNode> _findDataTypeEntities() {
     var dataTypeEntities = xmlDocument.descendants
         .where((node) => _isDataTypeEntity(node))
@@ -73,29 +70,9 @@ class ProjectIndexXml extends ArchiveXml {
       node.name.local == entity &&
       node.getAttribute(typeAttribute) == dataType;
 
-  bool _isGlobalVariableEntity(XmlNode node) =>
-      node is XmlElement &&
-      node.name.local == entity &&
-      node.getAttribute(typeAttribute) == 'Variables' &&
-      node.getAttribute(subTypeAttribute) == 'Global' &&
-      node.getAttribute(nameAttribute) == 'Global Variables';
-
-  ArchiveFile globalVariableArchiveFile() {
-    List<XmlNode> entities = _findGlobalVariableEntities();
-    if (entities.length != 1) {
-      throw Exception('Expected only one reference to the variables');
-    }
-    var variableDataFileId = entities.first.getAttribute(idAttribute)!;
-    var variableDataFile = findArchiveFile(variableDataFileId);
-    if (variableDataFile == null) {
-      throw Exception('Could not find file: $variableDataFileId');
-    }
-    return variableDataFile;
-  }
-
   ArchiveFile? findArchiveFile(String id) {
     String xmlFileName = '$id.xml';
-    return archive.firstWhereOrNull(
+    return _archive.firstWhereOrNull(
       (ArchiveFile archiveFile) => archiveFile.name.endsWith(xmlFileName),
     );
   }

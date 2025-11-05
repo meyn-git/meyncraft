@@ -4,7 +4,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function/funct
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function/function.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:shouldly/shouldly.dart';
 import 'package:xml/xml.dart';
 
@@ -12,10 +12,10 @@ import '../../../../../../test_resource.dart';
 
 void main() {
   group('SysmacProject', () {
-    late SysmacProjectArchive sysmacProjectArchive;
+    late SysmacProject sysmacProject;
 
     setUp(() async {
-      sysmacProjectArchive = await SysmacProjectArchive.create(
+      sysmacProject = await SysmacProject.create(
         SysmacProjectTestResource().file,
       );
     });
@@ -24,7 +24,8 @@ void main() {
       late List<Function$> functions;
 
       setUp(() {
-        XmlElement plcElement = sysmacProjectArchive
+        XmlElement plcElement = sysmacProject
+            .archive
             .projectIndexXml
             .xmlDocument
             .descendantElements
@@ -35,7 +36,7 @@ void main() {
                   (e.getAttribute(subTypeAttribute) ?? '').startsWith('NJ'),
             );
 
-        functions = createFunctions(sysmacProjectArchive, plcElement);
+        functions = createFunctions(sysmacProject, plcElement);
       });
 
       test('should return 5 functions', () {
@@ -91,14 +92,15 @@ void main() {
       late List<Function$> functions;
 
       setUp(() {
-        XmlElement libraryElement = sysmacProjectArchive
+        XmlElement libraryElement = sysmacProject
+            .archive
             .projectIndexXml
             .xmlDocument
             .descendantElements
             .where(isLibraryElement)
             .toList()[1];
 
-        functions = createFunctions(sysmacProjectArchive, libraryElement);
+        functions = createFunctions(sysmacProject, libraryElement);
       });
 
       test('should return 5 functions', () {

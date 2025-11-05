@@ -1,19 +1,26 @@
 import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/code_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 
-abstract class Program {
-  String get name;
-  CodeType get codeType;
-}
+abstract class Program extends ProgramOrganizationUnit {}
 
 class LadderProgram extends DelegatingList<LadderSection> implements Program {
   @override
   final String name;
   @override
   final codeType = CodeType.ladder;
+  @override
+  final List<Variable> externalVariables;
+  @override
+  final List<Variable> internalVariables;
 
-  LadderProgram(this.name, List<LadderSection> ladderSections)
-    : super(ladderSections);
+  LadderProgram({
+    required this.name,
+    required List<LadderSection> ladderSections,
+    required this.externalVariables,
+    required this.internalVariables,
+  }) : super(ladderSections);
 
   @override
   String toString() => name;
@@ -24,8 +31,18 @@ class StructuredTextProgram implements Program {
   final String name;
   @override
   final codeType = CodeType.structuredText;
+  @override
+  final List<Variable> externalVariables;
+  @override
+  final List<Variable> internalVariables;
+
   final String structuredText;
-  StructuredTextProgram({required this.name, required this.structuredText});
+  StructuredTextProgram({
+    required this.name,
+    required this.structuredText,
+    required this.externalVariables,
+    required this.internalVariables,
+  });
 
   @override
   String toString() => name;

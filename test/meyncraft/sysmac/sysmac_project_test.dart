@@ -60,10 +60,9 @@ void main() {
       });
     });
 
-    group('property: globalVariableService', () {
+    group('property: globalVariables', () {
       test('finds globalVariableService with variable', () {
-        var globalVariableService = sysmacProjectFile.globalVariableService;
-        expect(globalVariableService.variables.length, 1729);
+        expect(sysmacProjectFile.globalVariables.length, 1729);
       });
     });
   });

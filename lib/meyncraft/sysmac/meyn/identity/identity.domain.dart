@@ -99,7 +99,7 @@ class ElectricPanel {
   }
 
   static final Parser<ElectricPanel> parser =
-      (stringIgnoreCase('de') & (digit().plus()).flatten()).map(
+      (string('de', ignoreCase: true) & (digit().plus()).flatten()).map(
         (values) => ElectricPanel(number: int.parse(values[1])),
       );
 }

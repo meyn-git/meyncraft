@@ -4,7 +4,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.d
 import 'package:meyncraft/meyncraft/sysmac/meyn/unit_equipment/unit_equipment.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.infrastructure.dart';
 
 List<Unit> findMeynUnitsAndEquipments(SysmacProject sysmacProject) {
   VariableMember? interfaceGlobalVar = findGlobalVariable(

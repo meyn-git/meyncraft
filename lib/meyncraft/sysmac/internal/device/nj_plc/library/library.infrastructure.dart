@@ -4,11 +4,11 @@ import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/librar
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
 List<Library> createLibraries(
-  SysmacProjectArchive sysmacProjectArchive,
+  SysmacProject sysmacProject,
   XmlElement deviceElement,
 ) {
   var libraryElements = getFilteredDescendingElements(
@@ -17,7 +17,7 @@ List<Library> createLibraries(
   );
 
   var libraries = libraryElements
-      .map((e) => createLibrary(sysmacProjectArchive, e))
+      .map((e) => createLibrary(sysmacProject, e))
       .toList();
 
   return libraries;
@@ -31,17 +31,11 @@ bool isNestedLibraryElement({
   required XmlElement element,
 }) => rootElement != element && isLibraryElement(element);
 
-Library createLibrary(
-  SysmacProjectArchive sysmacProjectArchive,
-  XmlElement libraryElement,
-) {
+Library createLibrary(SysmacProject sysmacProject, XmlElement libraryElement) {
   var name = libraryElement.getAttribute(nameAttribute)!;
-  var libraries = createLibraries(sysmacProjectArchive, libraryElement);
-  var programs = createPrograms(sysmacProjectArchive, libraryElement);
-  var functions = createFunctions(sysmacProjectArchive, libraryElement);
-  var functionBlocks = createFunctionBlocks(
-    sysmacProjectArchive,
-    libraryElement,
-  );
+  var libraries = createLibraries(sysmacProject, libraryElement);
+  var programs = createPrograms(sysmacProject, libraryElement);
+  var functions = createFunctions(sysmacProject, libraryElement);
+  var functionBlocks = createFunctionBlocks(sysmacProject, libraryElement);
   return Library(name, libraries, programs, functions, functionBlocks);
 }

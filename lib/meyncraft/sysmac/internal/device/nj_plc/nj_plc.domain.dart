@@ -1,8 +1,10 @@
 import 'package:meyncraft/meyncraft/sysmac/internal/device/device.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/code_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function/function.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function_block/function_block.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 
 class NjPlc implements Device, CodeOwner {
   @override
@@ -48,4 +50,22 @@ class NjPlc implements Device, CodeOwner {
 
   @override
   String toString() => name;
+}
+
+/// There are three main types of Program Organization Units (POUs):
+///
+/// - **Program**: The top-level block that typically contains the main logic
+///   of the application. It can call functions and function blocks.
+///
+/// - **Function Block (FB)**: A reusable block of code that can maintain
+///   internal state (like memory). It's ideal for modeling components such as
+///   motors, valves, or PID controllers.
+///
+/// - **Function (FUN)**: A block of code that performs a specific task and
+
+abstract class ProgramOrganizationUnit {
+  String get name;
+  CodeType get codeType;
+  List<Variable> get internalVariables;
+  List<Variable> get externalVariables;
 }

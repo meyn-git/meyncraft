@@ -119,8 +119,9 @@ class AcknowledgeAttribute implements CommentAttribute {
   final bool value;
 
   AcknowledgeAttribute(this.value);
-  static Parser<AcknowledgeAttribute> noAckParser = (stringIgnoreCase(
+  static Parser<AcknowledgeAttribute> noAckParser = (string(
     'noack',
+    ignoreCase: true,
   ).map((_) => AcknowledgeAttribute(false)));
 
   static Parser<AcknowledgeAttribute> parser =
@@ -186,7 +187,10 @@ class ArrayAttribute implements CommentAttribute, Replaceable {
   final int offSet;
 
   static Parser<ArrayAttribute> parser =
-      (stringIgnoreCase('array') & char('(') & expressionParser & char(')'))
+      (string('array', ignoreCase: true) &
+              char('(') &
+              expressionParser &
+              char(')'))
           .map((values) => values[2]);
 
   static Parser<ArrayAttribute> expressionParser = ChoiceParser<ArrayAttribute>(
@@ -194,21 +198,23 @@ class ArrayAttribute implements CommentAttribute, Replaceable {
   );
 
   static Parser<ArrayAttribute> firstExpressionParser =
-      (stringIgnoreCase('first') & (char('+') & intParser).optional()).map(
-        (values) => values.last == null
-            ? ArrayAttribute(ArrayIndexType.first, 0)
-            : ArrayAttribute(ArrayIndexType.first, values.last.last),
-      );
+      (string('first', ignoreCase: true) & (char('+') & intParser).optional())
+          .map(
+            (values) => values.last == null
+                ? ArrayAttribute(ArrayIndexType.first, 0)
+                : ArrayAttribute(ArrayIndexType.first, values.last.last),
+          );
 
   static Parser<ArrayAttribute> numberExpressionParser = intParser.map(
     (value) => ArrayAttribute(ArrayIndexType.first, value),
   );
   static Parser<ArrayAttribute> lastExpressionParser =
-      (stringIgnoreCase('last') & (char('-') & intParser).optional()).map(
-        (values) => values.last == null
-            ? ArrayAttribute(ArrayIndexType.last, 0)
-            : ArrayAttribute(ArrayIndexType.last, -values.last.last),
-      );
+      (string('last', ignoreCase: true) & (char('-') & intParser).optional())
+          .map(
+            (values) => values.last == null
+                ? ArrayAttribute(ArrayIndexType.last, 0)
+                : ArrayAttribute(ArrayIndexType.last, -values.last.last),
+          );
 
   ArrayAttribute(this.indexType, this.offSet);
 

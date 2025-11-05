@@ -3,7 +3,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/code_type.doma
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:shouldly/shouldly.dart';
 import 'package:xml/xml.dart';
 
@@ -11,15 +11,16 @@ import '../../../../../../test_resource.dart';
 
 void main() {
   group('SysmacProject', () {
-    late SysmacProjectArchive sysmacProjectArchive;
+    late SysmacProject sysmacProject;
     late XmlElement plcElement;
 
     setUp(() async {
-      sysmacProjectArchive = await SysmacProjectArchive.create(
+      sysmacProject = await SysmacProject.create(
         SysmacProjectTestResource().file,
       );
 
-      plcElement = sysmacProjectArchive
+      plcElement = sysmacProject
+          .archive
           .projectIndexXml
           .xmlDocument
           .descendantElements
@@ -35,7 +36,7 @@ void main() {
       late List<Program> programs;
 
       setUp(() {
-        programs = createPrograms(sysmacProjectArchive, plcElement);
+        programs = createPrograms(sysmacProject, plcElement);
       });
 
       test('should return 28 programs', () {
@@ -56,6 +57,8 @@ void main() {
             firstProgram.name.should.be('TaskControl');
             firstProgram.codeType.should.be(CodeType.ladder);
             (firstProgram as LadderProgram).length.should.be(1);
+            firstProgram.internalVariables.length.should.be(0);
+            firstProgram.externalVariables.length.should.be(1);
           },
         );
 
@@ -156,6 +159,8 @@ void main() {
             (lastProgram as StructuredTextProgram).name.should.be('Test');
             (lastProgram as StructuredTextProgram).structuredText.should
                 .endWith('numer:=1+1;');
+                lastProgram.internalVariables.length.should.be(1);
+            lastProgram.externalVariables.length.should.be(0);
           },
         );
       });
