@@ -1,11 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:petitparser/petitparser.dart';
 import 'package:shouldly/shouldly.dart';
 
+import '../../../test_resource.dart';
+
 void main() {
+  GetIt.I.registerSingleton<Logger>(Logger());
+
   group('commentParser', () {
     test("commentParser.parse('') should return the correct result", () {
       var result = commentPathParser.parse('');
@@ -358,6 +365,134 @@ void main() {
         result.should
             .beOfType<Success<ComponentCodeOverrideLettersAttribute>>();
         result.value.componentLetters.should.be('Q');
+      },
+    );
+  });
+
+  group('IOAttribute class', () {
+    test(
+      "IOAttribute.parser.parse('i=trigger') should return a correct value",
+      () {
+        var result = IOAttribute.parser.parse('i=trigger');
+        result.should.beOfType<Failure>();
+      },
+    );
+
+    test(
+      "IOAttribute.parser.parse('io=trigger') should return a correct value",
+      () {
+        var result = IOAttribute.parser.parse('io=trigger');
+        result.should.beOfType<Success<IOAttribute>>();
+      },
+    );
+
+    test("IOAttribute.parentNamePath should return a correct value", () async {
+      IOAttribute.parentNamePath(
+        'EventGlobal.CropperBrushMtr.MtrProt',
+      ).should.be('EventGlobal.CropperBrushMtr');
+    });
+
+    test("IOAttribute.findCall should return a correct value", () async {
+      var sysmacProjectFile = SysmacProjectTestResource();
+      var sysmacProject = await MeynSysmacProject.create(
+        sysmacProjectFile.file,
+      );
+
+      var call = IOAttribute.findCall(
+        sysmacProject,
+        'EventGlobal.CropperBrushMtr',
+      );
+
+      call.should.not.beNull();
+    });
+
+    test(
+      "IOAttribute.findCallParameter should return a correct value",
+      () async {
+        var sysmacProjectFile = SysmacProjectTestResource();
+        var sysmacProject = await MeynSysmacProject.create(
+          sysmacProjectFile.file,
+        );
+
+        var call = IOAttribute.findCall(
+          sysmacProject,
+          'EventGlobal.CropperBrushMtr',
+        );
+
+        var argumentName = 'iMtrProtOk';
+        var callParameter = IOAttribute.findCallParameter(call!, argumentName);
+
+        callParameter.should.not.beNull();
+        callParameter!.argument.should.be(argumentName);
+        callParameter.argumentType.should.be('BOOL');
+        callParameter.variable.should.be('iCropperBrushMtrProt');
+        callParameter.index.should.be(7);
+        callParameter.inAndOut.should.beNull();
+      },
+    );
+
+    test(
+      "IOAttribute.findIoVariables(EventGlobal.CropperBrushMtr.MtrProt) should return a correct value",
+      () async {
+        var sysmacProjectFile = SysmacProjectTestResource();
+        var sysmacProject = await MeynSysmacProject.create(
+          sysmacProjectFile.file,
+        );
+
+        var eventNamePath = 'EventGlobal.CropperBrushMtr.MtrProt';
+
+        var eventValues = [IOAttribute('iMtrProtOk')];
+
+        var globalVariables = IOAttribute.findIoVariables(
+          sysmacProject,
+          eventNamePath,
+          eventValues,
+        );
+
+        globalVariables.length.should.be(1);
+        globalVariables[0].name.should.be('iCropperBrushMtrProt');
+        globalVariables[0].comment.should.be(
+          '37Q3 Cropping machine brush motor protection',
+        );
+        globalVariables[0].at.should.be(
+          'IOBus://unit#6/Input Bit 16 bits/Input Bit 09',
+        );
+      },
+    );
+
+    test(
+      "IOAttribute.findIoVariables(EventGlobal.CropperBrushMtr.MtrProt) should return a correct value",
+      () async {
+        var sysmacProjectFile = SysmacProjectTestResource();
+        var sysmacProject = await MeynSysmacProject.create(
+          sysmacProjectFile.file,
+        );
+
+        var eventNamePath = 'EventGlobal.IoWasher1BoostPmp.SenfaultProdLow';
+
+        var eventValues = [IOAttribute('iLvlLow'), IOAttribute('iLvlProd')];
+
+        var globalVariables = IOAttribute.findIoVariables(
+          sysmacProject,
+          eventNamePath,
+          eventValues,
+        );
+
+        globalVariables.length.should.be(2);
+        globalVariables[0].name.should.be('iIoWasher1BoostPmpLvlLow');
+        globalVariables[0].comment.should.be(
+          '81K1 IoWasher 1-Boost pump-Too low level',
+        );
+        globalVariables[0].at.should.be(
+          'IOBus://unit#10/Input Bit 16 bits/Input Bit 04',
+        );
+        globalVariables[1].name.should.be('iIoWasher1BoostPmpLvlProd');
+        globalVariables[1].comment.should.be(
+          '81K3 IoWasher 1-Boost pump-Production level',
+        );
+        globalVariables[1].at.should.be(
+          'IOBus://unit#10/Input Bit 16 bits/Input Bit 05',
+        );
       },
     );
   });

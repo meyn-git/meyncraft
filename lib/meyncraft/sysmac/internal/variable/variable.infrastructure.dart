@@ -1,10 +1,8 @@
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:xml/xml.dart';
@@ -134,7 +132,10 @@ List<Group> parseSLWD(String input) {
         groups.add(currentGroup);
       }
     } else if (line.startsWith('++D=') && currentGroup != null) {
-      final detailParts = RegExp(r'(\w+)=(\S+)').allMatches(line);
+      final detailParts =
+          //RegExp(r'(\w+)=(\S+)')
+          RegExp(r'(\w+)=((?:(?!\s\w+=).)+)').allMatches(line);
+      // RegExp(r'(\w+)=((?:[^=]+(?:\s(?!\w+=))*)+)').allMatches(line);
       final attributes = {
         for (final match in detailParts) match.group(1)!: match.group(2)!,
       };
@@ -143,26 +144,4 @@ List<Group> parseSLWD(String input) {
   }
 
   return groups;
-}
-
-VariableMember? findGlobalVariable(
-  SysmacProject sysmacProject,
-  String nameToFind,
-) {
-  var variables = sysmacProject.globalVariables.where(
-    (v) => v.name == nameToFind,
-  );
-  if (variables.length != 1) {
-    logger.warning(
-      '  Expected the sysmac project to have 1 global variable of name "$nameToFind"',
-    );
-    return null;
-  }
-  var variable = variables.first;
-  var variableType = variable.baseType;
-  if (variableType is! DataTypeReference) {
-    logger.warning('Expected "$nameToFind" to be a DataType');
-    return null;
-  }
-  return VariableMember(variable, variableType.dataType, []);
 }

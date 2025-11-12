@@ -1,7 +1,12 @@
+import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// A [CommentAttribute]s is additional information that is placed inside Sysmac variable or structure comments.
@@ -66,6 +71,7 @@ final commentAttributeParsers = <Parser<CommentAttribute>>[
   AcknowledgeAttribute.parser,
   ArrayAttribute.parser,
   PriorityAttribute.parser,
+  IOAttribute.parser,
   ComponentCodeAddColumnsAttribute.parser,
   ComponentCodeAddPageAttribute.parser,
   ComponentCodeOverrideLettersAttribute.parser,
@@ -113,6 +119,122 @@ class UnknownAttribute implements CommentAttribute {
 
   @override
   String toString() => '[$expression]';
+}
+
+/// refers to an in or output parameter of a PLC [Function$] or [FunctionBlock]
+/// call so that the PLC Address and component codes can be added to the [Event]
+class IOAttribute implements CommentAttribute {
+  final bool
+  warningWhenInputCommentDoesNotContainComponentCode; //TODO implement
+  final String callArgumentName;
+
+  IOAttribute(
+    this.callArgumentName, {
+    this.warningWhenInputCommentDoesNotContainComponentCode = false,
+  });
+
+  static Parser<IOAttribute> parser = NameEqualsValueParser<IOAttribute>(
+    nameValueConverter,
+  );
+
+  static IOAttribute nameValueConverter({
+    required String name,
+    required String value,
+  }) {
+    if (name.trim().toLowerCase() != 'io') {
+      throw Exception('invalid name');
+    }
+    if (value.trim().isNotEmpty) {
+      return IOAttribute(value);
+    }
+    throw Exception('invalid value');
+  }
+
+  static List<Variable> findIoVariables(
+    SysmacProject sysmacProject,
+    String eventNamePath,
+    List eventValues,
+  ) {
+    var globalVariables = <Variable>[];
+    var ioAttributes = eventValues.whereType<IOAttribute>();
+    var globalVariablePath = parentNamePath(eventNamePath);
+    for (var ioAttribute in ioAttributes) {
+      var call = findCall(sysmacProject, globalVariablePath);
+      if (call == null) {
+        logger.warning(
+          'Could not find a function or function block call that outputs: $eventNamePath',
+        );
+        continue;
+      }
+      var callParameter = findCallParameter(call, ioAttribute.callArgumentName);
+      if (callParameter == null) {
+        logger.warning(
+          'Function or FunctionBlock ${call.name} '
+          'does not have parameter: ${ioAttribute.callArgumentName}',
+        );
+        continue;
+      }
+      if (callParameter.variable != null) {
+        var variable = sysmacProject.globalVariables.firstWhereOrNull(
+          (v) => v.name == callParameter.variable,
+        );
+        if (variable == null) {
+          // logger.warning(
+          //   'Could not find a global variable for'
+          //   ' function (block) parameter: ${callParameter.variable}',
+          // );
+          continue;
+        }
+        var componentCodes = componentCodeParser.allMatches(variable.comment);
+        if (ioAttribute.warningWhenInputCommentDoesNotContainComponentCode &&
+            componentCodes.isEmpty) {
+          logger.warning(
+            'Expected global variable ${variable.name} to have a '
+            'component code (e.g. 30S1) in its comment.',
+          );
+          continue;
+        }
+        globalVariables.add(variable);
+      }
+    }
+    return globalVariables;
+  }
+
+  static Call? findCall(
+    SysmacProject sysmacProject,
+    String globalVariableMemberToFind,
+  ) {
+    var devices = sysmacProject.devices;
+    var plcs = devices.whereType<NjPlc>();
+    for (var plc in plcs) {
+      for (var program in plc.programs.whereType<LadderProgram>()) {
+        for (var section in program) {
+          for (var rung in section.rungs) {
+            for (var call in rung.ladderObjects.whereType<Call>()) {
+              for (var outParameter in call.parametersOut) {
+                if (outParameter.variable == globalVariableMemberToFind) {
+                  return call;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  static Parameter? findCallParameter(Call call, String argumentName) => [
+    ...call.parametersIn,
+    ...call.parametersOut,
+  ].firstWhereOrNull((parameter) => parameter.argument == argumentName);
+
+  static String parentNamePath(String namePath) {
+    if (!namePath.contains('.')) return namePath; // No dot, return as is
+    List<String> parts = namePath.split('.');
+    parts.removeLast();
+    return parts.join('.');
+  }
 }
 
 class AcknowledgeAttribute implements CommentAttribute {

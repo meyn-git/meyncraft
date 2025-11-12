@@ -66,14 +66,14 @@ class Rung {
 
 abstract class LadderObject {}
 
-class HorizontalLine extends LadderObject {
+class HorizontalLine implements LadderObject {
   final int x;
   final int y;
 
   HorizontalLine({required this.x, required this.y});
 }
 
-class VerticalLine extends LadderObject {
+class VerticalLine implements LadderObject {
   final int index;
   final int x;
   final int y;
@@ -81,7 +81,7 @@ class VerticalLine extends LadderObject {
   VerticalLine({required this.index, required this.x, required this.y});
 }
 
-class Contact extends LadderObject {
+class Contact implements LadderObject {
   final String variable;
   final int index;
   final int x;
@@ -99,7 +99,7 @@ class Contact extends LadderObject {
   });
 }
 
-class Coil extends LadderObject {
+class Coil implements LadderObject {
   final String variable;
   final int index;
   final int x;
@@ -123,7 +123,7 @@ enum EdgeDetection { none, up, down }
 
 enum ActuationMode { none, set, reset }
 
-class Jump extends LadderObject {
+class Jump implements LadderObject {
   final int x;
   final int y;
   final int index;
@@ -142,26 +142,41 @@ class Parameter {
   final String argument;
   final String? argumentType;
   final String? variable;
-  final bool? io;
+  final bool? inAndOut;
   final int index;
   Parameter({
     required this.type,
     required this.argument,
     this.argumentType,
     this.variable,
-    this.io,
+    this.inAndOut,
     required this.index,
   });
 }
 
 enum ParameterType { parameter, inOutConnection }
 
-class FunctionCall extends LadderObject {
+abstract class Call implements LadderObject {
+  String get name;
+  int get index;
+  int get x;
+  int get y;
+  List<Parameter> get parametersIn;
+  List<Parameter> get parametersOut;
+}
+
+class FunctionCall implements Call {
+  @override
   final String name;
+  @override
   final int index;
+  @override
   final int x;
+  @override
   final int y;
+  @override
   final List<Parameter> parametersIn;
+  @override
   final List<Parameter> parametersOut;
   final bool ud;
   final bool pl;
@@ -178,16 +193,21 @@ class FunctionCall extends LadderObject {
   });
 }
 
-class FunctionBlockCall extends LadderObject {
+class FunctionBlockCall implements Call {
+  @override
   final String name;
-  final String variable;
+  @override
   final int index;
+  @override
   final int x;
+  @override
   final int y;
+  @override
   final List<Parameter> parametersIn;
+  @override
   final List<Parameter> parametersOut;
+  final String variable;
   final bool ud;
-  // final bool pl;
 
   FunctionBlockCall(
     this.name, {
@@ -198,11 +218,10 @@ class FunctionBlockCall extends LadderObject {
     required this.parametersIn,
     required this.parametersOut,
     required this.ud,
-    // required this.pl,
   });
 }
 
-class InlineStructuredText extends LadderObject {
+class InlineStructuredText implements LadderObject {
   final String structuredText;
   final int index;
   final int x;

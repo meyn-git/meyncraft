@@ -1,18 +1,18 @@
+import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/unit_equipment/unit_equipment.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.infrastructure.dart';
 
 List<Unit> createMeynUnitsAndEquipments(SysmacProject sysmacProject) {
-  VariableMember? interfaceGlobalVar = findGlobalVariable(
+  VariableMember? interfaceGlobalVar = findGlobalVariableMember(
     sysmacProject,
     interfaceGlobalVariableName,
   );
   if (interfaceGlobalVar == null) return [];
-  VariableMember? configGlobalVar = findGlobalVariable(
+  VariableMember? configGlobalVar = findGlobalVariableMember(
     sysmacProject,
     configGlobalVariableName,
   );
@@ -20,6 +20,27 @@ List<Unit> createMeynUnitsAndEquipments(SysmacProject sysmacProject) {
 
   var units = _createUnits(interfaceGlobalVar, configGlobalVar);
   return units;
+}
+
+VariableMember? findGlobalVariableMember(
+  SysmacProject sysmacProject,
+  String nameToFind,
+) {
+  var variable = sysmacProject.globalVariables.firstWhereOrNull(
+    (v) => v.name == nameToFind,
+  );
+  if (variable == null) {
+    logger.warning(
+      '  Expected the sysmac project to have 1 global variable of name "$nameToFind"',
+    );
+    return null;
+  }
+  var variableType = variable.baseType;
+  if (variableType is! DataTypeReference) {
+    logger.warning('Expected "$nameToFind" to be a DataType');
+    return null;
+  }
+  return VariableMember(variable, variableType.dataType, []);
 }
 
 const String interfaceGlobalVariableName = 'InterfaceGlobal';

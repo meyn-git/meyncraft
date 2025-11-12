@@ -301,16 +301,19 @@ LadderObject createFunctionCall(Map<String, dynamic> map) {
 }
 
 List<Parameter> createParameters(Object? parameters) {
-  if (parameters is! List<Map<String, String>>) {
+  if (parameters is! List) {
     return <Parameter>[];
   }
   return parameters
-      .map((p) => createParameter(p))
+      .map(createParameter)
       .whereType<Parameter>() // remove nulls
       .toList();
 }
 
-Parameter? createParameter(Map<String, String> parameter) {
+Parameter? createParameter(dynamic parameter) {
+  if (parameter is! Map<String, dynamic>) {
+    return null;
+  }
   ParameterType? type = switch (parameter['__type']) {
     'PF' => ParameterType.inOutConnection,
     'PRM' => ParameterType.parameter,
@@ -332,7 +335,7 @@ Parameter? createParameter(Map<String, String> parameter) {
     argument: argument,
     argumentType: argumentType,
     variable: variable,
-    io: io,
+    inAndOut: io,
     index: index,
   );
 }
