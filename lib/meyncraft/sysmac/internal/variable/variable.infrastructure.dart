@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.infrastructure.dart';
@@ -5,6 +7,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.d
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:petitparser/petitparser.dart';
 import 'package:xml/xml.dart';
 
 const String nameSpacePathSeparator = '\\';
@@ -86,21 +89,40 @@ Variable createVariable(
   var name = attributes['N']!;
   var comment = attributes['Com'] ?? '';
   var direction = toDirection(attributes['G']);
+  var isRetained = attributes['R'] == '1';
+  var isConstant = attributes['Const'] == '1';
+  var initialValue = attributes['IV'];
   var typeExpression = attributes['D']!;
   var baseType = _baseTypeFactory.createFromExpressionIncludingCustomTypes(
     typeExpression,
     dataTypeTree,
   );
-  var at = attributes['AT'];
+  var hardwareAddress = attributes['AT'];
   var networkPublish = NetworkPublish.ofValue(attributes['NTP']);
+
+  // var unknownAttributes = {...attributes};
+  // unknownAttributes.remove('N');
+  // unknownAttributes.remove('Com');
+  // unknownAttributes.remove('G');
+  // unknownAttributes.remove('D');
+  // unknownAttributes.remove('AT');
+  // unknownAttributes.remove('NTP');
+  // unknownAttributes.remove('R');
+  // unknownAttributes.remove('IV');
+  // if (unknownAttributes.isNotEmpty) {
+  //   print(unknownAttributes);
+  // }
 
   return Variable(
     name: name,
     comment: comment,
     networkPublish: networkPublish,
     baseType: baseType,
-    at: at,
+    hardwareAddress: hardwareAddress,
     direction: direction,
+    isRetained: isRetained,
+    isConstant: isConstant,
+    initialValue: initialValue,
   );
 }
 
@@ -124,24 +146,66 @@ List<Group> parseSLWD(String input) {
 
   for (final line in lines) {
     if (line.startsWith('+GN=')) {
-      final parts = RegExp(
-        r'\+GN=(\S+)(?:\s+GA=(\S+))?(?:\s+GVT=(\S+))?',
-      ).firstMatch(line);
-      if (parts != null) {
-        currentGroup = Group(parts.group(1)!, []);
+      var result = slwdLineParser.parse(line);
+      if (result is Success) {
+        var attributes = result.value;
+        var groupName = attributes['GN']!;
+        currentGroup = Group(groupName, []);
         groups.add(currentGroup);
       }
     } else if (line.startsWith('++D=') && currentGroup != null) {
-      final detailParts =
-          //RegExp(r'(\w+)=(\S+)')
-          RegExp(r'(\w+)=((?:(?!\s\w+=).)+)').allMatches(line);
-      // RegExp(r'(\w+)=((?:[^=]+(?:\s(?!\w+=))*)+)').allMatches(line);
-      final attributes = {
-        for (final match in detailParts) match.group(1)!: match.group(2)!,
-      };
-      currentGroup.entities.add(attributes);
+      var result = slwdLineParser.parse(line);
+      if (result is Success) {
+        var attributes = result.value;
+        currentGroup.entities.add(attributes);
+      }
     }
   }
-
   return groups;
+}
+
+/// Build a parser for key=value pairs separated by whitespace.
+/// Keys: letters and digits only.
+/// Values: any characters except tabs/newlines.
+/// Leading  +, or ++ are ignored by trimming before parsing.
+Parser<Map<String, String>> slwdLineParser =
+    (slwdPrefixParser & slwdAttributesParser).map((values) => values[1]);
+
+Parser<String> slwdPrefixParser = (string('+').repeat(1, 2)).flatten();
+
+Parser<Map<String, String>> slwdAttributesParser = (slwdAttributeParser.plus())
+    .map((entries) => Map.fromEntries(entries));
+
+Parser<MapEntry<String, String>> slwdAttributeParser =
+    (slwdKeyParser & char('=') & slwdValueParser).map(
+      (values) => MapEntry(values[0], (values[2] as String).trim()),
+    );
+
+Parser<String> slwdValueParser = SlwdValueParser();
+
+Parser<String> slwdKeyParser = (letter() | digit()).plus().flatten();
+
+class SlwdValueParser extends Parser<String> {
+  @override
+  Parser<String> copy() => SlwdValueParser();
+
+  @override
+  Result<String> parseOn(Context context) {
+    var endIndex = findEndIndex(context);
+    var result = context.buffer.substring(context.position, endIndex);
+    return context.success(result, endIndex);
+  }
+
+  final nextAttributeParser = slwdKeyParser & char('=');
+
+  int findEndIndex(Context context) {
+    var input = context.buffer;
+    for (int i = context.position; i < input.length; i++) {
+      var context = Context(input, i);
+      var result = nextAttributeParser.parseOn(context);
+      if (result is Success) return i;
+    }
+    // no match: consume until the end
+    return input.length;
+  }
 }

@@ -19,6 +19,12 @@
         "meyncraft",
         "msix",
         "noack",
+        "noaddr",
+        "noaddrwarn",
+        "nocompcode",
+        "nocompcodewarn",
+        "nowarn",
+        "nowarning",
         "numer",
         "Omron",
         "packml",
@@ -31,6 +37,7 @@
         "swld",
         "sysmac",
         "TAGLOCATOR",
-        "useractions"
+        "useractions",
+        "warnifnocompcode"
     ]
 }

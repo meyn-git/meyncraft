@@ -369,36 +369,36 @@ void main() {
     );
   });
 
-  group('IOAttribute class', () {
+  group('IoAttribute class', () {
     test(
-      "IOAttribute.parser.parse('i=trigger') should return a correct value",
+      "IoAttribute.parser.parse('i=trigger') should return a correct value",
       () {
-        var result = IOAttribute.parser.parse('i=trigger');
+        var result = IoAttribute.parser.parse('i=trigger');
         result.should.beOfType<Failure>();
       },
     );
 
     test(
-      "IOAttribute.parser.parse('io=trigger') should return a correct value",
+      "IoAttribute.parser.parse('io=trigger') should return a correct value",
       () {
-        var result = IOAttribute.parser.parse('io=trigger');
-        result.should.beOfType<Success<IOAttribute>>();
+        var result = IoAttribute.parser.parse('io=trigger');
+        result.should.beOfType<Success<IoAttribute>>();
       },
     );
 
-    test("IOAttribute.parentNamePath should return a correct value", () async {
-      IOAttribute.parentNamePath(
+    test("IoAttribute.parentNamePath should return a correct value", () async {
+      IoAttribute.parentNamePath(
         'EventGlobal.CropperBrushMtr.MtrProt',
       ).should.be('EventGlobal.CropperBrushMtr');
     });
 
-    test("IOAttribute.findCall should return a correct value", () async {
+    test("IoAttribute.findCall should return a correct value", () async {
       var sysmacProjectFile = SysmacProjectTestResource();
       var sysmacProject = await MeynSysmacProject.create(
         sysmacProjectFile.file,
       );
 
-      var call = IOAttribute.findCall(
+      var call = IoAttribute.findCalls(
         sysmacProject,
         'EventGlobal.CropperBrushMtr',
       );
@@ -407,20 +407,23 @@ void main() {
     });
 
     test(
-      "IOAttribute.findCallParameter should return a correct value",
+      "IoAttribute.findCallParameter should return a correct value",
       () async {
         var sysmacProjectFile = SysmacProjectTestResource();
         var sysmacProject = await MeynSysmacProject.create(
           sysmacProjectFile.file,
         );
 
-        var call = IOAttribute.findCall(
+        var calls = IoAttribute.findCalls(
           sysmacProject,
           'EventGlobal.CropperBrushMtr',
         );
 
         var argumentName = 'iMtrProtOk';
-        var callParameter = IOAttribute.findCallParameter(call!, argumentName);
+        var callParameter = IoAttribute.findCallParameter(
+          calls.first,
+          argumentName,
+        );
 
         callParameter.should.not.beNull();
         callParameter!.argument.should.be(argumentName);
@@ -432,7 +435,7 @@ void main() {
     );
 
     test(
-      "IOAttribute.findIoVariables(EventGlobal.CropperBrushMtr.MtrProt) should return a correct value",
+      "IoAttribute.findIoVariables(EventGlobal.CropperBrushMtr.MtrProt) should return a correct value",
       () async {
         var sysmacProjectFile = SysmacProjectTestResource();
         var sysmacProject = await MeynSysmacProject.create(
@@ -441,27 +444,30 @@ void main() {
 
         var eventNamePath = 'EventGlobal.CropperBrushMtr.MtrProt';
 
-        var eventValues = [IOAttribute('iMtrProtOk')];
+        var ioAttribute = IoAttribute('iMtrProtOk');
+        var eventValues = [ioAttribute];
 
-        var globalVariables = IOAttribute.findIoVariables(
+        var ioAttributeVariables = IoAttribute.findIoAttributeVariables(
           sysmacProject,
           eventNamePath,
           eventValues,
         );
 
-        globalVariables.length.should.be(1);
-        globalVariables[0].name.should.be('iCropperBrushMtrProt');
-        globalVariables[0].comment.should.be(
+        ioAttributeVariables.length.should.be(1);
+        ioAttributeVariables[ioAttribute].should.not.beNull();
+        var variable = ioAttributeVariables[ioAttribute]!;
+        variable.name.should.be('iCropperBrushMtrProt');
+        variable.comment.should.be(
           '37Q3 Cropping machine brush motor protection',
         );
-        globalVariables[0].at.should.be(
+        variable.hardwareAddress.should.be(
           'IOBus://unit#6/Input Bit 16 bits/Input Bit 09',
         );
       },
     );
 
     test(
-      "IOAttribute.findIoVariables(EventGlobal.CropperBrushMtr.MtrProt) should return a correct value",
+      "IoAttribute.findIoVariables(EventGlobal.CropperBrushMtr.MtrProt) should return a correct value",
       () async {
         var sysmacProjectFile = SysmacProjectTestResource();
         var sysmacProject = await MeynSysmacProject.create(
@@ -470,27 +476,33 @@ void main() {
 
         var eventNamePath = 'EventGlobal.IoWasher1BoostPmp.SenfaultProdLow';
 
-        var eventValues = [IOAttribute('iLvlLow'), IOAttribute('iLvlProd')];
+        var ioAttribute1 = IoAttribute('iLvlLow');
+        var ioAttribute2 = IoAttribute('iLvlProd');
+        var eventValues = [ioAttribute1, ioAttribute2];
 
-        var globalVariables = IOAttribute.findIoVariables(
+        var ioAttributeVariables = IoAttribute.findIoAttributeVariables(
           sysmacProject,
           eventNamePath,
           eventValues,
         );
 
-        globalVariables.length.should.be(2);
-        globalVariables[0].name.should.be('iIoWasher1BoostPmpLvlLow');
-        globalVariables[0].comment.should.be(
-          '81K1 IoWasher 1-Boost pump-Too low level',
-        );
-        globalVariables[0].at.should.be(
+        ioAttributeVariables.length.should.be(2);
+
+        ioAttributeVariables[ioAttribute1].should.not.beNull();
+        var variable1 = ioAttributeVariables[ioAttribute1]!;
+        variable1.name.should.be('iIoWasher1BoostPmpLvlLow');
+        variable1.comment.should.be('81K1 IoWasher 1-Boost pump-Too low level');
+        variable1.hardwareAddress.should.be(
           'IOBus://unit#10/Input Bit 16 bits/Input Bit 04',
         );
-        globalVariables[1].name.should.be('iIoWasher1BoostPmpLvlProd');
-        globalVariables[1].comment.should.be(
+
+        ioAttributeVariables[ioAttribute2].should.not.beNull();
+        var variable2 = ioAttributeVariables[ioAttribute2]!;
+        variable2.name.should.be('iIoWasher1BoostPmpLvlProd');
+        variable2.comment.should.be(
           '81K3 IoWasher 1-Boost pump-Production level',
         );
-        globalVariables[1].at.should.be(
+        variable2.hardwareAddress.should.be(
           'IOBus://unit#10/Input Bit 16 bits/Input Bit 05',
         );
       },

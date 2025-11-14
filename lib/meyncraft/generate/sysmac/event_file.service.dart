@@ -8,8 +8,26 @@ Future<void> writeSysmacEventFile(MeynSysmacProject sysmacProject) async {
 
   var code = StringBuffer();
   for (var event in events) {
+    var componentCodesOldStyle = event.componentCodes.join(', ');
+    var componentCodesNewStyle = event.variableNameWithComponentCodes.values
+        .expand((e) => e)
+        .join(', ');
+    var variableNameWithAddresses = [
+      for (var entry in event.variableNameWithHardwareAddress.entries)
+        '${entry.key}:${entry.value}',
+    ].join(', ');
     code.writeln(
-      '${event.number},${event.namePath},${event.group},${event.componentCodes.join(' ')},${event.message},${event.priority.name},${event.acknowledgeRequired}',
+      [
+        event.number,
+        event.namePath,
+        event.group,
+        wrapCommas(componentCodesNewStyle),
+        wrapCommas(componentCodesOldStyle),
+        wrapCommas(event.message),
+        event.priority.name,
+        event.acknowledgeRequired,
+        wrapCommas(variableNameWithAddresses),
+      ].join(','),
     );
   }
 
@@ -22,6 +40,8 @@ Future<void> writeSysmacEventFile(MeynSysmacProject sysmacProject) async {
     '     A file that can be opened with MS-Excel to quickly check the generated events',
   );
 }
+
+String wrapCommas(String contentWithCommas) => '"$contentWithCommas"';
 
 File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   var sysmacFile = sysmacProject.identity.projectFile;

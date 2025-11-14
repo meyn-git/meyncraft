@@ -71,7 +71,7 @@ final commentAttributeParsers = <Parser<CommentAttribute>>[
   AcknowledgeAttribute.parser,
   ArrayAttribute.parser,
   PriorityAttribute.parser,
-  IOAttribute.parser,
+  IoAttribute.parser,
   ComponentCodeAddColumnsAttribute.parser,
   ComponentCodeAddPageAttribute.parser,
   ComponentCodeOverrideLettersAttribute.parser,
@@ -121,23 +121,72 @@ class UnknownAttribute implements CommentAttribute {
   String toString() => '[$expression]';
 }
 
-/// refers to an in or output parameter of a PLC [Function$] or [FunctionBlock]
+/// refers to an in or output argument of a PLC [Function$] or [FunctionBlock]
 /// call so that the PLC Address and component codes can be added to the [Event]
-class IOAttribute implements CommentAttribute {
-  final bool
-  warningWhenInputCommentDoesNotContainComponentCode; //TODO implement
+/// Usage: [io=<parameter>,<flags>]
+/// Example: [io=iMtrProtOk,noAddr,noWarn]
+///
+/// * <parameter> = name of the function or function block parameter
+///                 that is tied to an global variable that contains
+///                 a component code in the comment and/or an hardware address
+/// * <flags>     = a comma separated list with zero or more of
+///                 the following flags (case unsensitive):
+///                 * noCompCode
+///                   Gets the hardwareAddress but not the component code.
+///                   This also sets the noCompCodeWarn flag
+///                 * noAddr
+///                   Gets the component code but not he hardware address.
+///                   This also sets the noAddrWarn flag
+///                 * noWarn
+///                   Normally the code generator will show a warnings if the
+///                   the global variable has no component code in the comment
+///                   or has no hardware address.
+///                   You can suppress this by adding this flag.
+///                 * noCompCodeWarn
+///                   Normally the code generator will show a warnings if the
+///                   the global variable has no component code in the comment
+///                   You can suppress this by adding this flag.
+///                 * noAddrWarn
+///                   Normally the code generator will show a warnings if the
+///                   the global variable has no hardware address.
+///                   You can suppress this by adding this flag.
+class IoAttribute implements CommentAttribute {
   final String callArgumentName;
 
-  IOAttribute(
+  /// Gets the hardwareAddress but not the component code.
+  /// This also sets the noCompCodeWarn flag
+
+  final bool noComponentCode;
+
+  /// Normally the code generator will show a warnings if the
+  /// the global variable has no component code in the comment
+  /// You can suppress this by setting this flag to true.
+  final bool noComponentCodeWarning;
+
+  /// Gets the component code but not he hardware address.
+  /// This also sets the noAddrWarn flag
+
+  final bool noAddress;
+
+  /// Normally the code generator will show a warnings if the
+  /// the global variable has no hardware address.
+  /// You can suppress this by setting this flag to true.
+
+  final bool noAddressWarning;
+
+  IoAttribute(
     this.callArgumentName, {
-    this.warningWhenInputCommentDoesNotContainComponentCode = false,
+    this.noComponentCode = false,
+    this.noComponentCodeWarning = false,
+    this.noAddress = false,
+    this.noAddressWarning = false,
   });
 
-  static Parser<IOAttribute> parser = NameEqualsValueParser<IOAttribute>(
+  static Parser<IoAttribute> parser = NameEqualsValueParser<IoAttribute>(
     nameValueConverter,
   );
 
-  static IOAttribute nameValueConverter({
+  static IoAttribute nameValueConverter({
     required String name,
     required String value,
   }) {
@@ -145,27 +194,57 @@ class IOAttribute implements CommentAttribute {
       throw Exception('invalid name');
     }
     if (value.trim().isNotEmpty) {
-      return IOAttribute(value);
+      var values = value.split(',');
+      var argumentName = values.first.trim();
+
+      var noComponentCode = values.any(
+        (v) => v.toLowerCase().trim() == 'nocompcode',
+      );
+      var noAddress = values.any((v) => v.toLowerCase().trim() == 'noaddr');
+      var noWarnings = values.any((v) => v.toLowerCase().trim() == 'nowarn');
+      var noComponentCodeWarning =
+          noComponentCode ||
+          noWarnings ||
+          values.any((v) => v.toLowerCase().trim() == 'nocompcodewarn');
+      var noAddressWarning =
+          noAddress ||
+          noWarnings ||
+          values.any((v) => v.toLowerCase().trim() == 'noaddrwarn');
+      return IoAttribute(
+        argumentName,
+        noComponentCode: noComponentCode,
+        noComponentCodeWarning: noComponentCodeWarning,
+        noAddress: noAddress,
+        noAddressWarning: noAddressWarning,
+      );
     }
     throw Exception('invalid value');
   }
 
-  static List<Variable> findIoVariables(
+  //FIXME change Variable to VariableMember
+  static Map<IoAttribute, Variable> findIoAttributeVariables(
     SysmacProject sysmacProject,
     String eventNamePath,
     List eventValues,
   ) {
-    var globalVariables = <Variable>[];
-    var ioAttributes = eventValues.whereType<IOAttribute>();
+    var result = <IoAttribute, Variable>{};
+    var ioAttributes = eventValues.whereType<IoAttribute>();
     var globalVariablePath = parentNamePath(eventNamePath);
     for (var ioAttribute in ioAttributes) {
-      var call = findCall(sysmacProject, globalVariablePath);
-      if (call == null) {
+      var calls = findCalls(sysmacProject, globalVariablePath);
+      if (calls.isEmpty) {
         logger.warning(
           'Could not find a function or function block call that outputs: $eventNamePath',
         );
         continue;
+      } else if (calls.length > 1) {
+        logger.warning(
+          'Found multiple function or function block calls that output to: $eventNamePath'
+          ', calls: ${calls.map((c) => c.name).join(', ')}',
+        );
+        continue;
       }
+      var call = calls.first;
       var callParameter = findCallParameter(call, ioAttribute.callArgumentName);
       if (callParameter == null) {
         logger.warning(
@@ -174,38 +253,75 @@ class IOAttribute implements CommentAttribute {
         );
         continue;
       }
-      if (callParameter.variable != null) {
-        var variable = sysmacProject.globalVariables.firstWhereOrNull(
-          (v) => v.name == callParameter.variable,
-        );
-        if (variable == null) {
-          // logger.warning(
-          //   'Could not find a global variable for'
-          //   ' function (block) parameter: ${callParameter.variable}',
-          // );
-          continue;
-        }
-        var componentCodes = componentCodeParser.allMatches(variable.comment);
-        if (ioAttribute.warningWhenInputCommentDoesNotContainComponentCode &&
-            componentCodes.isEmpty) {
-          logger.warning(
-            'Expected global variable ${variable.name} to have a '
-            'component code (e.g. 30S1) in its comment.',
-          );
-          continue;
-        }
-        globalVariables.add(variable);
+      if (callParameter.variable == null) {
+        continue;
       }
+      var variable = sysmacProject.globalVariables.firstWhereOrNull(
+        (v) => v.name == callParameter.variable,
+      );
+      if (variable == null) {
+        continue;
+      }
+      result[ioAttribute] = variable;
     }
-    return globalVariables;
+    return result;
   }
 
-  static Call? findCall(
+  static Map<String, List<ComponentCode>> findIoVariableNameWithComponentCodes(
+    Map<IoAttribute, Variable> ioAttributeVariables,
+  ) {
+    var result = <String, List<ComponentCode>>{};
+    for (var ioAttribute in ioAttributeVariables.keys) {
+      if (ioAttribute.noComponentCode) {
+        continue;
+      }
+      var variable = ioAttributeVariables[ioAttribute]!;
+
+      var componentCodes = componentCodeParser
+          .allMatches(variable.comment)
+          .toList();
+      if (!ioAttribute.noComponentCodeWarning && componentCodes.isEmpty) {
+        logger.warning(
+          'Expected global variable ${variable.name} to have a '
+          'one or more component code in its comment.',
+        );
+      } else {
+        result[variable.name] = componentCodes;
+      }
+    }
+    return result;
+  }
+
+  static Map<String, String> findIoVariableNameWithAddresses(
+    Map<IoAttribute, Variable> ioAttributeVariables,
+  ) {
+    var result = <String, String>{};
+    for (var ioAttribute in ioAttributeVariables.keys) {
+      if (ioAttribute.noAddress) {
+        continue;
+      }
+      var variable = ioAttributeVariables[ioAttribute]!;
+
+      var address = variable.hardwareAddress;
+      if (!ioAttribute.noAddress && address == null || address!.isEmpty) {
+        logger.warning(
+          'Expected global variable ${variable.name} to have an '
+          'hardware address.',
+        );
+      } else {
+        result[variable.name] = address;
+      }
+    }
+    return result;
+  }
+
+  static List<Call> findCalls(
     SysmacProject sysmacProject,
     String globalVariableMemberToFind,
   ) {
     var devices = sysmacProject.devices;
     var plcs = devices.whereType<NjPlc>();
+    var calls = <Call>[];
     for (var plc in plcs) {
       for (var program in plc.programs.whereType<LadderProgram>()) {
         for (var section in program) {
@@ -213,7 +329,7 @@ class IOAttribute implements CommentAttribute {
             for (var call in rung.ladderObjects.whereType<Call>()) {
               for (var outParameter in call.parametersOut) {
                 if (outParameter.variable == globalVariableMemberToFind) {
-                  return call;
+                  calls.add(call);
                 }
               }
             }
@@ -221,7 +337,7 @@ class IOAttribute implements CommentAttribute {
         }
       }
     }
-    return null;
+    return calls;
   }
 
   static Parameter? findCallParameter(Call call, String argumentName) => [

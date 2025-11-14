@@ -1,0 +1,616 @@
+# CommentAttribute's that still need to be added to The PLC program and standard Meyn Libraries
+# New style: where we try to get the component codes and PLC addresses using the parameters of function block calls
+
+
+# Code owner: EVI1_PLC
+# function (block): fbVacuumUnit
+# in: ENI, iPresent, iEventSuppress, iConfig, iSetting, iSafetyOk, iAirPressureOk, iTankLevel, iWaterPres, iVacuum, iPtcPump1, iPtcPump2, iDischargeActive
+# out: ENO, oEnableLocal, oVacuumRun
+# in/out: ioEventHandling, ioFb, ioHmi, ioPump, ioFillVlv
+Equipment\VacuumUnit\sEvent\StopTimeOut=[noAck]
+Equipment\VacuumUnit\sEvent\PtcMtr1=[io=iPtcPump1]
+Equipment\VacuumUnit\sEvent\PtcMtr2=[io=iPtcPump2]
+Equipment\VacuumUnit\sEvent\PtcMtr3=
+Equipment\VacuumUnit\sEvent\PtcMtr4=
+Equipment\VacuumUnit\sEvent\PressLow=[io=iWaterPres]
+Equipment\VacuumUnit\sEvent\LevelLow=[io=iTankLevel]
+Equipment\VacuumUnit\sEvent\VacuumLow=[io=iVacuum]
+Equipment\VacuumUnit\sEvent\PmpFault=[io=iPtcPump1][io=iPtcPump2]
+
+# Code owner: EVI1_PLC
+# function (block): fbShackleDivider
+# in: ENI, iEventSuppress, iConfig, iSetting, iPresent, iSafetyOk, iSpeedRefSource, iSpeedExternRef, iSpeedServiceRef, iQuickStopLineIn, iQuickStopLineOut1, iQuickStopLineOut2
+# out: ENO, oEnableLocal
+# in/out: ioEventHandling, ioHmi, ioFb, ioMotor
+Equipment\ShackleDivider\sEvent\StopTimeOut=[noAck]
+Equipment\ShackleDivider\sEvent\EventTrigger=
+Equipment\ShackleDivider\sEvent\QuickStopLineIn=[io=iQuickStopLineIn]
+Equipment\ShackleDivider\sEvent\QuickStopLineOut1=[io=iQuickStopLineOut1]
+Equipment\ShackleDivider\sEvent\QuickStopLineOut2=[io=iQuickStopLineOut2]
+
+# Code owner: EVI1_PLC
+# function (block): fbOPCUA_VET_v4
+# in: ENI, iLotChange, iWarningNewLot, iCntExt
+# out: ENO, oMessageNewLot, oActiveLotEod, oLotChangeReady
+# in/out: ioEventHandling, ioHmi, ioData
+MeynConnect\Generic\sEvent\LotIdIsZero=
+MeynConnect\Generic\sEvent\LotIdEqualsActive=
+MeynConnect\Generic\sEvent\NoLotId=
+
+# Code owner: EVI1_PLC
+# function (block): fbPanConvSync
+# in: ENI, iMasterZPls, iMasterEncPos, iMasterEncDir, iMasterEncCntEnbl, iMasterEncZRstComp, iSlaveZPls, iSlaveEncPos, iSlaveEncDir, iSlaveEncCntEnbl, iSlaveEncZRstComp, iPresent, iSafetyOk, iSpeedRefSource, iSpeedServiceRef, iConfig, iSetting, iMtrMaster, iEventSuppress
+# out: ENO, oMasterEncCntCmdEn, oMasterEncZRstCmdEn, oMasterEncZRstCmdClr, oSlaveEncCntCmdEn, oSlaveEncZRstCmdEn, oSlaveEncZRstCmdClr, oFFAutoTuneValue, oEnableLocal
+# in/out: ioMtrSlave, ioFb, ioHmi, ioEventHandling
+Equipment\PanConvSync\sEvent\StopTimeOut=[noAck]
+Equipment\PanConvSync\sEvent\AutoTuneNoSlaveSpd=
+Equipment\PanConvSync\sEvent\AutoTuneNoStableSpd=
+Equipment\PanConvSync\sEvent\RevTriggerMissingMaster=
+Equipment\PanConvSync\sEvent\RevTriggerMissingSlave=
+Equipment\PanConvSync\sEvent\MasterEncWrongDir=[io=iMasterEncPos][io=iMasterEncDir][io=iMasterEncCntEnbl][io=iMasterEncZRstComp][io=oMasterEncCntCmdEn][io=oMasterEncZRstCmdEn]
+Equipment\PanConvSync\sEvent\SlaveEncWrongDir=[io=iSlaveEncPos][io=iSlaveEncDir][io=iSlaveEncCntEnbl]
+Equipment\PanConvSync\sEvent\MasterEncNoZPulse=[io=iMasterEncPos][io=iMasterEncDir][io=iMasterEncCntEnbl][io=iMasterEncZRstComp][io=oMasterEncCntCmdEn][io=oMasterEncZRstCmdEn]
+Equipment\PanConvSync\sEvent\SlaveEncNoZPulse=[io=iSlaveEncPos][io=iSlaveEncDir][io=iSlaveEncCntEnbl]
+Equipment\PanConvSync\sEvent\MasterEncNotEnabled=[io=iMasterEncPos][io=iMasterEncDir][io=iMasterEncCntEnbl]
+Equipment\PanConvSync\sEvent\SlaveEncNotEnabled=[io=iSlaveEncPos][io=iSlaveEncDir]
+Equipment\PanConvSync\sEvent\MasterNoValueAtRun=
+Equipment\PanConvSync\sEvent\SlaveNoValueAtRun=
+Equipment\PanConvSync\sEvent\MaxSpeedOutput=
+
+# Code owner: EVI1_PLC
+# function (block): fbBlowTransport
+# in: ENI, iSetting, iConfig, iSafetyOk, iAirPressOk, iReceivingProducts, iEventSuppress
+# out: ENO
+# in/out: ioEventHandling, ioBlowTransport, ioHmi, ioFillVlv, ioInjectionVlv1, ioInjectionVlv2, ioInjectionVlv3
+Equipment\BlowTransport\sEvent\LowAirPressure=[io=iAirPressOk]
+Equipment\BlowTransport\sEvent\StopTimeOut=[noAck]
+
+# Code owner: EVI1_PLC
+# function (block): fbAbortUnitSensor
+# in: ENI, iPresent, iSensor, iEventSuppress
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb
+Equipment\AbortUnitSensor\sEvent\StopTimeOut=[noAck]
+Equipment\AbortUnitSensor\sEvent\Sensor=[io=iSensor]
+
+# Code owner: EVI1_PLC
+# function (block): fbStartStopCtrl_0011
+# in: ENI, iStartStop, iUnitPackML, iSysOff, iStartCmdExternal, iStopCmdExternal, iEventSuppress, iLampTest, iMainBoxNo, iPulseBlinkIndicator
+# out: ENO, oIndicator, oCmdStart, oCmdStop
+# in/out: ioEventHandling, ioHmi, ioConfig
+Cm\StartStopCtrl_0011\sEvent\StopBox1=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl_0011\sEvent\StopBox2=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl_0011\sEvent\StopBox3=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl_0011\sEvent\StopBox4=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl_0011\sEvent\StopBox5=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl_0011\sEvent\StopBox6=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl_0011\sEvent\StopBox7=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl_0011\sEvent\StopBox8=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl_0011\sEvent\StopBox9=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl_0011\sEvent\StopBox10=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox11=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox12=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox13=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox14=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox15=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox16=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox17=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox18=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox19=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox20=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox21=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox22=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox23=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox24=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox25=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox26=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox27=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox28=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox29=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox30=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox31=[noAck][prio=info]
+Cm\StartStopCtrl_0011\sEvent\StopBox32=[noAck][prio=info]
+
+# Code owner: EVI1_PLC
+# function (block): fbEvisModule
+# in: ENI, iEventSuppress, iPresent, iSafetyOk, iTrqSwOk, iAirPressOk, iRemIoBoxOk, iEstpButtonOk, iEstpPushBarOk, iSfDoor1Ok, iSfDoor2Ok, iSfDoor3Ok, iSfDoor4Ok, iSfDoor5Ok, iSfDoor6Ok, iSfDoor7Ok, iSfDoor8Ok
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb
+Equipment\EvisModule\sEvent\StopTimeOut=[noAck]
+Equipment\EvisModule\sEvent\TrqSw=[io=iTrqSwOk]
+Equipment\EvisModule\sEvent\AirPressLow=[io=iAirPressOk]
+
+# Code owner: EVI1_PLC
+# function (block): fbWaterTankWithPump
+# in: ENI, iPresent, iSelect, iEventSuppress, iConfig, iSetting, iSafetyOk, iLvlLow, iLvlProd, iLvlHigh
+# out: ENO, oFillVlv, oEnableLocal
+# in/out: ioEventHandling, ioHmi, ioFb, ioPump
+Equipment\WaterTankWithPump\sEvent\StopTimeOut=[noAck]
+Equipment\WaterTankWithPump\sEvent\LvlTooLow=
+Equipment\WaterTankWithPump\sEvent\LvlTooHigh=
+Equipment\WaterTankWithPump\sEvent\SenFaultHighProd=
+Equipment\WaterTankWithPump\sEvent\SenFaultHighLow=
+Equipment\WaterTankWithPump\sEvent\SenfaultProdLow=
+
+# Code owner: EVI1_PLC
+# function (block): fbVacuumCheck
+# in: ENI, iVacuumSensor, iSetting, iEventSuppress, iPresent, iSafetyOk
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb
+Equipment\VacuumCheck\sEvent\StopTimeOut=[noAck]
+Equipment\VacuumCheck\sEvent\VacuumPressTooLow=
+
+# Code owner: EVI1_PLC
+# function (block): fbCamAdj
+# in: ENI, iPresent, iSafetyOk, iEventSuppress, iMoveUpBtn, iMoveDwnBtn, iNoCylSelected, iCyl1Selected, iCyl2Selected, iCyl3Selected, iCyl4Selected, iCfgCyl1HghSpd, iCfgCyl2HghSpd, iCfgCyl3HghSpd, iCfgCyl4HghSpd
+# out: ENO, oEnableLocal
+# in/out: ioEventHandling, ioHmi, ioFb, ioEnable
+Equipment\CamAdj\sEvent\SelectionSwitchFault=
+Equipment\CamAdj\sEvent\SelectionSwitchNoInputs=
+Equipment\CamAdj\sEvent\StopTimeOut=[noAck]
+
+# Code owner: EVI1_PLC
+# function (block): fbIoLinkPressurePV70xx
+# in: ENI, iEventSuppress, iIoLinkData01, iIoLinkData02, iIoLinkPortError
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb, ioConfig
+Cm\Ai\sEvent\WireBreak=
+Cm\Ai\sEvent\Overrange=
+Cm\Ai\sEvent\Underrange=
+Cm\Ai\sEvent\WrongConfig=[io=ioConfig]
+
+# Code owner: EVI1_PLC
+# function (block): fbIoLinkMaster_v0104
+# in: ENI, iPort1Use, iPort2Use, iPort3Use, iPort4Use, iEventSuppress, iLocationIoLinkMaster, iIoPortStatus, iIoPort1_2ErrorStatus, iIoPort3_4ErrorStatus
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFbPort1, ioFbPort2, ioFbPort3, ioFbPort4
+Cm\IoLinkMaster\sEvent\Port1Error=[io=ioFbPort1][io=iPort1Use]
+Cm\IoLinkMaster\sEvent\Port2Error=[io=ioFbPort2][io=iPort2Use]
+Cm\IoLinkMaster\sEvent\Port3Error=[io=ioFbPort3][io=iPort3Use]
+Cm\IoLinkMaster\sEvent\Port4Error=[io=ioFbPort4][io=iPort4Use]
+
+# Code owner: Meyn_MeynConnect1.2
+# function (block): fbCheckLotId
+# in: ENI, iLotChange, iNextLotId, iActiveLotId
+# out: ENO, oLotIdChanged
+# in/out:
+MeynConnect\Generic\sEvent\LotIdIsZero=
+MeynConnect\Generic\sEvent\LotIdEqualsActive=
+MeynConnect\Generic\sEvent\NoLotId=[io=iNextLotId][io=iActiveLotId][io=oLotIdChanged]
+
+# Code owner: Meyn_MeynConnect1.2
+# function (block): fbOPCUA_DOA
+# in: ENI, iLotChange, iCntExt
+# out: ENO, oActiveLotEod
+# in/out: ioEventHandling, ioHmi, ioData
+MeynConnect\Generic\sEvent\LotIdIsZero=
+MeynConnect\Generic\sEvent\LotIdEqualsActive=
+MeynConnect\Generic\sEvent\NoLotId=
+
+# Code owner: Meyn_MeynConnect1.2
+# function (block): fbOPCUA_BCO
+# in: ENI, iLotChange, iCntExt
+# out: ENO, oActiveLotEod
+# in/out: ioEventHandling, ioHmi, ioData
+MeynConnect\Generic\sEvent\LotIdIsZero=
+MeynConnect\Generic\sEvent\LotIdEqualsActive=
+MeynConnect\Generic\sEvent\NoLotId=
+
+# Code owner: Meyn_MeynConnect1.2
+# function (block): fbOPCUA_BCV
+# in: ENI, iLotChange, iCntExt
+# out: ENO, oActiveLotEod
+# in/out: ioEventHandling, ioHmi, ioData
+MeynConnect\Generic\sEvent\LotIdIsZero=
+MeynConnect\Generic\sEvent\LotIdEqualsActive=
+MeynConnect\Generic\sEvent\NoLotId=
+
+# Code owner: Meyn_MeynConnect1.2
+# function (block): fbOPCUA_VET
+# in: ENI, iLotChange, iWarningNewLot, iCntExt
+# out: ENO, oMessageNewLot, oActiveLotEod
+# in/out: ioEventHandling, ioHmi, ioData
+MeynConnect\Generic\sEvent\LotIdIsZero=
+MeynConnect\Generic\sEvent\LotIdEqualsActive=
+MeynConnect\Generic\sEvent\NoLotId=
+
+# Code owner: Meyn_MeynConnect1.2
+# function (block): fbOPCUA_EST
+# in: ENI, iCommunicationOK, iLotChange, iVoltageAct, iAmperageAct, iFrequencyAct
+# out: ENO
+# in/out: ioEventHandling, ioReadActuals, ioWriteSettings, ioReadSettings, ioStartStunner
+MeynConnect\Stunner\sEvent\CheckLotId=
+MeynConnect\Stunner\sEvent\StunnerEvents=[io=ioStartStunner]
+
+# Code owner: Meyn_Standard
+# function (block): fbCylCtrl
+# in: ENI, iConfig, iEventSuppress, iIn, iOut, iEnableMoveIn, iEnableMoveOut
+# out: ENO, oIn, oOut
+# in/out: ioEventHandling, ioHmi, ioFb
+Cm\CylCtrl\sEvent\In=[io=iIn][io=oIn]
+Cm\CylCtrl\sEvent\Out=[io=iOut][io=oOut]
+Cm\CylCtrl\sEvent\InWrn=[io=iIn][io=oIn]
+Cm\CylCtrl\sEvent\OutWrn=[io=iOut][io=oOut]
+Cm\CylCtrl\sEvent\NotMoving=
+Cm\CylCtrl\sEvent\InOut=[io=ENO][io=iIn][io=iOut][io=oIn][io=oOut]
+Cm\CylCtrl\sEvent\Interlocked=
+Cm\CylCtrl\sEvent\WrongConfig=[io=iConfig]
+
+# Code owner: Meyn_Standard
+# function (block): fbEcBusControl
+# in: ENI, iSlaveRestart, iEcNodeStatus, iSlaveRestartUnitId, iEventSuppress
+# out: ENO
+# in/out: ioEventHandling, ioHmi
+Cm\EcBusControl\sEvent\Topology=
+Cm\EcBusControl\sEvent\EcReset=
+Cm\EcBusControl\sEvent\Enable=
+Cm\EcBusControl\sEvent\HwReset=
+
+# Code owner: Meyn_Standard
+# function (block): fbEcNodeStatus
+# in: ENI, iEcNodeNr, iEcNodeEnable, iEventSuppress
+# out: ENO, oEcNodeSts
+# in/out: ioEventHandling
+Cm\EcNodeStatus\sEvent\HwDisconnected=
+Cm\EcNodeStatus\sEvent\HwError=
+Cm\EcNodeStatus\sEvent\PdOkPdoError=
+Cm\EcNodeStatus\sEvent\PdOkMinorError=
+
+# Code owner: Meyn_Standard
+# function (block): fbFestoCpxTerminal
+# in: ENI, iSafetyOk, iEcNodeSts, iErrVlv, iErrOutput, iErrInput, iErrAnalog, iUnderVoltage, iShortCircuit, iWireBreak, iErrOther, iEventSuppress
+# out: ENO, oEcNodeStsOk
+# in/out: ioEventHandling
+Cm\FestoCpxTerminal\sEvent\ErrVlv=[io=iErrVlv]
+Cm\FestoCpxTerminal\sEvent\ErrOutput=[io=iErrOutput]
+Cm\FestoCpxTerminal\sEvent\ErrInput=[io=iErrInput]
+Cm\FestoCpxTerminal\sEvent\ErrAnalog=[io=iErrAnalog]
+Cm\FestoCpxTerminal\sEvent\UnderVoltage=[io=iUnderVoltage]
+Cm\FestoCpxTerminal\sEvent\ShortCircuit=[io=iShortCircuit]
+Cm\FestoCpxTerminal\sEvent\WireBreak=[io=iWireBreak]
+Cm\FestoCpxTerminal\sEvent\ErrOther=[io=iErrOther]
+
+# Code owner: Meyn_Standard
+# function (block): fbIoLinkCabinetMon
+# in: ENI, iUnitTemperature, iIoLinkModule, iEventSuppress
+# out: ENO, oFan, oHeater
+# in/out: ioEventHandling, ioHmi, ioFb, ioConfig
+Cm\IoLinkCabinetMon\sEvent\HumidityHigh=
+Cm\IoLinkCabinetMon\sEvent\HumidityInvalid=
+Cm\IoLinkCabinetMon\sEvent\TemperatureHigh=[io=iUnitTemperature]
+Cm\IoLinkCabinetMon\sEvent\TemperatureLow=[io=iUnitTemperature]
+Cm\IoLinkCabinetMon\sEvent\TemperatureInvalid=[io=iUnitTemperature]
+
+# Code owner: Meyn_Standard
+# function (block): fbIoLinkMaster
+# in: ENI, iPort1Use, iPort2Use, iPort3Use, iPort4Use, iEventSuppress, iLocationIOLinkMaster, iIoPortStatus, iIoPort1_2ErrorStatus, iIoPort3_4ErrorStatus
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFbPort1, ioFbPort2, ioFbPort3, ioFbPort4
+Cm\IoLinkMaster\sEvent\Port1Error=[io=ioFbPort1]
+Cm\IoLinkMaster\sEvent\Port2Error=[io=ioFbPort2]
+Cm\IoLinkMaster\sEvent\Port3Error=[io=ioFbPort3]
+Cm\IoLinkMaster\sEvent\Port4Error=[io=ioFbPort4]
+
+# Code owner: Meyn_Standard
+# function (block): fbLineTensioner
+# in: ENI, iEventSuppress, iIndex, iAirPressure, iSensorWrn, iSensorAlm
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb, ioConfig
+Cm\LineTensioner\sEvent\AirPressure=[io=iAirPressure]
+Cm\LineTensioner\sEvent\SensorWrn=[io=iSensorWrn]
+Cm\LineTensioner\sEvent\SensorAlm=[io=iSensorAlm]
+
+# Code owner: Meyn_Standard
+# function (block): fbMtrCtrlDol
+# in: ENI, iEventSuppress, iMtrSwOk, iMtrProtOk, iRunningFwd, iRunningRev, iEnableRunFwd, iEnableRunRev
+# out: ENO, oCmdFwd, oCmdRev
+# in/out: ioEventHandling, ioHmi, ioFb, ioConfig, ioStartSeq
+Cm\MtrCtrl\sEventDol\MtrSw=[io=iMtrSwOk]
+Cm\MtrCtrl\sEventDol\MtrProt=[io=iMtrProtOk]
+Cm\MtrCtrl\sEventDol\NotRunning=[io=iRunningFwd][io=iRunningRev]
+Cm\MtrCtrl\sEventDol\NotStopped=[io=iRunningFwd][io=iRunningRev]
+Cm\MtrCtrl\sEventDol\Interlocked=[io=iEnableRunFwd][io=iEnableRunRev]
+
+# Code owner: Meyn_Standard
+# function (block): fbMtrCtrlVfd
+# in: ENI, iEventSuppress, iEcNodeSts, iVfdStatusWord, iVfdVelocityActual, iVfdTorque, iVfdAlarmWord, iEnableRunFwd, iEnableRunRev, iMtrSwOk
+# out: ENO, oVfdControlWord, oVfdTargetVelocity, oVfdTorqueLimit
+# in/out: ioEventHandling, ioHmi, ioFb, ioConfig
+Cm\MtrCtrl\sEventVfd\MtrSw=[io=iVfdAlarmWord][ccl=S]
+Cm\MtrCtrl\sEventVfd\MtrProt=[io=iEventSuppress][ccl=Q]
+Cm\MtrCtrl\sEventVfd\Interlocked=[io=iEnableRunFwd][io=iEnableRunRev]
+Cm\MtrCtrl\sEventVfd\Tripped=[io=iVfdStatusWord]
+Cm\MtrCtrl\sEventVfd\DriveOff=[io=iVfdStatusWord]
+Cm\MtrCtrl\sEventVfd\Warning=[io=iVfdStatusWord]
+Cm\MtrCtrl\sEventVfd\Low10V=[io=iVfdStatusWord]
+Cm\MtrCtrl\sEventVfd\MtrEtrOverTmp=[io=iVfdAlarmWord]
+Cm\MtrCtrl\sEventVfd\TorqueLimit=[io=iVfdAlarmWord]
+Cm\MtrCtrl\sEventVfd\OverCurr=[io=iVfdAlarmWord]
+Cm\MtrCtrl\sEventVfd\GroundFault=[io=iVfdAlarmWord]
+Cm\MtrCtrl\sEventVfd\ShortCircuit=[io=iVfdAlarmWord]
+Cm\MtrCtrl\sEventVfd\SafeStop=[io=iVfdAlarmWord]
+Cm\MtrCtrl\sEventVfd\FeedbackMonitor=[io=iVfdAlarmWord]
+Cm\MtrCtrl\sEventVfd\TrackingErr=[io=iVfdAlarmWord]
+Cm\MtrCtrl\sEventVfd\MtrSwDi=[io=iMtrSwOk]
+
+# Code owner: Meyn_Standard
+# function (block): fbNxbStatus
+# in: ENI, iEventSuppress
+# out: ENO
+# in/out: ioEventHandling
+Cm\NxbStatus\sEvent\ObservationError=
+Cm\NxbStatus\sEvent\MinorError=
+Cm\NxbStatus\sEvent\PartialError=
+Cm\NxbStatus\sEvent\MajorError=
+
+# Code owner: Meyn_Standard
+# function (block): fbProductCounter
+# in: ENI, iEventSuppress, iConfig, iPresent, iEnable, iTriggerA, iTriggerB, iSensor1, iSensor2, iSensor3, iLotChange, iReset, iProduct, iEmptyShackle, iOneLegged, iTooHigh, iLooseFeet, iLotName
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioLotID
+Cm\ProductCounter\sEvent\TriggerA=[io=iTriggerA][io=iTriggerB]
+Cm\ProductCounter\sEvent\TriggerB=[io=iTriggerA][io=iTriggerB]
+Cm\ProductCounter\sEvent\Sensor1=[io=iSensor1][io=iSensor2][io=iSensor3]
+Cm\ProductCounter\sEvent\Sensor2=[io=iSensor1][io=iSensor2][io=iSensor3]
+Cm\ProductCounter\sEvent\Sensor3=[io=iSensor1][io=iSensor2][io=iSensor3]
+Cm\ProductCounter\sEvent\Stopped=
+
+# Code owner: Meyn_Standard
+# function (block): fbReadAnalogInput
+# in: ENI, iEventSuppress, iAi
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb, ioConfig
+Cm\Ai\sEvent\WireBreak=
+Cm\Ai\sEvent\Overrange=
+Cm\Ai\sEvent\Underrange=
+Cm\Ai\sEvent\WrongConfig=[io=ioConfig]
+
+# Code owner: Meyn_Standard
+# function (block): fbSfStsInSingleChannel
+# in: ENI, iDiagCode, iEcNodeStatus, iNumber, iUnitStatus2, iUnitConnected, iOverride, iEventSuppress
+# out: ENO, oDisabled, oControlOn
+# in/out: ioEventHandling
+Safety\sEventInSingleChannel\Active=[prio=critical]
+Safety\sEventInSingleChannel\ChErr=[prio=critical]
+Safety\sEventInSingleChannel\RstReq=[prio=critical]
+Safety\sEventInSingleChannel\ActiveWarning=[prio=critical]
+
+# Code owner: Meyn_Standard
+# function (block): fbSfStsInDualChannel
+# in: ENI, iDiagCode, iEcNodeStatus, iNumber, iUnitStatus2, iUnitConnected, iOverride, iEventSuppress
+# out: ENO, oDisabled, oControlOn
+# in/out: ioEventHandling
+Safety\sEventInDualChannel\Active=[noAck][prio=critical][io=iDiagCode,noAddr][io=iUnitStatus2,noCompCode]
+Safety\sEventInDualChannel\ChErr=[prio=critical][io=iDiagCode,noAddr][io=iUnitStatus2,noCompCode]
+Safety\sEventInDualChannel\RstReq=[noAck][prio=info][io=iDiagCode,noAddr][io=iUnitStatus2,noCompCode]
+Safety\sEventInDualChannel\ActiveWarning=[noAck][prio=info][io=iDiagCode,noAddr][io=iUnitStatus2,noCompCode]
+
+# Code owner: Meyn_Standard
+# function (block): fbSfStsTwoHandControl
+# in: ENI, iDiagCode, iEcNodeStatus, iNumberBtn1, iNumberBtn2, iUnitStatus2Btn1, iUnitStatus2Btn2, iUnitConnected, iEventSuppress
+# out: ENO, oDisabled, oControlOn
+# in/out: ioEventHandling
+Safety\sEventTwoHandControl\Activation=[prio=critical]
+Safety\sEventTwoHandControl\Discrepancy=[prio=critical]
+Safety\sEventTwoHandControl\Release=[prio=critical]
+Safety\sEventTwoHandControl\ChErrBtn1=[prio=critical][io=iNumberBtn1]
+Safety\sEventTwoHandControl\ChErrBtn2=[prio=critical][io=iNumberBtn2]
+
+# Code owner: Meyn_Standard
+# function (block): fbSfStsModeSwitch
+# in: ENI, iDiagCode, iEcNodeStatus, iUnitConnected, iNumberInpMode1, iNumberInpMode2, iNumberInpMode3, iUnitStatus2InpMode1, iUnitStatus2InpMode2, iUnitStatus2InpMode3, iEventSuppress
+# out: ENO, oDisabled, oMode1, oMode2, oMode3
+# in/out: ioEventHandling
+Safety\sEventModeSwitch\ChErr=[prio=critical]
+Safety\sEventModeSwitch\ShortCircuit=[prio=critical]
+Safety\sEventModeSwitch\OpenCircuit=[prio=critical]
+
+# Code owner: Meyn_Standard
+# function (block): fbSfStsOverrideSwitch
+# in: ENI, iDiagCode, iEcNodeStatus, iNumber, iUnitStatus2, iUnitConnected, iEventSuppress
+# out: ENO, oDisabled, oControlOn
+# in/out: ioEventHandling
+Safety\sEventOverrideSwitch\ChErr=[prio=critical]
+Safety\sEventOverrideSwitch\ActiveTimeOut=[prio=critical]
+
+# Code owner: Meyn_Standard
+# function (block): fbSfStsChErr
+# in: ENI, iEcNodeStatus, iNumber, iUnitStatus2, iUnitConnected, iEventSuppress
+# out: ENO
+# in/out: ioEventHandling
+Safety\sEventChErr\ChErr=[prio=critical][io=iUnitStatus2,noCompCode][io=oEvent,noAddr]
+
+# Code owner: Meyn_Standard
+# function (block): fbSfStsOutDualChannel
+# in: ENI, iDiagCode, iEcNodeStatus, iNumber, iUnitStatus2, iUnitConnected, iEventSuppress
+# out: ENO, oDisabled, oControlOn
+# in/out: ioEventHandling
+Safety\sEventOutDualChannel\ChErr=[prio=critical][io=iDiagCode,noAddr][io=iUnitStatus2,noCompCode]
+Safety\sEventOutDualChannel\Feedback1=[prio=critical][io=iDiagCode,noAddr][io=iUnitStatus2,noCompCode]
+Safety\sEventOutDualChannel\Feedback2=[prio=critical][io=iDiagCode,noAddr][io=iUnitStatus2,noCompCode]
+
+# Code owner: Meyn_Standard
+# function (block): fbSfStsOutSingleChannel
+# in: ENI, iDiagCode, iEcNodeStatus, iNumber, iUnitStatus2, iUnitConnected, iEventSuppress
+# out: ENO, oDisabled, oControlOn
+# in/out: ioEventHandling
+Safety\sEventOutSingleChannel\ChErr=[prio=critical][io=iDiagCode,noAddr][io=iUnitStatus2,noCompCode]
+
+# Code owner: Meyn_Standard
+# function (block): fbStartStopCtrl
+# in: ENI, iStartStop, iUnitPackML, iSysOff, iStartCmdExternal, iStopCmdExternal, iEventSuppress, iLampTest, iMainBoxNo, iPulseBlinkIndicator
+# out: ENO, oIndicator, oCmdStart, oCmdStop
+# in/out: ioEventHandling, ioHmi, ioConfig
+Cm\StartStopCtrl\sEvent\StopBox1=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl\sEvent\StopBox2=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl\sEvent\StopBox3=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl\sEvent\StopBox4=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl\sEvent\StopBox5=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl\sEvent\StopBox6=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl\sEvent\StopBox7=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl\sEvent\StopBox8=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl\sEvent\StopBox9=[noAck][prio=info][io=oCmdStop]
+Cm\StartStopCtrl\sEvent\StopBox10=[noAck][prio=info]
+Cm\StartStopCtrl\sEvent\StopBox11=[noAck][prio=info]
+Cm\StartStopCtrl\sEvent\StopBox12=[noAck][prio=info]
+Cm\StartStopCtrl\sEvent\StopBox13=[noAck][prio=info]
+Cm\StartStopCtrl\sEvent\StopBox14=[noAck][prio=info]
+Cm\StartStopCtrl\sEvent\StopBox15=[noAck][prio=info]
+Cm\StartStopCtrl\sEvent\StopBox16=[noAck][prio=info]
+
+# Code owner: Meyn_Standard
+# function (block): fbVlvCtrl
+# in: ENI, iEventSuppress, iConfig, iClosed, iOpen, iEnableMoveClose, iEnableMoveOpen
+# out: ENO, oClose, oOpen
+# in/out: ioEventHandling, ioHmi, ioFb
+Cm\VlvCtrl\sEvent\Closed=[io=iClosed][io=oClose]
+Cm\VlvCtrl\sEvent\Open=[io=ENO][io=ENI][io=iOpen][io=oOpen]
+Cm\VlvCtrl\sEvent\ClosedWrn=[io=iClosed][io=oClose]
+Cm\VlvCtrl\sEvent\OpenWrn=[io=iOpen][io=oOpen]
+Cm\VlvCtrl\sEvent\NotMoving=
+Cm\VlvCtrl\sEvent\ClosedOpen=[io=iClosed][io=iOpen][io=oClose][io=oOpen]
+Cm\VlvCtrl\sEvent\Interlocked=
+Cm\VlvCtrl\sEvent\WrongConfig=[io=iConfig]
+
+# Code owner: Meyn_Equipment
+# function (block): fbBlowVessel
+# in: ENI, iPresent, iSafetyOk, iEventSuppress, iConfig, iSetting
+# out: ENO, oEnableLocal, oInjVlv1Opn, oInjVlv2Opn, oInjVlv3Opn
+# in/out: ioEventHandling, ioHmi, ioFb, ioFillVlv, ioInfTrans
+Equipment\BlowVessel\sEvent\StopTimeOut=[noAck]
+
+# Code owner: Meyn_Equipment
+# function (block): fbCamHeight
+# in: ENI, iEventSuppress, iPresent, iSafetyOk, iConfig
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb, ioSetting, ioHeight, ioMtr
+Equipment\CamHeight\sEvent\StopTimeOut=[noAck]
+Equipment\CamHeight\sEvent\NotMoving=
+Equipment\CamHeight\sEvent\WrongDirection=
+Equipment\CamHeight\sEvent\OutPosRange=
+
+# Code owner: Meyn_Equipment
+# function (block): fbCarrierStopper
+# in: ENI, iEventSuppress, iPresent, iSafetyOk, iConfig, iTrigger, iTriggerTimeOut, iTopSensor1, iTopSensor2, iBottomSensor, iBreakOut
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb, ioCyl, iSetting
+Equipment\CarrierStopper\sEvent\StopTimeOut=[noAck][io=iTriggerTimeOut]
+Equipment\CarrierStopper\sEvent\Pos=
+Equipment\CarrierStopper\sEvent\TopSensor1=[io=iTopSensor1][io=iTopSensor2][io=iBottomSensor]
+Equipment\CarrierStopper\sEvent\TopSensor2=[io=iTopSensor1][io=iTopSensor2][io=iBottomSensor]
+Equipment\CarrierStopper\sEvent\BottomSensor=[io=iTopSensor1][io=iTopSensor2][io=iBottomSensor]
+Equipment\CarrierStopper\sEvent\BreakOut=[io=iBreakOut]
+Equipment\CarrierStopper\sEvent\TriggerTimeOut=[io=iTrigger][io=iTriggerTimeOut]
+
+# Code owner: Meyn_Equipment
+# function (block): fbCuttingModule
+# in: ENI, iTorqueSwitch, iShacklePos, iHghtAdjAlm, iPresent, iSelect, iBypass, iMotorPresent, iSafetyOkMtr, iSafetyOkCyl, iEventSuppress, iConfig, iSetting
+# out: ENO, oEnableLocal, oBypass
+# in/out: ioEventHandling, ioHmi, ioFb, ioMotor, ioCyl
+Equipment\CuttingModule\sEvent\StopTimeOut=[noAck]
+Equipment\CuttingModule\sEvent\Torque=[io=iTorqueSwitch]
+Equipment\CuttingModule\sEvent\Shackle=[io=iShacklePos]
+Equipment\CuttingModule\sEvent\HghtAdjFault=[io=iHghtAdjAlm]
+
+# Code owner: Meyn_Equipment
+# function (block): fbLineDrive
+# in: ENI, iEventSuppress, iConfig, iSetting, iPresent, iSafetyOk, iSpeedRefSource, iSpeedExternRef, iSpeedServiceRef, iQuickStopUpstream, iQuickStopDownstream1, iQuickStopDownstream2, iTriggerLocal, iTriggerUpstream, iTriggerDownstream, iFlag, iShackle1, iShackle2, iTrolleyLeft, iTrolleyRight, iStartingAllowed
+# out: ENO, oLubricationOn, oEnableLocal
+# in/out: ioEventHandling, ioHmi, ioFb, ioMotor, ioTensioner
+Equipment\LineDrive\sEvent\StopTimeOut=[noAck]
+Equipment\LineDrive\sEvent\LineTrigger=[io=iTriggerLocal][io=iTriggerUpstream]
+Equipment\LineDrive\sEvent\ShackleStop=[io=iShackle1][io=iShackle2]
+Equipment\LineDrive\sEvent\ShackleWarning=[io=iShackle1][io=iShackle2]
+Equipment\LineDrive\sEvent\ShackleSensor1Alm=[io=iShackle1][io=iShackle2]
+Equipment\LineDrive\sEvent\ShackleSensor2Alm=[io=iShackle1][io=iShackle2]
+Equipment\LineDrive\sEvent\ShackleSensor1Wrn=[io=iShackle1][io=iShackle2]
+Equipment\LineDrive\sEvent\ShackleSensor2Wrn=[io=iShackle1][io=iShackle2]
+Equipment\LineDrive\sEvent\TrolleyStop=[io=iTrolleyLeft][io=iTrolleyRight]
+Equipment\LineDrive\sEvent\TrolleyWarning=[io=iTrolleyLeft][io=iTrolleyRight]
+Equipment\LineDrive\sEvent\QuickStopUpstream=[io=iQuickStopUpstream]
+Equipment\LineDrive\sEvent\QuickStopDownstream1=[io=iQuickStopDownstream1][io=iQuickStopDownstream2][io=iTriggerDownstream]
+Equipment\LineDrive\sEvent\QuickStopDownstream2=[io=iQuickStopDownstream1][io=iQuickStopDownstream2][io=iTriggerDownstream]
+
+# Code owner: Meyn_Equipment
+# function (block): fbLineModule
+# in: ENI, iEventSuppress, iPresent, iSafetyOk, iTrqSw, iEstpCord, iInfSfDoor, iCurv1SfDoor, iCurv2SfDoor, iCurv3SfDoor, iCurv4SfDoor, iCurv5SfDoor, iCurv6SfDoor, iOutfSfDoor
+# out: ENO, oEnableLocal, oEnableProcessVlv, oEnableCleanVlv
+# in/out: ioEventHandling, ioHmi, ioFb
+Equipment\LineModule\sEvent\StopTimeOut=[noAck]
+Equipment\LineModule\sEvent\TrqSw=[io=iTrqSw]
+
+# Code owner: Meyn_Equipment
+# function (block): fbLineModuleVacuum
+# in: ENI, iSetting, iConfig, iEventSuppress, iPresent, iSafetyOk, iTrqSw, iEstpCord, iInfSfDoor, iCurv1SfDoor, iCurv2SfDoor, iCurv3SfDoor, iCurv4SfDoor, iCurv5SfDoor, iCurv6SfDoor, iOutfSfDoor, iVacPmpOk
+# out: ENO, oEnableLocal, oEnableProcessVlv, oEnableCleanVlv
+# in/out: ioEventHandling, ioHmi, ioFb, ioVacuum
+Equipment\LineModuleVacuum\sEvent\StopTimeOut=[noAck]
+Equipment\LineModuleVacuum\sEvent\TrqSw=[io=iTrqSw]
+Equipment\LineModuleVacuum\sEvent\VacuumLow=[io=ioVacuum]
+Equipment\LineModuleVacuum\sEvent\PumpNotOk=
+
+# Code owner: Meyn_Equipment
+# function (block): fbLineModuleWash
+# in: ENI, iPresent, iSelect, iEventSuppress, iConfig, iSetting, iSafetyOk, iTrqSw, iEstpCord, iInfSfDoor, iCurv1SfDoor, iCurv2SfDoor, iCurv3SfDoor, iCurv4SfDoor, iCurv5SfDoor, iCurv6SfDoor, iOutfSfDoor, iLvlLow, iLvlProd, iLvlHigh
+# out: ENO, oHppFillVlv, oEnableLocal, oEnableProcessVlv, oEnableCleanVlv
+# in/out: ioEventHandling, ioHmi, ioFb, ioHpp, ioBoostPmp
+Equipment\LineModuleWash\sEvent\StopTimeOut=[noAck]
+Equipment\LineModuleWash\sEvent\TrqSw=[io=iTrqSw]
+Equipment\LineModuleWash\sEvent\LvlLow=[io=iLvlLow]
+Equipment\LineModuleWash\sEvent\LvlHigh=[io=iLvlHigh]
+Equipment\LineModuleWash\sEvent\SenFaultHighProd=
+Equipment\LineModuleWash\sEvent\SenFaultHighLow=
+Equipment\LineModuleWash\sEvent\SenfaultProdLow=
+
+# Code owner: Meyn_Equipment
+# function (block): fbModuleCtrl
+# in: ENI, iPresent, iSafetyOkMtr, iSafetyOkCyl, iMotorPresent, iModuleSelect, iEventSuppress, iConfig, iSetting, iEnableInWork, iEnableOutWork
+# out: ENO, oEnableLocal, oEnableProcessVlv, oEnableCleanVlv
+# in/out: ioEventHandling, ioHmi, ioFb, ioMotor, ioModPos1, ioModPos2
+Equipment\ModuleControl\sEvent\StopTimeOut=[noAck]
+Equipment\ModuleControl\sEvent\NotInPosition=
+
+# Code owner: Meyn_Equipment
+# function (block): fbMtrModule
+# in: ENI, iPresent, iSelect, iEventSuppress, iConfig, iSetting, iSafetyOk, iStartEnableProduction, iStartEnableCleaning, iEnablePackMLStopDelay, iReverse
+# out: ENO, oEnableLocal, oEnableProcessVlv, oEnableCleanVlv
+# in/out: ioEventHandling, ioHmi, ioFb, ioMotor
+Equipment\MtrModule\sEvent\StopTimeOut=[noAck]
+
+# Code owner: Meyn_Equipment
+# function (block): fbOneLegDropStation
+# in: ENI, iTrigger, iLegSensor, iPresent, iSafetyOkCyl, iEventSuppress, iConfig, iSetting
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb, ioCyl
+Equipment\OneLegDropStation\sEvent\StopTimeOut=[noAck]
+
+# Code owner: Meyn_Equipment
+# function (block): fbPosAdj
+# in: ENI, iEventSuppress, iPresent, iSafetyOk, iConfig, iAtPosition, iAdjFault
+# out: ENO, oAdjLearn, oAdjReset, oAoPos
+# in/out: ioEventHandling, ioHmi, ioFb, ioSetting
+Equipment\PosAdj\sEvent\StopTimeOut=[noAck]
+Equipment\PosAdj\sEvent\AdjFault=[io=iAdjFault]
+Equipment\PosAdj\sEvent\PosErr=[io=oAoPos]
+
+# Code owner: Meyn_Equipment
+# function (block): fbShackleWasher
+# in: ENI, iPresent, iSafetyOk, iLineRunning, iLineTrigger, iBrushMtrPresent, iBoostPumpPresent, iModuleSelect, iConfig, iSetting, iEventSuppress
+# out: ENO, oEnableLocal, oEnableWatVlv, oHotWatUprVlv, oHotWatLwrVlv, oFoamVlv, oDesInfVlv, oDrainVlv
+# in/out: ioEventHandling, ioHmi, ioFb, ioBrushMtr, ioBoostPmp, ioModPos
+Equipment\ShackleWasher\sEvent\StopTimeOut=[noAck]
+
+# Code owner: Meyn_Equipment
+# function (block): fbSortStation
+# in: ENI, iTrigger, iProduct, iPresent, iSafetyOkCyl1, iSafetyOkCyl2, iSafetyOkCyl3, iEventSuppress, iConfig, iSetting
+# out: ENO
+# in/out: ioEventHandling, ioHmi, ioFb, ioCyl
+Equipment\SortStation\sEvent\StopTimeOut=[noAck]
+
+# Code owner: Meyn_Equipment
+# function (block): fbTransport
+# in: ENI, iEventSuppress, iConfig, iSetting, iLineTrigger, iSafetyOk
+# out: ENO, oEnableLocal
+# in/out: ioEventHandling, ioHmi, ioFb, ioMotor
+Equipment\Transport\sEvent\StopTimeOut=[noAck]
+Equipment\Transport\sEvent\LineTrigger=[io=iLineTrigger]

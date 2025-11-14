@@ -1,6 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
 @Deprecated('Use Variable')
 class VariableOld extends DataType {
@@ -24,22 +26,35 @@ class VariableOld extends DataType {
   }
 }
 
-class Variable {
+class Variable 
+//TODO extends Node<DataTypeBase> 
+{
+  @override
   final String name;
   final String comment;
   final NetworkPublish networkPublish;
   final BaseType baseType;
-  // optional IO address where variable is linked
-  final String? at;
+  final String? hardwareAddress;
   final VariableDirection? direction;
+  final bool isRetained;
+  final bool isConstant;
+  final String? initialValue;
+  // TODO
+  // @override
+  // late final List<DataTypeBase> children = baseType is DataTypeReference
+  //     ? (baseType as DataTypeReference).dataType.children
+  //     : [];
 
   Variable({
     required this.name,
     required this.comment,
     required this.networkPublish,
     required this.baseType,
-    this.at,
+    this.hardwareAddress,
     this.direction,
+    this.isRetained = false,
+    this.isConstant = false,
+    this.initialValue,
   });
 }
 

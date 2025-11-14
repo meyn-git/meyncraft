@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/event/default_event_attribute.infrastructure.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/event/additional_attribute.infrastructure.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
@@ -106,20 +106,32 @@ class EventNode {
         var eventValues = createEventValues(namePath, commentPath);
         var acknowledgeNeeded = AcknowledgeAttribute.acknowledge(eventValues);
         var priority = PriorityAttribute.priority(eventValues);
-        var io = IOAttribute.findIoVariables(
+        var ioAttributeVariables = IoAttribute.findIoAttributeVariables(
           sysmacProject,
           namePath,
           eventValues,
         );
-        var plcAddresses = findPlcAddresses(io);
-        var componentCodes = findComponentCodes(namePath, eventValues, io);
+        var variableNameWithComponentCodes = IoAttribute.findIoVariableNameWithComponentCodes(
+          ioAttributeVariables,
+        );
+        var variableNameWithHardwareAddress = IoAttribute.findIoVariableNameWithAddresses(
+          ioAttributeVariables,
+        );
+        var componentCodes = findComponentCodes(
+          namePath,
+          eventValues,
+          //TODO change to ioVariables
+          [],
+        );
         var message = createMessage(eventValues);
         var event = Event(
           number: counter.next(),
           namePath: namePath,
           group: createGroupName(namePath),
-          plcAddresses: plcAddresses,
+          ioVariables: ioAttributeVariables.values.toSet().toList(),
           componentCodes: componentCodes,
+          variableNameWithComponentCodes: variableNameWithComponentCodes,
+          variableNameWithHardwareAddress: variableNameWithHardwareAddress,
           message: message,
           priority: priority,
           acknowledgeRequired: acknowledgeNeeded,
@@ -145,9 +157,6 @@ class EventNode {
     }
     return events;
   }
-
-  List<String> findPlcAddresses(List<Variable> io) =>
-      io.map((v) => v.at).whereType<String>().toList();
 
   /// e.g. returns GizzardPump1 if namePath == EventGlobal.GizzardPump[1].MtrProt
   String createGroupName(String namePath) {
@@ -258,11 +267,13 @@ class EventNode {
   ];
 
   List createEventValues(String namePath, String commentPath) {
-    var defaultAttributes = createDefaultAttributes(this, oldStyle: true);
-    var result = commentPathParser.parse(commentPath);
-    var values = result is Failure
-        ? [...defaultAttributes]
-        : [...defaultAttributes, ...result.value];
+    var additionalAttributes = createAdditionalCommentAttributes(
+      this,
+      //oldAdditionalCommentAttributeMap,
+      newAdditionalCommentAttributeMap,
+    );
+    var result = commentPathParser.parse(additionalAttributes + commentPath);
+    var values = result is Failure ? [] : result.value;
     var eventValues = replaceEventValues(namePath, values);
     var unknownAttributes = eventValues.whereType<UnknownAttribute>();
     if (unknownAttributes.isNotEmpty) {
