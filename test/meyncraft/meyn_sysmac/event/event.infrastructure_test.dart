@@ -14,7 +14,7 @@ Future<void> main() async {
   var sysmacProject = await MeynSysmacProject.create(file);
 
   group('class: EventService', () {
-    test('variables isNot Empty', () {
+    test('events isNot Empty', () {
       var events = sysmacProject.events;
       events.should.not.beEmpty();
     });

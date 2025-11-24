@@ -2,8 +2,15 @@ import 'package:collection/collection.dart';
 import 'package:fluent_regex/fluent_regex.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
 class BaseTypeFactory {
+  BaseTypeFactory._internal();
+
+  static final BaseTypeFactory _singleton = BaseTypeFactory._internal();
+
+  factory BaseTypeFactory() => _singleton;
+
   final List<BaseTypeSubFactory> baseTypeSubFactories = [
     ArrayFactory(),
     StructFactory(),
@@ -22,14 +29,17 @@ class BaseTypeFactory {
 
   BaseType createFromExpressionIncludingCustomTypes(
     String typeExpression,
-    DataTypeTree dataTypeTree,
+    DataTypes dataTypes,
   ) {
     var baseType = createFromExpression(typeExpression);
     if (baseType is UnknownBaseType) {
-      var dataType = dataTypeTree.findNamePathString(typeExpression);
-      if (dataType != null) {
+      //var dataType = dataTypes.findNamePathString(typeExpression);
+      var dataTypePath = dataTypes.findFirstNodePath(
+        namePathFinder(typeExpression.split(r'\'), caseSensitive: false),
+      );
+      if (dataTypePath.isNotEmpty) {
         return DataTypeReference(
-          dataType: dataType as DataType,
+          dataType: dataTypePath.last as DataType,
           arrayRanges: baseType.arrayRanges,
           namePathWithBackSlashes: typeExpression,
         );
@@ -251,14 +261,14 @@ class ArrayFactory extends BaseTypeSubFactory {
 
 /// Replaces all the [UnknownBaseType]s with [DataTypeReference]s
 /// when the path can be found
-void replaceDataTypeReferencesWherePossible(DataTypeTree dataTypeTree) {
-  for (var child in dataTypeTree.descendants.whereType<DataType>()) {
+void replaceDataTypeReferencesWherePossible(DataTypes dataTypes) {
+  for (var child in dataTypes.descendants.whereType<DataType>()) {
     var baseType = child.baseType;
     if (baseType is UnknownBaseType) {
       var dataTypeReference = _baseTypeFactory
           .createFromExpressionIncludingCustomTypes(
             baseType.expression,
-            dataTypeTree,
+            dataTypes,
           );
       dataTypeReference.arrayRanges.clear();
       dataTypeReference.arrayRanges.addAll(baseType.arrayRanges);

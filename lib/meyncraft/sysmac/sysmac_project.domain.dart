@@ -18,11 +18,11 @@ import 'internal/data_type/data_type.domain.dart';
 class SysmacProject {
   late final SysmacProjectArchive archive;
 
-  late final DataTypeTree dataTypeTree = createDataTypeTree(archive);
+  late final DataTypes dataTypes = createDataTypes(archive);
 
   late final List<Variable> globalVariables = createGlobalVariables(
     archive,
-    dataTypeTree,
+    dataTypes,
   );
 
   late final List<Device> devices = createDevices(this);

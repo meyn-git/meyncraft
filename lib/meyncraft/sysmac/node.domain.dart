@@ -2,11 +2,9 @@ import 'package:collection/collection.dart';
 
 /// A named [Node] for building tree models.
 abstract class Node<T extends Node<T>> {
-  final String name;
-
-  Node(this.name);
-
-  final List<T> children = [];
+  String get name;
+  String get comment;
+  List<T> get children;
 
   List<T> get descendants {
     List<T> all = [];
@@ -15,64 +13,6 @@ abstract class Node<T extends Node<T>> {
       all.addAll(child.descendants);
     }
     return all;
-  }
-
-  /// Tries to find a child using a list of [namesToFind]
-  /// Returns this when [namesToFind] is empty.
-  /// Returns null when a name can't be found.
-  /// Note that the search is case insensitive because
-  /// Sysmac does not seem to ignore casing for [DataType] names.
-  Node? findNamePath(List<String> namesToFind) {
-    if (namesToFind.isEmpty) {
-      return this;
-    }
-    var childNameToFind = namesToFind.first.toLowerCase();
-    Node? foundChild = children.firstWhereOrNull(
-      (child) => child.name.toLowerCase() == childNameToFind,
-    );
-    if (foundChild == null) {
-      // not found
-      return null;
-    }
-    if (namesToFind.length == 1) {
-      // found the full path
-      return foundChild;
-    }
-    //try to find recursively
-    var remainingNames = namesToFind.sublist(1);
-    return foundChild.findNamePath(remainingNames);
-  }
-
-  Node? findNamePathString(String pathToFind) =>
-      findNamePath(pathToFind.split('\\'));
-
-  Node? findFirst(bool Function(Node node) predicate) {
-    if (predicate(this)) {
-      return this;
-    }
-    for (var child in children) {
-      //recursive call
-      var found = child.findFirst(predicate);
-      if (found != null) {
-        return found;
-      }
-    }
-    return null;
-  }
-
-  List<Node> findPath(Node nodeToFind, [List<Node> currentPath = const []]) {
-    currentPath = [...currentPath, this];
-    if (nodeToFind.toString() == toString()) {
-      return currentPath;
-    }
-    for (var child in children) {
-      //recursive call
-      var result = child.findPath(nodeToFind, currentPath);
-      if (result.isNotEmpty) {
-        return result;
-      }
-    }
-    return [];
   }
 
   @override
@@ -97,12 +37,90 @@ abstract class Node<T extends Node<T>> {
     }
     return string;
   }
+
+  NodePath findFirstNodePath(NodePathFinder finder) => finder(this);
+
+  List<NodePath> findAllNodePaths(NodePathsFinder finder) => finder(this);
 }
 
-class LeafNode<T extends Node<T>> extends Node<T> {
-  LeafNode(super.name);
+class NodeList<T extends Node<T>> extends DelegatingList<T> {
+  NodeList(): super(<T>[]);
 
-  /// A [LeafNode] has no children
-  @override
-  List<T> get children => [];
+  NodePath findFirstNodePath(NodePathFinder finder) {
+    for (var child in this) {
+      var result = finder(child);
+      if (result.isNotEmpty) {
+        return result;
+      }
+    }
+    return const [];
+  }
+
+  List<NodePath> findAllNodePaths(NodePathsFinder finder) {
+    var nodePaths = <NodePath>[];
+    for (var child in this) {
+      var foundNodePaths = finder(child);
+      if (foundNodePaths.isNotEmpty) {
+        nodePaths.addAll(foundNodePaths);
+      }
+    }
+    return nodePaths;
+  }
 }
+
+typedef NodePath = List<Node>;
+
+typedef NodePathFinder = NodePath Function(Node node);
+
+typedef NodePathsFinder = List<NodePath> Function(Node node);
+
+/// returns the first [NodePath] for the first matching name path
+NodePathFinder namePathFinder(
+  Iterable<String> namePath, {
+  bool caseSensitive = true,
+  NodePath precedingPath = const [],
+}) => (Node node) {
+  var currentPath = [...precedingPath, node];
+  if (namePath.isEmpty) {
+    return [];
+  }
+  if (!equalNames(namePath.first, node.name, caseSensitive)) {
+    return [];
+  }
+  if (namePath.length == 1) {
+    return currentPath;
+  }
+  var finder = namePathFinder(namePath.skip(1), precedingPath: currentPath);
+  for (var child in node.children) {
+    var found = finder(child as Node);
+    if (found.isNotEmpty) {
+      return found;
+    }
+  }
+  return [];
+};
+
+
+/// returns the first [NodePath] for the first matching name path
+NodePathsFinder leafPathsFinder( {
+  
+  NodePath precedingPath = const [],
+}) => (Node node) {
+  var currentPath = [...precedingPath, node];
+  if (node.children.isEmpty) {
+    return [currentPath];
+  }
+
+  var nodePaths = <NodePath>[];
+  var finder = leafPathsFinder(precedingPath: currentPath);
+  for (var child in node.children) {
+    var foundNodePaths = finder(child as Node);
+    if (foundNodePaths.isNotEmpty) {
+      nodePaths.addAll(foundNodePaths);
+    }
+  }
+  return nodePaths;
+};
+
+bool equalNames(String name1, String name2, bool caseSensitive) =>
+    caseSensitive ? name1 == name2 : name1.toLowerCase() == name2.toLowerCase();

@@ -1,16 +1,33 @@
 import '../base_type/base_type.domain.dart';
 import '../../node.domain.dart';
 
-///Root [Node] of the DataType tree containing [DataTypeBase]s
-class DataTypeTree extends DataTypeBase {
-  DataTypeTree() : super('$DataTypeTree');
+// ///Root [Node] of the DataType tree containing [DataTypeBase]s
+// class dataTypes extends DataTypeBase {
+//   dataTypes() : super('$dataTypes');
+
+//   @override
+//   List<DataTypeBase> children = [];
+// }
+
+class DataTypes extends NodeList<DataTypeBase> {
+  List<DataTypeBase> get descendants {
+    List<DataTypeBase> all = [];
+    for (var child in this) {
+      all.add(child);
+      all.addAll(child.descendants);
+    }
+    return all;
+  }
 }
 
 /// Abstract base type of [DataType]s and [NameSpace]s
 abstract class DataTypeBase extends Node<DataTypeBase> {
+  @override
+  final String name;
+  @override
   final String comment;
 
-  DataTypeBase(super.name, [this.comment = '']);
+  DataTypeBase(this.name, [this.comment = '']);
 
   List<DataTypeBasePaths> findPaths(
     DataTypeBaseFilter includeFilter, {
@@ -79,12 +96,17 @@ abstract class DataTypeBase extends Node<DataTypeBase> {
 
 class NameSpace extends DataTypeBase {
   NameSpace(super.name, [super.comment]);
+
+  @override
+  NodeList<DataTypeBase> children = NodeList();
 }
 
 /// A [DataType] is a custom data type that is made of [BaseType]s
 class DataType extends DataTypeBase {
   // DataType? parent;
   BaseType baseType;
+
+  final List<DataTypeBase> _children = [];
 
   DataType({required String name, required this.baseType, String comment = ''})
     : super(name, comment);
@@ -94,7 +116,7 @@ class DataType extends DataTypeBase {
     if (baseType is DataTypeReference) {
       return (baseType as DataTypeReference).dataType.children;
     } else {
-      return super.children;
+      return _children;
     }
   }
 

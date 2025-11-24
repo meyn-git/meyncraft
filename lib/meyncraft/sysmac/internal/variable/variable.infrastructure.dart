@@ -17,7 +17,7 @@ const String networkPublicationAttribute = 'NetworkPublication';
 
 List<Variable> createGlobalVariables(
   SysmacProjectArchive sysmacProjectArchive,
-  DataTypeTree dataTypeTree,
+  DataTypes dataTypes,
 ) {
   var globalVariableElement = sysmacProjectArchive
       .projectIndexXml
@@ -29,7 +29,7 @@ List<Variable> createGlobalVariables(
   var globalVariables =
       createVariableGroups(
         sysmacProjectArchive,
-        dataTypeTree,
+        dataTypes,
         id,
       )[VariableGroup.global] ??
       [];
@@ -44,7 +44,7 @@ bool isGlobalVariableElement(XmlElement element) =>
 
 Map<VariableGroup, List<Variable>> createVariableGroups(
   SysmacProjectArchive sysmacProjectArchive,
-  DataTypeTree dataTypeTree,
+  DataTypes dataTypes,
   String id,
 ) {
   var projectIndexXml = sysmacProjectArchive.projectIndexXml;
@@ -57,7 +57,7 @@ Map<VariableGroup, List<Variable>> createVariableGroups(
   var groups = parseSLWD(variableData);
   var variableGroups = {
     for (var group in groups)
-      toVariableGroup(group): toVariables(group, dataTypeTree),
+      toVariableGroup(group): toVariables(group, dataTypes),
   };
   return variableGroups;
 }
@@ -77,15 +77,11 @@ VariableDirection? toDirection(String? name) => switch (name) {
   'VAR_IN_OUT' => VariableDirection.inOut,
   _ => null,
 };
-List<Variable> toVariables(Group group, DataTypeTree dataTypeTree) => group
-    .entities
-    .map((attributes) => createVariable(attributes, dataTypeTree))
+List<Variable> toVariables(Group group, DataTypes dataTypes) => group.entities
+    .map((attributes) => createVariable(attributes, dataTypes))
     .toList();
 
-Variable createVariable(
-  Map<String, String> attributes,
-  DataTypeTree dataTypeTree,
-) {
+Variable createVariable(Map<String, String> attributes, DataTypes dataTypes) {
   var name = attributes['N']!;
   var comment = attributes['Com'] ?? '';
   var direction = toDirection(attributes['G']);
@@ -93,9 +89,11 @@ Variable createVariable(
   var isConstant = attributes['Const'] == '1';
   var initialValue = attributes['IV'];
   var typeExpression = attributes['D']!;
-  var baseType = _baseTypeFactory.createFromExpressionIncludingCustomTypes(
+
+
+  var baseType =  BaseTypeFactory().createFromExpressionIncludingCustomTypes(
     typeExpression,
-    dataTypeTree,
+    dataTypes,
   );
   var hardwareAddress = attributes['AT'];
   var networkPublish = NetworkPublish.ofValue(attributes['NTP']);
@@ -125,8 +123,6 @@ Variable createVariable(
     initialValue: initialValue,
   );
 }
-
-final _baseTypeFactory = BaseTypeFactory();
 
 class Group {
   final String name;

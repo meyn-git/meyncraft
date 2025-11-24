@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 
@@ -53,10 +54,10 @@ void main() {
       late File file = SysmacProjectTestResource().file;
       sysmacProjectFile = await SysmacProject.create(file);
     });
-    group('property: dataTypeTree', () {
-      test('finds populated dataTypeTree', () {
-        var dataTypeTree = sysmacProjectFile.dataTypeTree;
-        expect(dataTypeTree.children.length, 1074);
+    group('property: dataTypes', () {
+      test('finds populated dataTypes', () {
+        var dataTypePaths = sysmacProjectFile.dataTypes.findAllNodePaths(leafPathsFinder());
+        expect(dataTypePaths.length, 123566);
       });
     });
 

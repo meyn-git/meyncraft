@@ -1,7 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 import 'package:shouldly/shouldly.dart';
+
+import '../../../../test_resource.dart';
 
 void main() {
   group('class: $BaseTypeFactory', () {
@@ -646,6 +651,35 @@ void main() {
         result.arrayRanges.length.should.be(1);
         result.arrayRanges[0].min.should.be(1);
         result.arrayRanges[0].max.should.be(6);
+      });
+    });
+    group('Custom types', () {
+      test('createFromExpressionIncludingCustomTypes', () async {
+        var sysmacProjectArchive = await SysmacProjectArchive.create(
+          SysmacProjectTestResource().file,
+        );
+        var dataTypes = createDataTypes(sysmacProjectArchive);
+        var sEventType = baseTypeFactory
+            .createFromExpressionIncludingCustomTypes('sEvent', dataTypes);
+        sEventType.should.beOfType<DataTypeReference>();
+      });
+
+      test('createFromExpressionIncludingCustomTypes', () async {
+        var sysmacProjectArchive = await SysmacProjectArchive.create(
+          SysmacProjectTestResource().file,
+        );
+        var dataTypes = createDataTypes(sysmacProjectArchive);
+        var found = <String>[];
+        for (var dataType in dataTypes) {
+          var paths = dataType.findAllNodePaths(leafPathsFinder());
+          for (var path in paths) {
+            var pathString = path.map((n) => n.name).join('.');
+            if (pathString.contains('sEvent.Common')) {
+              found.add(pathString);
+            }
+          }
+        }
+        found.length.should.be(2);
       });
     });
   });

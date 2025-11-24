@@ -1,36 +1,14 @@
-import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
-@Deprecated('Use Variable')
-class VariableOld extends DataType {
-  VariableOld({
-    required super.name,
-    required super.baseType,
-    required super.comment,
-  });
 
-  @override
-  String toString() {
-    String string =
-        '$VariableOld{name: $name, comment: $comment, dataType: $baseType}';
-    for (var child in children) {
-      var lines = child.toString().split('\n');
-      for (var line in lines) {
-        string += "\n  $line";
-      }
-    }
-    return string;
-  }
-}
-
-class Variable 
-//TODO extends Node<DataTypeBase> 
+class Variable extends Node<DataTypeBase> 
 {
   @override
   final String name;
+  @override
   final String comment;
   final NetworkPublish networkPublish;
   final BaseType baseType;
@@ -39,11 +17,11 @@ class Variable
   final bool isRetained;
   final bool isConstant;
   final String? initialValue;
-  // TODO
-  // @override
-  // late final List<DataTypeBase> children = baseType is DataTypeReference
-  //     ? (baseType as DataTypeReference).dataType.children
-  //     : [];
+  
+  @override
+  late final List<DataTypeBase> children = baseType is DataTypeReference
+      ? (baseType as DataTypeReference).dataType.children
+      : [];
 
   Variable({
     required this.name,
@@ -69,7 +47,9 @@ enum VariableGroup {
 
 enum VariableDirection { in$, out, inOut }
 
+
 /// contains information of a member somewhere in a [variable]
+/// TODO can we do without?
 class VariableMember {
   final Variable variable;
   final DataTypeBase dataTypeBase;

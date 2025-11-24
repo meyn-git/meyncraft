@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 
@@ -84,7 +85,7 @@ Future<void> main() async {
           expect(dataTypes[0].comment, 'Event');
         });
         test('baseType==UnknownBaseType', () {
-          expect(dataTypes[0].baseType is Struct, true);
+          expect((dataTypes[0] as DataType).baseType is Struct, true);
         });
         test('children.length==2', () {
           expect(dataTypes[0].children, hasLength(2));
@@ -93,14 +94,13 @@ Future<void> main() async {
     });
   });
 
-  File file = SysmacProjectTestResource().file;
-  var sysmacProject = await SysmacProject.create(file);
-  var dataTypeTree = sysmacProject.dataTypeTree;
-
-  group('class: DataTypeTree', () {
+  group('class: dataTypes', () {
     group('constructor', () {
-      test('children isNot Empty', () {
-        expect(dataTypeTree.children, isNotEmpty);
+      test('children isNot Empty', () async {
+        File file = SysmacProjectTestResource().file;
+        var sysmacProject = await SysmacProject.create(file);
+        var dataTypes = sysmacProject.dataTypes;
+        expect(dataTypes, isNotEmpty);
       });
     });
   });

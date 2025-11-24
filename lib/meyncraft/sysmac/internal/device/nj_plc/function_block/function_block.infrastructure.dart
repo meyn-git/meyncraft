@@ -81,7 +81,7 @@ StructuredTextFunctionBlock createStructuredTextFunctionBlock(
 }) {
   var variableGroups = createVariableGroups(
     sysmacProject.archive,
-    sysmacProject.dataTypeTree,
+    sysmacProject.dataTypes,
     variablesElement.getAttribute(idAttribute)!,
   );
   var internalVariables = variableGroups[VariableGroup.internal] ?? [];
@@ -108,7 +108,7 @@ LadderFunctionBlock createLadderFunctionBlock(
 }) {
   var variableGroups = createVariableGroups(
     sysmacProject.archive,
-    sysmacProject.dataTypeTree,
+    sysmacProject.dataTypes,
     variablesElement.getAttribute(idAttribute)!,
   );
   var internalVariables = variableGroups[VariableGroup.internal] ?? [];

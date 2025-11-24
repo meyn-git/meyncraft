@@ -81,7 +81,7 @@ StructuredTextFunction createStructuredTextFunction(
 }) {
   var variableGroups = createVariableGroups(
     sysmacProject.archive,
-    sysmacProject.dataTypeTree,
+    sysmacProject.dataTypes,
     variablesElement.getAttribute(idAttribute)!,
   );
   var internalVariables = variableGroups[VariableGroup.internal] ?? [];
@@ -108,7 +108,7 @@ LadderFunction createLadderFunction(
 }) {
   var variableGroups = createVariableGroups(
     sysmacProject.archive,
-    sysmacProject.dataTypeTree,
+    sysmacProject.dataTypes,
     variablesElement.getAttribute(idAttribute)!,
   );
   var internalVariables = variableGroups[VariableGroup.internal] ?? [];

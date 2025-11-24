@@ -1,6 +1,7 @@
 import 'package:archive/archive.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 import 'package:xml/xml.dart';
 
 import '../base_type/base_type.infrastructure.dart';
@@ -13,59 +14,149 @@ const String enumValueAttribute = 'EnumValue';
 
 const String nameSpacePathSeparator = '\\';
 
-DataTypeTree createDataTypeTree(SysmacProjectArchive sysmacProjectArchive) {
-  DataTypeTree dataTypeTree = DataTypeTree();
-  _addAndCreateChildren(sysmacProjectArchive, dataTypeTree);
-  replaceDataTypeReferencesWherePossible(dataTypeTree);
-  return dataTypeTree;
+DataTypes createDataTypes(SysmacProjectArchive sysmacProjectArchive) {
+  DataTypes dataTypes = DataTypes();
+  _addAndCreateChildren(sysmacProjectArchive, dataTypes);
+  replaceDataTypeReferencesWherePossible(dataTypes);
+  return dataTypes;
 }
 
 void _addAndCreateChildren(
   SysmacProjectArchive sysmacProjectArchive,
-  DataTypeTree dataTypeTree,
+  DataTypes dataTypes,
 ) {
   var dataTypeArchiveXmlFiles = sysmacProjectArchive.projectIndexXml
       .dataTypeArchiveXmlFiles();
 
   for (var dataTypeArchiveXmlFile in dataTypeArchiveXmlFiles) {
-    String nameSpacePath = dataTypeArchiveXmlFile.nameSpacePath;
-    DataTypeBase nameSpace = _findOrCreateNameSpacePath(
-      dataTypeTree,
-      nameSpacePath,
-    );
+    var newDataTypes = dataTypeArchiveXmlFile.toDataTypes();
 
-    var dataTypes = dataTypeArchiveXmlFile.toDataTypes();
-    nameSpace.children.addAll(dataTypes);
+    if (dataTypeArchiveXmlFile.nameSpacePath.isEmpty) {
+      _addAllNoneExisting(dataTypes, newDataTypes);
+    } else {
+      var nameSpacePath = dataTypeArchiveXmlFile.nameSpacePath.split(r'\');
+      DataTypeBase nameSpace = _findOrCreateNameSpacePath(
+        dataTypes,
+        nameSpacePath,
+      );
+      _addAllNoneExisting(nameSpace.children, newDataTypes);
+    }
+  }
+}
+
+void _addAllNoneExisting(List<DataTypeBase> children, DataTypes newDataTypes) {
+  for (var newDataType in newDataTypes) {
+    var exists = children.any(
+      (dt) => dt.name.toLowerCase() == newDataType.name.toLowerCase(),
+    );
+    if (!exists) {
+      children.add(newDataType);
+    } 
   }
 }
 
 DataTypeBase _findOrCreateNameSpacePath(
-  DataTypeBase nameSpace,
-  String nameSpacePathToFind,
+  DataTypes dataTypes,
+  List<String> namePath,
 ) {
-  if (nameSpacePathToFind.isEmpty) {
-    // found
-    return nameSpace;
-  }
+  for (var dataType in dataTypes) {
+    var foundPath = dataType.findFirstNodePath(
+      findPartialOrFullNamePath(namePath),
+    );
 
-  var namesToFind = nameSpacePathToFind.split(nameSpacePathSeparator);
-  String nameToFind = namesToFind.first;
+    if (foundPath.isNotEmpty) {
+      if (foundPath.length == namePath.length) {
+        // found full path: return it
+        return dataType;
+      }
 
-  for (DataTypeBase child in nameSpace.children) {
-    if (child.name == nameToFind) {
-      namesToFind.removeAt(0);
-      String remainingPathToFind = namesToFind.join(nameSpacePathSeparator);
-      return _findOrCreateNameSpacePath(child, remainingPathToFind);
+      /// complete path
+      var remainingNamePath = namePath.skip(foundPath.length);
+      var existingNamePath = foundPath.last as DataTypeBase;
+      var lastNameSpace = appendToNameSpaceAndReturnLast(
+        existingNamePath,
+        remainingNamePath,
+      );
+      return lastNameSpace;
     }
   }
-  //not found: create nameSpace tree
-  for (String nameToCreate in namesToFind) {
-    var newNameSpaceChild = NameSpace(nameToCreate);
-    nameSpace.children.add(newNameSpaceChild);
-    nameSpace = newNameSpaceChild;
-  }
-  return nameSpace;
+
+  /// add new name space path to the root
+  var newNameSpace = NameSpace(namePath.first);
+  dataTypes.add(newNameSpace);
+  var lastNameSpace = appendToNameSpaceAndReturnLast(
+    newNameSpace,
+    namePath.skip(1),
+  );
+  return lastNameSpace;
 }
+
+/// returns the first [NodePath] for the first matching (partial) name path
+NodePathFinder findPartialOrFullNamePath(
+  Iterable<String> namePath, {
+  bool caseSensitive = true,
+  NodePath precedingPath = const [],
+}) => (Node node) {
+  var currentPath = [...precedingPath, node];
+  if (namePath.isEmpty) {
+    return [];
+  }
+  if (!equalNames(namePath.first, node.name, caseSensitive)) {
+    return precedingPath;
+  }
+  if (namePath.length == 1) {
+    return currentPath;
+  }
+  var finder = namePathFinder(namePath.skip(1), precedingPath: currentPath);
+  for (var child in node.children) {
+    var found = finder(child as Node);
+    if (found.isNotEmpty) {
+      return found;
+    }
+  }
+  return [];
+};
+
+/// returns the last node of a created name space path
+DataTypeBase appendToNameSpaceAndReturnLast(
+  DataTypeBase last,
+  Iterable<String> namePath,
+) {
+  for (var name in namePath) {
+    var nameSpace = NameSpace(name);
+    last.children.add(nameSpace);
+    last = nameSpace;
+  }
+  return last;
+}
+
+// DataTypeBase _findOrCreateNam11eSpacePath(
+//   DataTypes nameSpace,
+//   String nameSpacePathToFind,
+// ) {
+//   if (nameSpacePathToFind.isEmpty) {
+//     // found
+//     return nameSpace;
+//   }
+
+//   var namesToFind = nameSpacePathToFind.split(nameSpacePathSeparator);
+//   String nameToFind = namesToFind.first;
+
+//   for (DataTypeBase child in nameSpace) {
+//     if (child.name == nameToFind) {
+//       namesToFind.removeAt(0);
+//       String remainingPathToFind = namesToFind.join(nameSpacePathSeparator);
+//       return _findOrCreateNameSpacePath(child, remainingPathToFind);
+//     }
+//   }
+//   //not found: create nameSpace tree
+//   for (String nameToCreate in namesToFind) {
+//     var newNameSpaceChild = NameSpace(nameToCreate);
+//     nameSpace.add(newNameSpaceChild);
+//     nameSpace = newNameSpaceChild;
+//   }
+//   return nameSpace;
+// }
 
 /// Represents an [ArchiveXml] with information of some [DataType]s within a given [nameSpacePath]
 class DataTypeArchiveXmlFile extends ArchiveXml {
@@ -81,16 +172,17 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     required String xml,
   }) : super.fromXml(xml);
 
-  List<DataType> toDataTypes() {
+  DataTypes toDataTypes() {
     var dataElement = xmlDocument.firstElementChild!;
     var dataTypeRootElement = dataElement.firstElementChild!;
-    return dataTypeRootElement.children
-        .where((node) => isDataTypeElement(node))
-        .map((node) => _createDataType(node))
-        .toList();
+    var dataTypes = DataTypes();
+    dataTypes.addAll(
+      dataTypeRootElement.children
+          .where((node) => isDataTypeElement(node))
+          .map((node) => _createDataType(node)),
+    );
+    return dataTypes;
   }
-
-  final _baseTypeFactory = BaseTypeFactory();
 
   DataType _createDataType(XmlNode dataTypeElement) {
     String name = dataTypeElement.getAttribute(nameAttribute)!;
@@ -99,7 +191,7 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     )!;
     String? enumValue = dataTypeElement.getAttribute(enumValueAttribute);
     BaseType baseType = enumValue == null || enumValue.isEmpty
-        ? _baseTypeFactory.createFromExpression(baseTypeExpression)
+        ? BaseTypeFactory().createFromExpression(baseTypeExpression)
         : EnumChild(int.parse(enumValue));
     String comment = dataTypeElement.getAttribute(commentAttribute)!;
     var dataType = DataType(name: name, baseType: baseType, comment: comment);

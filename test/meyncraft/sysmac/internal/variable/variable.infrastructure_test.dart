@@ -1,6 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.infrastructure.dart';
@@ -12,22 +14,40 @@ import '../../../../test_resource.dart';
 void main() {
   GetIt.I.registerSingleton<Logger>(Logger());
 
-  group('createDataTypeTree function', () {
-    late final SysmacProjectArchive sysmacProjectArchive;
-    late final DataTypeTree dataTypeTree;
+  group('createdataTypes function', () {
+    late  SysmacProjectArchive sysmacProjectArchive;
+    late DataTypes dataTypes;
     setUp(() async {
       sysmacProjectArchive = await SysmacProjectArchive.create(
         SysmacProjectTestResource().file,
       );
-      dataTypeTree = createDataTypeTree(sysmacProjectArchive);
+      dataTypes = createDataTypes(sysmacProjectArchive);
     });
 
-    test('createGlobalVariables(0 should return correct result)', () {
+    test('createGlobalVariables should return correct result)', () {
       var globalVariables = createGlobalVariables(
         sysmacProjectArchive,
-        dataTypeTree,
+        dataTypes,
       );
       globalVariables.length.should.be(1729);
     });
+
+    test(
+      'createGlobalVariables should contain a GlobalEvents variable of the correct type)',
+      () {
+        var globalVariables = createGlobalVariables(
+          sysmacProjectArchive,
+          dataTypes,
+        );
+        var globalEvent = globalVariables.firstWhereOrNull(
+          (v) => v.name == 'EventGlobal',
+        );
+        globalEvent.should.not.beNull();
+        globalEvent!.baseType.should.beOfType<DataTypeReference>();
+        (globalEvent.baseType as DataTypeReference).dataType.name.should.be(
+          'sEvent',
+        );
+      },
+    );
   });
 }

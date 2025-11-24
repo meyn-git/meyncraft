@@ -77,7 +77,7 @@ LadderProgram createLadderProgram(
   );
   var variableGroups = createVariableGroups(
     sysmacProject.archive,
-    sysmacProject.dataTypeTree,
+    sysmacProject.dataTypes,
     variablesElement.getAttribute(idAttribute)!,
   );
   var internalVariables = variableGroups[VariableGroup.internal] ?? [];
@@ -113,7 +113,7 @@ StructuredTextProgram? createStructuredTextProgram(
   );
   var variableGroups = createVariableGroups(
     sysmacProject.archive,
-    sysmacProject.dataTypeTree,
+    sysmacProject.dataTypes,
     variablesElement.getAttribute(idAttribute)!,
   );
   var internalVariables = variableGroups[VariableGroup.internal] ?? [];
