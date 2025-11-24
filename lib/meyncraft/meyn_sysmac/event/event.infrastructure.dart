@@ -111,12 +111,12 @@ class EventNode {
           namePath,
           eventValues,
         );
-        var variableNameWithComponentCodes = IoAttribute.findIoVariableNameWithComponentCodes(
-          ioAttributeVariables,
-        );
-        var variableNameWithHardwareAddress = IoAttribute.findIoVariableNameWithAddresses(
-          ioAttributeVariables,
-        );
+        var variableNameWithComponentCodes =
+            IoAttribute.findIoVariableNameWithComponentCodes(
+              ioAttributeVariables,
+            );
+        var variableNameWithHardwareAddress =
+            IoAttribute.findIoVariableNameWithAddresses(ioAttributeVariables);
         var componentCodes = findComponentCodes(
           namePath,
           eventValues,

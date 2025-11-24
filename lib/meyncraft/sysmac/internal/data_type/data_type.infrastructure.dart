@@ -51,7 +51,7 @@ void _addAllNoneExisting(List<DataTypeBase> children, DataTypes newDataTypes) {
     );
     if (!exists) {
       children.add(newDataType);
-    } 
+    }
   }
 }
 

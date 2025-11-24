@@ -88,15 +88,13 @@ Variable createVariable(Map<String, String> attributes, DataTypes dataTypes) {
   var isRetained = attributes['R'] == '1';
   var isConstant = attributes['Const'] == '1';
   var initialValue = attributes['IV'];
+  var hardwareAddress = attributes['AT'];
+  var networkPublish = NetworkPublish.ofValue(attributes['NTP']);
   var typeExpression = attributes['D']!;
-
-
-  var baseType =  BaseTypeFactory().createFromExpressionIncludingCustomTypes(
+  var baseType = BaseTypeFactory().createFromExpressionIncludingCustomTypes(
     typeExpression,
     dataTypes,
   );
-  var hardwareAddress = attributes['AT'];
-  var networkPublish = NetworkPublish.ofValue(attributes['NTP']);
 
   // var unknownAttributes = {...attributes};
   // unknownAttributes.remove('N');

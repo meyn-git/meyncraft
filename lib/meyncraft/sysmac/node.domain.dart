@@ -44,7 +44,7 @@ abstract class Node<T extends Node<T>> {
 }
 
 class NodeList<T extends Node<T>> extends DelegatingList<T> {
-  NodeList(): super(<T>[]);
+  NodeList() : super(<T>[]);
 
   NodePath findFirstNodePath(NodePathFinder finder) {
     for (var child in this) {
@@ -100,27 +100,24 @@ NodePathFinder namePathFinder(
   return [];
 };
 
-
 /// returns the first [NodePath] for the first matching name path
-NodePathsFinder leafPathsFinder( {
-  
-  NodePath precedingPath = const [],
-}) => (Node node) {
-  var currentPath = [...precedingPath, node];
-  if (node.children.isEmpty) {
-    return [currentPath];
-  }
+NodePathsFinder leafPathsFinder({NodePath precedingPath = const []}) =>
+    (Node node) {
+      var currentPath = [...precedingPath, node];
+      if (node.children.isEmpty) {
+        return [currentPath];
+      }
 
-  var nodePaths = <NodePath>[];
-  var finder = leafPathsFinder(precedingPath: currentPath);
-  for (var child in node.children) {
-    var foundNodePaths = finder(child as Node);
-    if (foundNodePaths.isNotEmpty) {
-      nodePaths.addAll(foundNodePaths);
-    }
-  }
-  return nodePaths;
-};
+      var nodePaths = <NodePath>[];
+      var finder = leafPathsFinder(precedingPath: currentPath);
+      for (var child in node.children) {
+        var foundNodePaths = finder(child as Node);
+        if (foundNodePaths.isNotEmpty) {
+          nodePaths.addAll(foundNodePaths);
+        }
+      }
+      return nodePaths;
+    };
 
 bool equalNames(String name1, String name2, bool caseSensitive) =>
     caseSensitive ? name1 == name2 : name1.toLowerCase() == name2.toLowerCase();

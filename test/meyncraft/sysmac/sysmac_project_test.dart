@@ -56,7 +56,9 @@ void main() {
     });
     group('property: dataTypes', () {
       test('finds populated dataTypes', () {
-        var dataTypePaths = sysmacProjectFile.dataTypes.findAllNodePaths(leafPathsFinder());
+        var dataTypePaths = sysmacProjectFile.dataTypes.findAllNodePaths(
+          leafPathsFinder(),
+        );
         expect(dataTypePaths.length, 123566);
       });
     });

@@ -3,9 +3,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.d
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
-
-class Variable extends Node<DataTypeBase> 
-{
+class Variable extends Node<DataTypeBase> {
   @override
   final String name;
   @override
@@ -17,7 +15,7 @@ class Variable extends Node<DataTypeBase>
   final bool isRetained;
   final bool isConstant;
   final String? initialValue;
-  
+
   @override
   late final List<DataTypeBase> children = baseType is DataTypeReference
       ? (baseType as DataTypeReference).dataType.children
@@ -46,7 +44,6 @@ enum VariableGroup {
 }
 
 enum VariableDirection { in$, out, inOut }
-
 
 /// contains information of a member somewhere in a [variable]
 /// TODO can we do without?

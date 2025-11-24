@@ -15,7 +15,7 @@ void main() {
   GetIt.I.registerSingleton<Logger>(Logger());
 
   group('createdataTypes function', () {
-    late  SysmacProjectArchive sysmacProjectArchive;
+    late SysmacProjectArchive sysmacProjectArchive;
     late DataTypes dataTypes;
     setUp(() async {
       sysmacProjectArchive = await SysmacProjectArchive.create(
