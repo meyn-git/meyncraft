@@ -2,7 +2,6 @@ import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 import 'package:xml/xml.dart';
 
 import '../base_type/base_type.infrastructure.dart';
