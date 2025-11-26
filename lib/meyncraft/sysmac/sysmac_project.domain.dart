@@ -20,7 +20,7 @@ class SysmacProject {
 
   late final DataTypes dataTypes = createDataTypes(archive);
 
-  late final List<Variable> globalVariables = createGlobalVariables(
+  late final Variables globalVariables = createGlobalVariables(
     archive,
     dataTypes,
   );

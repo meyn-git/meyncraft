@@ -5,12 +5,6 @@ import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.d
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
 class BaseTypeFactory {
-  BaseTypeFactory._internal();
-
-  static final BaseTypeFactory _singleton = BaseTypeFactory._internal();
-
-  factory BaseTypeFactory() => _singleton;
-
   final List<BaseTypeSubFactory> baseTypeSubFactories = [
     ArrayFactory(),
     StructFactory(),
@@ -241,8 +235,10 @@ class ArrayFactory extends BaseTypeSubFactory {
       return NxBool();
     }
 
-    return BaseTypeFactory().createFromExpression(typeExpression);
+    return baseTypeFactory.createFromExpression(typeExpression);
   }
+
+  late final baseTypeFactory = BaseTypeFactory();
 
   List<ArrayRange> _createArrayRanges(String expression) {
     var rangeExpressions = ArrayRange.regex.allMatches(expression);

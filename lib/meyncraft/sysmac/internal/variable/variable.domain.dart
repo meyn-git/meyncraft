@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
@@ -32,6 +33,31 @@ class Variable extends Node<DataTypeBase> {
     this.isConstant = false,
     this.initialValue,
   });
+}
+
+class Variables extends DelegatingList<Variable> {
+  Variables([List<Variable>? variables]) : super(variables ?? <Variable>[]);
+
+  NodePath findFirstNodePath(NodePathFinder finder) {
+    for (var child in this) {
+      var result = finder(child);
+      if (result.isNotEmpty) {
+        return result;
+      }
+    }
+    return const [];
+  }
+
+  List<NodePath> findAllNodePaths(NodePathsFinder finder) {
+    var nodePaths = <NodePath>[];
+    for (var child in this) {
+      var foundNodePaths = finder(child);
+      if (foundNodePaths.isNotEmpty) {
+        nodePaths.addAll(foundNodePaths);
+      }
+    }
+    return nodePaths;
+  }
 }
 
 enum VariableGroup {

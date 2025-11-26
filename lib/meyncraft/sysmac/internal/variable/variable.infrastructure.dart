@@ -15,7 +15,7 @@ const String dataTypeNameAttribute = 'DataTypeName';
 const String commentAttribute = 'Comment';
 const String networkPublicationAttribute = 'NetworkPublication';
 
-List<Variable> createGlobalVariables(
+Variables createGlobalVariables(
   SysmacProjectArchive sysmacProjectArchive,
   DataTypes dataTypes,
 ) {
@@ -33,8 +33,7 @@ List<Variable> createGlobalVariables(
         id,
       )[VariableGroup.global] ??
       [];
-
-  return globalVariables;
+  return Variables(globalVariables);
 }
 
 bool isGlobalVariableElement(XmlElement element) =>
@@ -81,6 +80,8 @@ List<Variable> toVariables(Group group, DataTypes dataTypes) => group.entities
     .map((attributes) => createVariable(attributes, dataTypes))
     .toList();
 
+final _baseTypeFactory = BaseTypeFactory();
+
 Variable createVariable(Map<String, String> attributes, DataTypes dataTypes) {
   var name = attributes['N']!;
   var comment = attributes['Com'] ?? '';
@@ -91,7 +92,7 @@ Variable createVariable(Map<String, String> attributes, DataTypes dataTypes) {
   var hardwareAddress = attributes['AT'];
   var networkPublish = NetworkPublish.ofValue(attributes['NTP']);
   var typeExpression = attributes['D']!;
-  var baseType = BaseTypeFactory().createFromExpressionIncludingCustomTypes(
+  var baseType = _baseTypeFactory.createFromExpressionIncludingCustomTypes(
     typeExpression,
     dataTypes,
   );

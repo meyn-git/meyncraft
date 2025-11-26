@@ -123,13 +123,13 @@ class UnknownAttribute implements CommentAttribute {
 
 /// refers to an in or output argument of a PLC [Function$] or [FunctionBlock]
 /// call so that the PLC Address and component codes can be added to the [Event]
-/// Usage: [io=<parameter>,<flags>]
+/// Usage: [io=parameter,flags]
 /// Example: [io=iMtrProtOk,noAddr,noWarn]
 ///
-/// * <parameter> = name of the function or function block parameter
+/// * parameter   = name of the function or function block parameter
 ///                 that is tied to an global variable that contains
 ///                 a component code in the comment and/or an hardware address
-/// * <flags>     = a comma separated list with zero or more of
+/// * flags       = a comma separated list with zero or more of
 ///                 the following flags (case unsensitive):
 ///                 * noCompCode
 ///                   Gets the hardwareAddress but not the component code.

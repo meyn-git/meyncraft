@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.infrastructure.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
@@ -690,6 +695,24 @@ void main() {
           .hasMatch('ARRAY[1..6] OF EquipmentLineModuleWashv11sInterface')
           .should
           .be(true);
+    });
+  });
+
+  group('function createDataTypes', () {
+    GetIt.I.registerSingleton<Logger>(Logger());
+    File file = SysmacProjectTestResource().file;
+    late SysmacProjectArchive sysmacProjectArchive;
+    setUpAll(() async {
+      sysmacProjectArchive = await SysmacProjectArchive.create(file);
+    });
+
+    test('"Common.Alarm0" should not be an array', () {
+      var dataTypes = createDataTypes(sysmacProjectArchive);
+      var common = dataTypes.firstWhere((v) => v.name == 'Common');
+      var sEvent = common.children.firstWhere((v) => v.name == 'sEvent');
+      var alarm0 = sEvent.children.firstWhere((v) => v.name == 'Alarm0');
+      var baseType = (alarm0 as DataType).baseType;
+      baseType.arrayRanges.should.beEmpty();
     });
   });
 }
