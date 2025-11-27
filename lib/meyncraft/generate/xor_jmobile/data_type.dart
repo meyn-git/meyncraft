@@ -58,7 +58,7 @@ abstract class XorDataType {
     XorFloat(),
     XorInt64(),
     XorUnsignedInt64(),
-    XorReal(),
+    XorDouble(),
     XorString(),
     XorDateTime(),
   ];
@@ -215,14 +215,26 @@ class XorUnsignedInt64 extends XorDataType {
       );
 }
 
-class XorReal extends XorDataType {
-  XorReal()
+// These values where copied from the standard Evisceration J mobile project. not sure they are correct:
+// class XorReal extends XorDataType {
+//   XorReal()
+//     : super(
+//         xorTypeName: 'real',
+//         iecTypeName: 'LREAL',
+//         comparableOmronTypes: [NxLReal, VbDouble],
+//         min: '-3.40282e+38',
+//         max: '3.40282e+38',
+//       );
+// }
+
+class XorDouble extends XorDataType {
+  XorDouble()
     : super(
-        xorTypeName: 'real',
+        xorTypeName: 'double',
         iecTypeName: 'LREAL',
         comparableOmronTypes: [NxLReal, VbDouble],
-        min: '-3.40282e+38',
-        max: '3.40282e+38',
+        min: '2.2e-308',
+        max: '1.79e308',
       );
 }
 
