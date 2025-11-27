@@ -1,5 +1,4 @@
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 
 class Event {
   final int number;
@@ -9,7 +8,7 @@ class Event {
 
   /// global variables related to this Event
   /// so we can get component codes and hardware addresses
-  final List<Variable> ioVariables;
+  final Iterable<String> ioVariableNamePaths;
   final List<ComponentCode> componentCodes;
   final Map<String, List<ComponentCode>> variableNameWithComponentCodes;
   final Map<String, String> variableNameWithHardwareAddress;
@@ -21,7 +20,7 @@ class Event {
     required this.namePath,
     required this.group,
     required this.message,
-    this.ioVariables = const <Variable>[],
+    this.ioVariableNamePaths = const <String>[],
     this.componentCodes = const <ComponentCode>[],
     this.variableNameWithComponentCodes = const <String, List<ComponentCode>>{},
     this.variableNameWithHardwareAddress = const <String, String>{},

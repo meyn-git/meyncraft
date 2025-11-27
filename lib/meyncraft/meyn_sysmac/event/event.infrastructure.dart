@@ -6,6 +6,7 @@ import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
 import 'package:petitparser/petitparser.dart';
@@ -106,17 +107,19 @@ class EventNode {
         var eventValues = createEventValues(namePath, commentPath);
         var acknowledgeNeeded = AcknowledgeAttribute.acknowledge(eventValues);
         var priority = PriorityAttribute.priority(eventValues);
-        var ioAttributeVariables = IoAttribute.findIoAttributeVariables(
+        var ioAttributeVariablePaths = IoAttribute.findIoAttributeVariablePaths(
           sysmacProject,
           namePath,
           eventValues,
         );
-        var variableNameWithComponentCodes =
+        var variablePathWithComponentCodes =
             IoAttribute.findIoVariableNameWithComponentCodes(
-              ioAttributeVariables,
+              ioAttributeVariablePaths,
             );
         var variableNameWithHardwareAddress =
-            IoAttribute.findIoVariableNameWithAddresses(ioAttributeVariables);
+            IoAttribute.findIoVariableNameWithAddresses(
+              ioAttributeVariablePaths,
+            );
         var componentCodes = findComponentCodes(
           namePath,
           eventValues,
@@ -128,9 +131,11 @@ class EventNode {
           number: counter.next(),
           namePath: namePath,
           group: createGroupName(namePath),
-          ioVariables: ioAttributeVariables.values.toSet().toList(),
+          ioVariableNamePaths: _uniqueNamePaths(
+            ioAttributeVariablePaths.values,
+          ).toSet().toList(),
           componentCodes: componentCodes,
-          variableNameWithComponentCodes: variableNameWithComponentCodes,
+          variableNameWithComponentCodes: variablePathWithComponentCodes,
           variableNameWithHardwareAddress: variableNameWithHardwareAddress,
           message: message,
           priority: priority,
@@ -298,4 +303,8 @@ class EventNode {
     }
     return values;
   }
+
+  Iterable<String> _uniqueNamePaths(Iterable<NodePath> nodePaths) => nodePaths
+      .map((nodePath) => nodePath.map((node) => node.name).join('.'))
+      .toSet();
 }

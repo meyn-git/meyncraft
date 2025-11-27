@@ -117,7 +117,7 @@ Cm\StartStopCtrl_0011\sEvent\StopBox32=[noAck][prio=info]
 # out: ENO
 # in/out: ioEventHandling, ioHmi, ioFb
 Equipment\EvisModule\sEvent\StopTimeOut=[noAck]
-Equipment\EvisModule\sEvent\TrqSw=[io=iTrqSwOk]
+Equipment\EvisModule\sEvent\TrqSw=[io=iTrqSwOk][prio=critical]
 Equipment\EvisModule\sEvent\AirPressLow=[io=iAirPressOk]
 
 # Code owner: EVI1_PLC
@@ -241,10 +241,10 @@ Cm\CylCtrl\sEvent\WrongConfig=[io=iConfig]
 # in: ENI, iSlaveRestart, iEcNodeStatus, iSlaveRestartUnitId, iEventSuppress
 # out: ENO
 # in/out: ioEventHandling, ioHmi
-Cm\EcBusControl\sEvent\Topology=
-Cm\EcBusControl\sEvent\EcReset=
-Cm\EcBusControl\sEvent\Enable=
-Cm\EcBusControl\sEvent\HwReset=
+Cm\EcBusControl\sEvent\Topology=[io=oEvent,noaddr][prio=critical]
+Cm\EcBusControl\sEvent\EcReset=[io=oEvent,noaddr][prio=critical]
+Cm\EcBusControl\sEvent\Enable=[io=oEvent,noaddr][prio=critical]
+Cm\EcBusControl\sEvent\HwReset=[io=oEvent,noaddr][prio=critical]
 
 # Code owner: Meyn_Standard
 # function (block): fbEcNodeStatus
@@ -338,10 +338,10 @@ Cm\MtrCtrl\sEventVfd\MtrSwDi=[io=iMtrSwOk]
 # in: ENI, iEventSuppress
 # out: ENO
 # in/out: ioEventHandling
-Cm\NxbStatus\sEvent\ObservationError=
-Cm\NxbStatus\sEvent\MinorError=
-Cm\NxbStatus\sEvent\PartialError=
-Cm\NxbStatus\sEvent\MajorError=
+Cm\NxbStatus\sEvent\ObservationError=[io=oEvent,noaddr][prio=low]
+Cm\NxbStatus\sEvent\MinorError=[io=oEvent,noaddr][prio=minor]
+Cm\NxbStatus\sEvent\PartialError=[io=oEvent,noaddr][prio=medium]
+Cm\NxbStatus\sEvent\MajorError=[io=oEvent,noaddr][prio=critical]
 
 # Code owner: Meyn_Standard
 # function (block): fbProductCounter

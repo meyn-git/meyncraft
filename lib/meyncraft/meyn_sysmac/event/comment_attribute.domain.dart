@@ -6,6 +6,7 @@ import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
@@ -222,12 +223,12 @@ class IoAttribute implements CommentAttribute {
   }
 
   //FIXME change Variable to VariableMember
-  static Map<IoAttribute, Variable> findIoAttributeVariables(
+  static Map<IoAttribute, NodePath> findIoAttributeVariablePaths(
     SysmacProject sysmacProject,
     String eventNamePath,
     List eventValues,
   ) {
-    var result = <IoAttribute, Variable>{};
+    var result = <IoAttribute, NodePath>{};
     var ioAttributes = eventValues.whereType<IoAttribute>();
     var globalVariablePath = parentNamePath(eventNamePath);
     for (var ioAttribute in ioAttributes) {
@@ -256,60 +257,72 @@ class IoAttribute implements CommentAttribute {
       if (callParameter.variable == null) {
         continue;
       }
-      var variable = sysmacProject.globalVariables.firstWhereOrNull(
-        (v) => v.name == callParameter.variable,
+
+      ///!!!!
+      // var variable = sysmacProject.globalVariables.firstWhereOrNull(
+      //   (v) => v.name == callParameter.variable,
+      // );
+      if (callParameter.variable == 'EventGlobal.Safety.iServiceModeSw') {
+        print('debug');
+      }
+      var variableNamePath = callParameter.variable!.split('.');
+      var variablePath = sysmacProject.globalVariables.findFirstNodePath(
+        namePathFinder(variableNamePath),
       );
-      if (variable == null) {
+      if (variablePath.isEmpty) {
         continue;
       }
-      result[ioAttribute] = variable;
+      result[ioAttribute] = variablePath;
     }
     return result;
   }
 
   static Map<String, List<ComponentCode>> findIoVariableNameWithComponentCodes(
-    Map<IoAttribute, Variable> ioAttributeVariables,
+    Map<IoAttribute, NodePath> ioAttributeVariables,
   ) {
     var result = <String, List<ComponentCode>>{};
     for (var ioAttribute in ioAttributeVariables.keys) {
       if (ioAttribute.noComponentCode) {
         continue;
       }
-      var variable = ioAttributeVariables[ioAttribute]!;
+      var variablePath = ioAttributeVariables[ioAttribute]!;
+      var variableComments = variablePath.map((node) => node.comment).join('-');
 
       var componentCodes = componentCodeParser
-          .allMatches(variable.comment)
+          .allMatches(variableComments)
           .toList();
+      var variableNamePath = variablePath.map((node) => node.name).join('.');
       if (!ioAttribute.noComponentCodeWarning && componentCodes.isEmpty) {
         logger.warning(
-          'Expected global variable ${variable.name} to have a '
+          'Expected global variable $variableNamePath to have a '
           'one or more component code in its comment.',
         );
       } else {
-        result[variable.name] = componentCodes;
+        result[variableNamePath] = componentCodes;
       }
     }
     return result;
   }
 
   static Map<String, String> findIoVariableNameWithAddresses(
-    Map<IoAttribute, Variable> ioAttributeVariables,
+    Map<IoAttribute, NodePath> ioAttributeVariablePaths,
   ) {
     var result = <String, String>{};
-    for (var ioAttribute in ioAttributeVariables.keys) {
+    for (var ioAttribute in ioAttributeVariablePaths.keys) {
       if (ioAttribute.noAddress) {
         continue;
       }
-      var variable = ioAttributeVariables[ioAttribute]!;
+      var variablePath = ioAttributeVariablePaths[ioAttribute]!;
 
-      var address = variable.hardwareAddress;
+      var address = (variablePath.first as Variable).hardwareAddress;
+      var variableNamePath = variablePath.map((node) => node.name).join('.');
       if (!ioAttribute.noAddress && address == null || address!.isEmpty) {
         logger.warning(
-          'Expected global variable ${variable.name} to have an '
+          'Expected global variable $variableNamePath to have an '
           'hardware address.',
         );
       } else {
-        result[variable.name] = address;
+        result[variableNamePath] = address;
       }
     }
     return result;

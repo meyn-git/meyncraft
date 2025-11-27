@@ -5,6 +5,7 @@ import 'package:meyncraft/meyncraft/meyn_sysmac/event/comment_attribute.domain.d
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:petitparser/petitparser.dart';
 import 'package:shouldly/shouldly.dart';
 
@@ -447,15 +448,19 @@ void main() {
         var ioAttribute = IoAttribute('iMtrProtOk');
         var eventValues = [ioAttribute];
 
-        var ioAttributeVariables = IoAttribute.findIoAttributeVariables(
+        var ioAttributeVariablePaths = IoAttribute.findIoAttributeVariablePaths(
           sysmacProject,
           eventNamePath,
           eventValues,
         );
 
-        ioAttributeVariables.length.should.be(1);
-        ioAttributeVariables[ioAttribute].should.not.beNull();
-        var variable = ioAttributeVariables[ioAttribute]!;
+        ioAttributeVariablePaths.length.should.be(1);
+        ioAttributeVariablePaths[ioAttribute].should.not.beNull();
+        var variablePath = ioAttributeVariablePaths[ioAttribute]!;
+        variablePath.length.should.be(1);
+        var variable = variablePath.first;
+        variable.should.beOfType<Variable>();
+        variable as Variable;
         variable.name.should.be('iCropperBrushMtrProt');
         variable.comment.should.be(
           '37Q3 Cropping machine brush motor protection',
@@ -480,24 +485,32 @@ void main() {
         var ioAttribute2 = IoAttribute('iLvlProd');
         var eventValues = [ioAttribute1, ioAttribute2];
 
-        var ioAttributeVariables = IoAttribute.findIoAttributeVariables(
+        var ioAttributeVariablePaths = IoAttribute.findIoAttributeVariablePaths(
           sysmacProject,
           eventNamePath,
           eventValues,
         );
 
-        ioAttributeVariables.length.should.be(2);
+        ioAttributeVariablePaths.length.should.be(2);
 
-        ioAttributeVariables[ioAttribute1].should.not.beNull();
-        var variable1 = ioAttributeVariables[ioAttribute1]!;
+        ioAttributeVariablePaths[ioAttribute1].should.not.beNull();
+        var variablePath1 = ioAttributeVariablePaths[ioAttribute1]!;
+        variablePath1.length.should.be(1);
+        var variable1 = variablePath1.first;
+        variable1.should.beOfType<Variable>();
+        variable1 as Variable;
         variable1.name.should.be('iIoWasher1BoostPmpLvlLow');
         variable1.comment.should.be('81K1 IoWasher 1-Boost pump-Too low level');
         variable1.hardwareAddress.should.be(
           'IOBus://unit#10/Input Bit 16 bits/Input Bit 04',
         );
 
-        ioAttributeVariables[ioAttribute2].should.not.beNull();
-        var variable2 = ioAttributeVariables[ioAttribute2]!;
+        ioAttributeVariablePaths[ioAttribute2].should.not.beNull();
+        var variablePath2 = ioAttributeVariablePaths[ioAttribute2]!;
+        variablePath2.length.should.be(1);
+        var variable2 = variablePath2.first;
+        variable2.should.beOfType<Variable>();
+        variable2 as Variable;
         variable2.name.should.be('iIoWasher1BoostPmpLvlProd');
         variable2.comment.should.be(
           '81K3 IoWasher 1-Boost pump-Production level',
