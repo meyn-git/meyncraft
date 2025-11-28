@@ -16,7 +16,7 @@ void main() {
 
   group('createdataTypes function', () {
     late SysmacProjectArchive sysmacProjectArchive;
-    late DataTypes dataTypes;
+    late List<DataTypeBase> dataTypes;
     setUp(() async {
       sysmacProjectArchive = await SysmacProjectArchive.create(
         SysmacProjectTestResource().file,

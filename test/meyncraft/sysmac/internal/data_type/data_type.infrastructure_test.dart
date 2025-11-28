@@ -6,7 +6,9 @@ import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
+import 'package:shouldly/shouldly.dart';
 
 import '../../../../test_resource.dart';
 
@@ -67,13 +69,14 @@ const String xml = """<?xml version="1.0" encoding="utf-8"?>
 
 Future<void> main() async {
   GetIt.I.registerSingleton<Logger>(Logger());
-  var dataTypes = DataTypeArchiveXmlFile.fromXml(
-    nameSpacePath: 'Test\\NameSpace',
-    xml: xml,
-  ).toDataTypes();
 
   group('class: DataTypeXml', () {
     group('method: toDataTypes', () {
+      var dataTypes = DataTypeArchiveXmlFile.fromXml(
+        nameSpacePath: 'Test\\NameSpace',
+        xml: xml,
+      ).toDataTypes();
+
       test('5 main DataTypes in test xml', () {
         expect(dataTypes, hasLength(11));
       });
@@ -94,14 +97,23 @@ Future<void> main() async {
     });
   });
 
-  group('class: dataTypes', () {
-    group('constructor', () {
-      test('children isNot Empty', () async {
-        File file = SysmacProjectTestResource().file;
-        var sysmacProject = await SysmacProject.create(file);
-        var dataTypes = sysmacProject.dataTypes;
-        expect(dataTypes, isNotEmpty);
-      });
+  group('function: createDataTypes', () {
+    test('created dataType leaf paths should be correct', () async {
+      File file = SysmacProjectTestResource().file;
+      var sysmacProjectArchive = await SysmacProjectArchive.create(file);
+      var dataTypes = createDataTypes(sysmacProjectArchive);
+      var dataTypeLeafPaths = dataTypes.findAllNodePaths(leafPathsFinder());
+      dataTypeLeafPaths.length.should.be(53260);
+    });
+
+    test('should not contain HMI dataTypes', () async {
+      File file = SysmacProjectTestResource().file;
+      var sysmacProjectArchive = await SysmacProjectArchive.create(file);
+      var dataTypes = createDataTypes(sysmacProjectArchive);
+      var dataTypePath = dataTypes.findFirstNodePath(
+        namePathFinder(['Safety', 'sEvent', 'iCircleanEstpCord']),
+      );
+      dataTypePath.should.beEmpty();
     });
   });
 }

@@ -43,31 +43,6 @@ abstract class Node<T extends Node<T>> {
   List<NodePath> findAllNodePaths(NodePathsFinder finder) => finder(this);
 }
 
-class NodeList<T extends Node<T>> extends DelegatingList<T> {
-  NodeList() : super(<T>[]);
-
-  NodePath findFirstNodePath(NodePathFinder finder) {
-    for (var child in this) {
-      var result = finder(child);
-      if (result.isNotEmpty) {
-        return result;
-      }
-    }
-    return const [];
-  }
-
-  List<NodePath> findAllNodePaths(NodePathsFinder finder) {
-    var nodePaths = <NodePath>[];
-    for (var child in this) {
-      var foundNodePaths = finder(child);
-      if (foundNodePaths.isNotEmpty) {
-        nodePaths.addAll(foundNodePaths);
-      }
-    }
-    return nodePaths;
-  }
-}
-
 typedef NodePath = List<Node>;
 
 typedef NodePathFinder = NodePath Function(Node node);

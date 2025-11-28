@@ -15,9 +15,9 @@ const String dataTypeNameAttribute = 'DataTypeName';
 const String commentAttribute = 'Comment';
 const String networkPublicationAttribute = 'NetworkPublication';
 
-Variables createGlobalVariables(
+List<Variable> createGlobalVariables(
   SysmacProjectArchive sysmacProjectArchive,
-  DataTypes dataTypes,
+  List<DataTypeBase> dataTypes,
 ) {
   var globalVariableElement = sysmacProjectArchive
       .projectIndexXml
@@ -33,7 +33,7 @@ Variables createGlobalVariables(
         id,
       )[VariableGroup.global] ??
       [];
-  return Variables(globalVariables);
+  return globalVariables;
 }
 
 bool isGlobalVariableElement(XmlElement element) =>
@@ -43,7 +43,7 @@ bool isGlobalVariableElement(XmlElement element) =>
 
 Map<VariableGroup, List<Variable>> createVariableGroups(
   SysmacProjectArchive sysmacProjectArchive,
-  DataTypes dataTypes,
+  List<DataTypeBase> dataTypes,
   String id,
 ) {
   var projectIndexXml = sysmacProjectArchive.projectIndexXml;
@@ -76,13 +76,17 @@ VariableDirection? toDirection(String? name) => switch (name) {
   'VAR_IN_OUT' => VariableDirection.inOut,
   _ => null,
 };
-List<Variable> toVariables(Group group, DataTypes dataTypes) => group.entities
+List<Variable> toVariables(Group group, List<DataTypeBase> dataTypes) => group
+    .entities
     .map((attributes) => createVariable(attributes, dataTypes))
     .toList();
 
 final _baseTypeFactory = BaseTypeFactory();
 
-Variable createVariable(Map<String, String> attributes, DataTypes dataTypes) {
+Variable createVariable(
+  Map<String, String> attributes,
+  List<DataTypeBase> dataTypes,
+) {
   var name = attributes['N']!;
   var comment = attributes['Com'] ?? '';
   var direction = toDirection(attributes['G']);

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
@@ -59,7 +60,7 @@ void main() {
         var dataTypePaths = sysmacProjectFile.dataTypes.findAllNodePaths(
           leafPathsFinder(),
         );
-        expect(dataTypePaths.length, 91198);
+        expect(dataTypePaths.length, 53260);
       });
     });
 

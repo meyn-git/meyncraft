@@ -659,33 +659,39 @@ void main() {
       });
     });
     group('Custom types', () {
-      test('createFromExpressionIncludingCustomTypes', () async {
-        var sysmacProjectArchive = await SysmacProjectArchive.create(
-          SysmacProjectTestResource().file,
-        );
-        var dataTypes = createDataTypes(sysmacProjectArchive);
-        var sEventType = baseTypeFactory
-            .createFromExpressionIncludingCustomTypes('sEvent', dataTypes);
-        sEventType.should.beOfType<DataTypeReference>();
-      });
+      test(
+        'createDataTypes should contain custom dataType path "sEvent"',
+        () async {
+          var sysmacProjectArchive = await SysmacProjectArchive.create(
+            SysmacProjectTestResource().file,
+          );
+          var dataTypes = createDataTypes(sysmacProjectArchive);
+          var sEventType = baseTypeFactory
+              .createFromExpressionIncludingCustomTypes('sEvent', dataTypes);
+          sEventType.should.beOfType<DataTypeReference>();
+        },
+      );
 
-      test('createFromExpressionIncludingCustomTypes', () async {
-        var sysmacProjectArchive = await SysmacProjectArchive.create(
-          SysmacProjectTestResource().file,
-        );
-        var dataTypes = createDataTypes(sysmacProjectArchive);
-        var found = <String>[];
-        for (var dataType in dataTypes) {
-          var paths = dataType.findAllNodePaths(leafPathsFinder());
-          for (var path in paths) {
-            var pathString = path.map((n) => n.name).join('.');
-            if (pathString.contains('sEvent.Common')) {
-              found.add(pathString);
+      test(
+        'createDataTypes should have a single "sEvent.Common" dataType path',
+        () async {
+          var sysmacProjectArchive = await SysmacProjectArchive.create(
+            SysmacProjectTestResource().file,
+          );
+          var dataTypes = createDataTypes(sysmacProjectArchive);
+          var found = <String>[];
+          for (var dataType in dataTypes) {
+            var paths = dataType.findAllNodePaths(leafPathsFinder());
+            for (var path in paths) {
+              var pathString = path.map((n) => n.name).join('.');
+              if (pathString.contains('sEvent.Common')) {
+                found.add(pathString);
+              }
             }
           }
-        }
-        found.length.should.be(2);
-      });
+          found.length.should.be(1);
+        },
+      );
     });
   });
   group('ArrayFactory class', () {

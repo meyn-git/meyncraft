@@ -18,9 +18,9 @@ import 'internal/data_type/data_type.domain.dart';
 class SysmacProject {
   late final SysmacProjectArchive archive;
 
-  late final DataTypes dataTypes = createDataTypes(archive);
+  late final List<DataTypeBase> dataTypes = createDataTypes(archive);
 
-  late final Variables globalVariables = createGlobalVariables(
+  late final List<Variable> globalVariables = createGlobalVariables(
     archive,
     dataTypes,
   );

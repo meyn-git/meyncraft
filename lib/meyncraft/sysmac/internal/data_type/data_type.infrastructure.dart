@@ -14,14 +14,14 @@ const String enumValueAttribute = 'EnumValue';
 
 const String nameSpacePathSeparator = '\\';
 
-DataTypes createDataTypes(SysmacProjectArchive sysmacProjectArchive) {
+List<DataTypeBase> createDataTypes(SysmacProjectArchive sysmacProjectArchive) {
   var dataTypes = _createChildren(sysmacProjectArchive);
   replaceDataTypeReferencesWherePossible(dataTypes);
   return dataTypes;
 }
 
-DataTypes _createChildren(SysmacProjectArchive sysmacProjectArchive) {
-  DataTypes dataTypes = DataTypes();
+List<DataTypeBase> _createChildren(SysmacProjectArchive sysmacProjectArchive) {
+  var dataTypes = <DataTypeBase>[];
   var dataTypeArchiveXmlFiles = sysmacProjectArchive.projectIndexXml
       .dataTypeArchiveXmlFiles();
 
@@ -29,6 +29,7 @@ DataTypes _createChildren(SysmacProjectArchive sysmacProjectArchive) {
     var newDataTypes = dataTypeArchiveXmlFile.toDataTypes();
     var nameSpacePath = dataTypeArchiveXmlFile.nameSpacePath.split(r'\');
     var newDataTypesWithNameSpace = addNameSpace(nameSpacePath, newDataTypes);
+
     merge(dataTypes, newDataTypesWithNameSpace);
   }
   return dataTypes;
@@ -36,7 +37,7 @@ DataTypes _createChildren(SysmacProjectArchive sysmacProjectArchive) {
 
 List<DataTypeBase> addNameSpace(
   List<String> nameSpacePath,
-  DataTypes newDataTypes,
+  List<DataTypeBase> newDataTypes,
 ) {
   if (nameSpacePath.join('.').isEmpty) {
     // add to the root
@@ -76,7 +77,6 @@ void merge(
   }
 }
 
-
 /// Represents an [ArchiveXml] with information of some [DataType]s within a given [nameSpacePath]
 class DataTypeArchiveXmlFile extends ArchiveXml {
   final String nameSpacePath;
@@ -91,10 +91,10 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     required String xml,
   }) : super.fromXml(xml);
 
-  DataTypes toDataTypes() {
+  List<DataTypeBase> toDataTypes() {
     var dataElement = xmlDocument.firstElementChild!;
     var dataTypeRootElement = dataElement.firstElementChild!;
-    var dataTypes = DataTypes();
+    var dataTypes = <DataTypeBase>[];
     dataTypes.addAll(
       dataTypeRootElement.children
           .where((node) => isDataTypeElement(node))

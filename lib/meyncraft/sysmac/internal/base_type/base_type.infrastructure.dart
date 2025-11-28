@@ -23,7 +23,7 @@ class BaseTypeFactory {
 
   BaseType createFromExpressionIncludingCustomTypes(
     String typeExpression,
-    DataTypes dataTypes,
+    List<DataTypeBase> dataTypes,
   ) {
     var baseType = createFromExpression(typeExpression);
     if (baseType is UnknownBaseType) {
@@ -257,7 +257,7 @@ class ArrayFactory extends BaseTypeSubFactory {
 
 /// Replaces all the [UnknownBaseType]s with [DataTypeReference]s
 /// when the path can be found
-void replaceDataTypeReferencesWherePossible(DataTypes dataTypes) {
+void replaceDataTypeReferencesWherePossible(List<DataTypeBase> dataTypes) {
   for (var child in dataTypes.descendants.whereType<DataType>()) {
     var baseType = child.baseType;
     if (baseType is UnknownBaseType) {

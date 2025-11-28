@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
@@ -35,9 +34,7 @@ class Variable extends Node<DataTypeBase> {
   });
 }
 
-class Variables extends DelegatingList<Variable> {
-  Variables([List<Variable>? variables]) : super(variables ?? <Variable>[]);
-
+extension VariableListExtension on List<Variable> {
   NodePath findFirstNodePath(NodePathFinder finder) {
     for (var child in this) {
       var result = finder(child);

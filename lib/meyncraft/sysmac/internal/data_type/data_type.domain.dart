@@ -9,7 +9,7 @@ import '../../node.domain.dart';
 //   List<DataTypeBase> children = [];
 // }
 
-class DataTypes extends NodeList<DataTypeBase> {
+extension DataTypeBaseListExtension on List<DataTypeBase> {
   List<DataTypeBase> get descendants {
     List<DataTypeBase> all = [];
     for (var child in this) {
@@ -17,6 +17,27 @@ class DataTypes extends NodeList<DataTypeBase> {
       all.addAll(child.descendants);
     }
     return all;
+  }
+
+  NodePath findFirstNodePath(NodePathFinder finder) {
+    for (var child in this) {
+      var result = finder(child);
+      if (result.isNotEmpty) {
+        return result;
+      }
+    }
+    return const [];
+  }
+
+  List<NodePath> findAllNodePaths(NodePathsFinder finder) {
+    var nodePaths = <NodePath>[];
+    for (var child in this) {
+      var foundNodePaths = finder(child);
+      if (foundNodePaths.isNotEmpty) {
+        nodePaths.addAll(foundNodePaths);
+      }
+    }
+    return nodePaths;
   }
 }
 
@@ -98,7 +119,7 @@ class NameSpace extends DataTypeBase {
   NameSpace(super.name, [super.comment]);
 
   @override
-  NodeList<DataTypeBase> children = NodeList();
+  List<DataTypeBase> children = <DataTypeBase>[];
 }
 
 /// A [DataType] is a custom data type that is made of [BaseType]s

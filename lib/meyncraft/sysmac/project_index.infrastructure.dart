@@ -35,7 +35,9 @@ class ProjectIndexXml extends ArchiveXml {
   );
 
   List<DataTypeArchiveXmlFile> dataTypeArchiveXmlFiles() {
-    List<XmlNode> dataTypeEntities = _findDataTypeEntities();
+    var plcDeviceEntities = _findPlcDeviceEntities();
+
+    List<XmlNode> dataTypeEntities = _findDataTypeEntities(plcDeviceEntities);
 
     List<DataTypeArchiveXmlFile> dataTypeArchiveXmlFiles = [];
     for (var dataTypeEntity in dataTypeEntities) {
@@ -45,11 +47,11 @@ class ProjectIndexXml extends ArchiveXml {
             dataTypeEntity.getAttribute(nameSpaceAttribute) ?? '';
         var archiveFile = findArchiveFile(id);
         if (archiveFile != null) {
-          var dataTypeXmlArchiveFile = DataTypeArchiveXmlFile.fromArchiveFile(
+          var dataTypeArchiveXmlFile = DataTypeArchiveXmlFile.fromArchiveFile(
             nameSpacePath: nameSpacePath,
             archiveFile: archiveFile,
           );
-          dataTypeArchiveXmlFiles.add(dataTypeXmlArchiveFile);
+          dataTypeArchiveXmlFiles.add(dataTypeArchiveXmlFile);
         }
       } on Error {
         // Not found: no problem, try next
@@ -58,17 +60,15 @@ class ProjectIndexXml extends ArchiveXml {
     return dataTypeArchiveXmlFiles;
   }
 
-  List<XmlNode> _findDataTypeEntities() {
-    var dataTypeEntities = xmlDocument.descendants
-        .where((node) => _isDataTypeEntity(node))
-        .toList();
-    return dataTypeEntities;
-  }
+  List<XmlNode> _findDataTypeEntities(Iterable<XmlElement> plcDeviceEntities) =>
+      [
+        for (var plcDeviceEntity in plcDeviceEntities)
+          ...plcDeviceEntity.descendantElements.where(_isDataTypeEntity),
+      ];
 
-  bool _isDataTypeEntity(XmlNode node) =>
-      node is XmlElement &&
-      node.name.local == entity &&
-      node.getAttribute(typeAttribute) == dataType;
+  bool _isDataTypeEntity(XmlElement element) =>
+      element.name.local == entity &&
+      element.getAttribute(typeAttribute) == dataType;
 
   ArchiveFile? findArchiveFile(String id) {
     String xmlFileName = '$id.xml';
@@ -76,4 +76,26 @@ class ProjectIndexXml extends ArchiveXml {
       (ArchiveFile archiveFile) => archiveFile.name.endsWith(xmlFileName),
     );
   }
+
+  /// gets a nam path of the given [dataTypeEntity] by getting the name attribute  of the xml elements up to the root
+  String namePathOfElement(XmlElement dataTypeEntity) {
+    List<String> namePath = [];
+    XmlElement? currentElement = dataTypeEntity;
+    while (currentElement != null) {
+      var name = currentElement.getAttribute(nameAttribute);
+      if (name != null) {
+        namePath.insert(0, name);
+      }
+      currentElement = currentElement.parentElement;
+    }
+    return namePath.join('.');
+  }
+
+  Iterable<XmlElement> _findPlcDeviceEntities() =>
+      xmlDocument.descendantElements.where(
+        (e) =>
+            e.name.local == entity &&
+            e.getAttribute(typeAttribute) == 'Device' &&
+            (e.getAttribute(subTypeAttribute) ?? '').startsWith('NJ'),
+      );
 }
