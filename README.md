@@ -7,10 +7,18 @@ A template engine to create Meyn Control System files using templates.
 * You will need to set the installer to allow the signature: https://www.youtube.com/watch?v=s40bCNnFUgg
 * Run the installer
 
-## Xor-JMobile tags
-MeynCraft creates Xor-JMobile touch screen tags from a Omron Sysmac file.:
-* All global variables that are published will be converted to Xor-JMobile tags
-* If will create a tag for each variable or data type that is (an array of) a base type (e.g. a boolean or int)
+## Sysmac event array
+MeynCraft creates structured text code to copy EventGlobal variable to the EventGlobalArray variable by reading an Omron Sysmac file. This is needed for more efficient communication with Exor-JMobile touch screens or MeynConnect.
+* Import this file in Sysmac with Menu \ Tools \ IEC 61131-10 XML \ Import'
+* Merge when needed
+* Right click the section in program "GeneratedByMeynCraft" and select copy with dependence
+* Paste the generated section at the end of section "Global\EventHandling"'
+* Remove program "GeneratedByMeynCraft"
+
+## Exor-JMobile tags
+MeynCraft creates Exor-JMobile touch screen tags from a Omron Sysmac file.:
+* All global variables that are published will be converted to Exor-JMobile tags
+* It will create a tag for each variable or data type that is (an array of) a base type (e.g. a boolean or int)
 * The generated tags are stored in an xml file so that it can be imported by JMobile:
   * Open a JMobile project
   * Open the tags window from the left menu Configuration\Tags
@@ -19,14 +27,19 @@ MeynCraft creates Xor-JMobile touch screen tags from a Omron Sysmac file.:
   * Select the "Tag editor exported xml" row from the import dialog and click ok
   * Select the generated *MobileTags.xml file
 
-## Xor-JMobile events
-MeynCraft creates Xor-JMobile touch screen events from a Omron Sysmac file.:
-* It uses the comments of the EventGlobal variable and its structure and some additional logic
-* The generated events are stored in an xml file so that it can be imported by JMobile:
-  * Open a JMobile project
-  * Open the events window from the left menu Configuration\Alarms
-  * Click on the "import alarms button" in the toolbar
-  * Select the generated *JMobileEvents.xml file
+## Events
+
+** UNDER CONSTRUCTION **
+
+MeynCraft can create touch screen events (alarm lists) from a Omron Sysmac file:
+* It uses the comments of the EventGlobal variable and its (sEvent) data types. 
+* Events are exported as:
+  * a csv file that van be opened in Excel
+  * a xml file so that it can be imported by JMobile:
+    * Open a JMobile project
+    * Open the events window from the left menu Configuration\Alarms
+    * Click on the "import alarms button" in the toolbar
+    * Select the generated *JMobileEvents.xml file
 * You can add additional information to the variable or structure comments to create the events:
   * No Acknowledgement needed: [noAck]<br>
     Events need to be acknowledged by default. Add [noAck] to the comments if an event is only informational and therefore does not have to be acknowledged by the operator.
@@ -64,7 +77,7 @@ MeynCraft creates Xor-JMobile touch screen events from a Omron Sysmac file.:
     * 21Q1 Motor3 overload tripped
     
     Note that the array value of the last array in the structure can be used.
-  * Event priority (named severity in Xor): [prio=m]<br>
+  * Event priority (named severity in Exor): [prio=m]<br>
     Event priorities indicate to an operator on what to focus on first.
     Events get a medium priority by default. Add [pri=<abbreviation>] to the comments if an event needs a different priority.
     See table below.
@@ -81,10 +94,5 @@ Priority definition:
 | Low         | L            | 7     | A problem with almost no consequences.                                      | Eventually action is required, e.g. a tripped plucker motor.                                |
 | Info        | I            | 9     | All events that are not an error, such as information for the operator.     | When a stop button is pressed, or external stop is activated.                               |
 
-## Sysmac event array
-MeynCraft creates structured text code to copy EventGlobal variable to the EventGlobalArray variable by reading an Omron Sysmac file. This is needed for more efficient communication with Xor-JMobile touch screens or MeynConnect.
-* Copy past the generated code from the generated *SysmacEventArray.txt into the Sysmac project: POUs\Programs\Global\HMIControl
-* Note that structured text blocks are limited to 1000 lines. Its good practice to do 500 booleans per ST block (e.g. 0-499, 500-999 etc)
-* Note that the array size of the EventGlobalArray size must be big enough for the amount of events.
 
 

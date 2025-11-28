@@ -48,7 +48,7 @@ String createFormattedEventsXml(List<Event> events) {
   return xml;
 }
 
-enum XorSeverity {
+enum ExorSeverity {
   notImportant(0, [EventPriority.info]),
   low(1, [EventPriority.low]),
   belowNormal(2, [EventPriority.mediumLow]),
@@ -60,9 +60,9 @@ enum XorSeverity {
   final int level;
   final List<EventPriority> comparableToSysmacPriorities;
 
-  const XorSeverity(this.level, this.comparableToSysmacPriorities);
+  const ExorSeverity(this.level, this.comparableToSysmacPriorities);
 
-  static XorSeverity valueOf(EventPriority priority) {
+  static ExorSeverity valueOf(EventPriority priority) {
     for (var value in values) {
       if (value.comparableToSysmacPriorities.contains(priority)) {
         return value;
@@ -108,7 +108,7 @@ XmlElement createJMobileAlarmElement(Event event) {
       XmlElement(XmlName('blinkTxt'), [], [XmlText('false')]),
       XmlElement(XmlName('requireReset'), [], [XmlText('true')]),
       XmlElement(XmlName('severity'), [], [
-        XmlText(XorSeverity.valueOf(event.priority).level.toString()),
+        XmlText(ExorSeverity.valueOf(event.priority).level.toString()),
       ]),
       XmlElement(XmlName('priority'), [], [XmlText('3')]),
       XmlElement(XmlName('logMask'), [], [XmlText('76')]),

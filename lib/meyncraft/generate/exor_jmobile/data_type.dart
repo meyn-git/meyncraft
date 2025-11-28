@@ -28,18 +28,18 @@ import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.d
 ///
 /// Source:
 /// * Omron source:	https://store.omron.com.au/knowledge-base/nxnj-to-na-data-types?srsltid:AfmBOoqIPj1s4ivQTDKOUYhCdUXpw4Qu2o-3vx0MKSpkXmf1Snzd5Dsn
-/// * Xor source:	https://www.exorint.com/faq/2017/06/14/can-you-explain-data-type-supported-on-jmobile-tag-editor
+/// * Exor source:	https://www.Exorint.com/faq/2017/06/14/can-you-explain-data-type-supported-on-jmobile-tag-editor
 
-abstract class XorDataType {
-  final String xorTypeName;
+abstract class ExorDataType {
+  final String exorTypeName;
   final String iecTypeName;
   final List<Type> comparableOmronTypes;
   final String min;
   final String max;
   final String arraySize;
 
-  const XorDataType({
-    required this.xorTypeName,
+  const ExorDataType({
+    required this.exorTypeName,
     required this.iecTypeName,
     required this.comparableOmronTypes,
     required this.min,
@@ -47,43 +47,43 @@ abstract class XorDataType {
     this.arraySize = '',
   });
 
-  static final List<XorDataType> _allTypes = [
-    XorBoolean(),
-    XorByte(),
-    XorUnsignedByte(),
-    XorShort(),
-    XorUnsignedShort(),
-    XorInt(),
+  static final List<ExorDataType> _allTypes = [
+    ExorBoolean(),
+    ExorByte(),
+    ExorUnsignedByte(),
+    ExorShort(),
+    ExorUnsignedShort(),
+    ExorInt(),
     UnsignedInt(),
-    XorFloat(),
-    XorInt64(),
-    XorUnsignedInt64(),
-    XorDouble(),
-    XorString(),
-    XorDateTime(),
+    ExorFloat(),
+    ExorInt64(),
+    ExorUnsignedInt64(),
+    ExorDouble(),
+    ExorString(),
+    ExorDateTime(),
   ];
 
-  static XorDataType findCompatibleType(BaseType omronBaseType) {
+  static ExorDataType findCompatibleType(BaseType omronBaseType) {
     return _allTypes.firstWhere(
       (type) => type.comparableOmronTypes.contains(omronBaseType.runtimeType),
       orElse: () => throw Exception(
-        'Omron data type: $omronBaseType could not be converted to a Xor data type',
+        'Omron data type: $omronBaseType could not be converted to a Exor data type',
       ),
     );
   }
 
-  static XorDataType findCompatibleTypeWithOneDimensionalArray(
+  static ExorDataType findCompatibleTypeWithOneDimensionalArray(
     BaseType baseType,
   ) {
     var compatibleType = findCompatibleType(baseType);
-    return XorOneDimensionalArray(compatibleType, baseType.arrayRanges.first);
+    return ExorOneDimensionalArray(compatibleType, baseType.arrayRanges.first);
   }
 }
 
-class XorEnum extends XorDataType {
-  XorEnum()
+class ExorEnum extends ExorDataType {
+  ExorEnum()
     : super(
-        xorTypeName: 'int',
+        exorTypeName: 'int',
         iecTypeName: 'DINT',
         comparableOmronTypes: [EnumParent],
         min: '-32768',
@@ -91,12 +91,12 @@ class XorEnum extends XorDataType {
       );
 }
 
-/// Wraps a [XorDataType] and overrides the arraySize  fields to make it a one dimensional array
-class XorOneDimensionalArray extends XorDataType {
-  XorOneDimensionalArray(XorDataType compatibleType, ArrayRange arrayRange)
+/// Wraps a [ExorDataType] and overrides the arraySize  fields to make it a one dimensional array
+class ExorOneDimensionalArray extends ExorDataType {
+  ExorOneDimensionalArray(ExorDataType compatibleType, ArrayRange arrayRange)
     : super(
-        xorTypeName: '${compatibleType.xorTypeName} []',
-        iecTypeName: compatibleType.xorTypeName,
+        exorTypeName: '${compatibleType.exorTypeName} []',
+        iecTypeName: compatibleType.exorTypeName,
         comparableOmronTypes: compatibleType.comparableOmronTypes,
         min: compatibleType.min,
         max: compatibleType.max,
@@ -105,10 +105,10 @@ class XorOneDimensionalArray extends XorDataType {
 }
 
 // Concrete implementations
-class XorBoolean extends XorDataType {
-  XorBoolean()
+class ExorBoolean extends ExorDataType {
+  ExorBoolean()
     : super(
-        xorTypeName: 'boolean',
+        exorTypeName: 'boolean',
         iecTypeName: 'BOOL',
         comparableOmronTypes: [VbBoolean, NxBool],
         min: '0',
@@ -116,10 +116,10 @@ class XorBoolean extends XorDataType {
       );
 }
 
-class XorByte extends XorDataType {
-  XorByte()
+class ExorByte extends ExorDataType {
+  ExorByte()
     : super(
-        xorTypeName: 'byte',
+        exorTypeName: 'byte',
         iecTypeName: 'SINT',
         comparableOmronTypes: [NxSInt, VbSByte],
         min: '-128',
@@ -127,10 +127,10 @@ class XorByte extends XorDataType {
       );
 }
 
-class XorUnsignedByte extends XorDataType {
-  XorUnsignedByte()
+class ExorUnsignedByte extends ExorDataType {
+  ExorUnsignedByte()
     : super(
-        xorTypeName: 'unsignedByte',
+        exorTypeName: 'unsignedByte',
         iecTypeName: 'USINT',
         comparableOmronTypes: [NxUSInt, NxByte, VbByte],
         min: '0',
@@ -138,10 +138,10 @@ class XorUnsignedByte extends XorDataType {
       );
 }
 
-class XorShort extends XorDataType {
-  XorShort()
+class ExorShort extends ExorDataType {
+  ExorShort()
     : super(
-        xorTypeName: 'short',
+        exorTypeName: 'short',
         iecTypeName: 'INT',
         comparableOmronTypes: [NxInt, VbShort],
         min: '-32768',
@@ -149,10 +149,10 @@ class XorShort extends XorDataType {
       );
 }
 
-class XorUnsignedShort extends XorDataType {
-  XorUnsignedShort()
+class ExorUnsignedShort extends ExorDataType {
+  ExorUnsignedShort()
     : super(
-        xorTypeName: 'unsignedShort',
+        exorTypeName: 'unsignedShort',
         iecTypeName: 'UINT',
         comparableOmronTypes: [NxUInt, NxWord, VbUShort],
         min: '0',
@@ -160,10 +160,10 @@ class XorUnsignedShort extends XorDataType {
       );
 }
 
-class XorInt extends XorDataType {
-  XorInt()
+class ExorInt extends ExorDataType {
+  ExorInt()
     : super(
-        xorTypeName: 'int',
+        exorTypeName: 'int',
         iecTypeName: 'DINT',
         comparableOmronTypes: [NxDInt, VbInteger],
         min: '-2147483648',
@@ -171,10 +171,10 @@ class XorInt extends XorDataType {
       );
 }
 
-class UnsignedInt extends XorDataType {
+class UnsignedInt extends ExorDataType {
   UnsignedInt()
     : super(
-        xorTypeName: 'unsignedInt',
+        exorTypeName: 'unsignedInt',
         iecTypeName: 'UDINT',
         comparableOmronTypes: [NxUDInt, NxDWord, VbUInteger],
         min: '0',
@@ -182,10 +182,10 @@ class UnsignedInt extends XorDataType {
       );
 }
 
-class XorFloat extends XorDataType {
-  XorFloat()
+class ExorFloat extends ExorDataType {
+  ExorFloat()
     : super(
-        xorTypeName: 'float',
+        exorTypeName: 'float',
         iecTypeName: 'REAL',
         comparableOmronTypes: [NxReal, VbSingle],
         min: '-3.40282e+38',
@@ -193,10 +193,10 @@ class XorFloat extends XorDataType {
       );
 }
 
-class XorInt64 extends XorDataType {
-  XorInt64()
+class ExorInt64 extends ExorDataType {
+  ExorInt64()
     : super(
-        xorTypeName: 'int64',
+        exorTypeName: 'int64',
         iecTypeName: 'LINT',
         comparableOmronTypes: [NxLInt, VbLong],
         min: '-9.2e18',
@@ -204,10 +204,10 @@ class XorInt64 extends XorDataType {
       );
 }
 
-class XorUnsignedInt64 extends XorDataType {
-  XorUnsignedInt64()
+class ExorUnsignedInt64 extends ExorDataType {
+  ExorUnsignedInt64()
     : super(
-        xorTypeName: 'uint64',
+        exorTypeName: 'uint64',
         iecTypeName: 'ULINT',
         comparableOmronTypes: [NxULInt, NxLWord, VbULong],
         min: '0',
@@ -216,10 +216,10 @@ class XorUnsignedInt64 extends XorDataType {
 }
 
 // These values where copied from the standard Evisceration J mobile project. not sure they are correct:
-// class XorReal extends XorDataType {
-//   XorReal()
+// class ExorReal extends ExorDataType {
+//   ExorReal()
 //     : super(
-//         xorTypeName: 'real',
+//         ExorTypeName: 'real',
 //         iecTypeName: 'LREAL',
 //         comparableOmronTypes: [NxLReal, VbDouble],
 //         min: '-3.40282e+38',
@@ -227,10 +227,10 @@ class XorUnsignedInt64 extends XorDataType {
 //       );
 // }
 
-class XorDouble extends XorDataType {
-  XorDouble()
+class ExorDouble extends ExorDataType {
+  ExorDouble()
     : super(
-        xorTypeName: 'double',
+        exorTypeName: 'double',
         iecTypeName: 'LREAL',
         comparableOmronTypes: [NxLReal, VbDouble],
         min: '2.2e-308',
@@ -238,10 +238,10 @@ class XorDouble extends XorDataType {
       );
 }
 
-class XorString extends XorDataType {
-  XorString()
+class ExorString extends ExorDataType {
+  ExorString()
     : super(
-        xorTypeName: 'string',
+        exorTypeName: 'string',
         iecTypeName: 'STRING',
         comparableOmronTypes: [NxString, VbString],
         min: '',
@@ -250,10 +250,10 @@ class XorString extends XorDataType {
       );
 }
 
-class XorDateTime extends XorDataType {
-  XorDateTime()
+class ExorDateTime extends ExorDataType {
+  ExorDateTime()
     : super(
-        xorTypeName: 'uint64',
+        exorTypeName: 'uint64',
         iecTypeName: 'DATE_AND_TIME',
         comparableOmronTypes: [NxTime, NxDateAndTime],
         min: '0',

@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:meyncraft/meyncraft/generate/exor_jmobile/data_type.dart';
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
-import 'package:meyncraft/meyncraft/generate/xor_jmobile/data_type.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
@@ -9,12 +9,12 @@ import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart'
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:xml/xml.dart';
 
-/// creates an xml file with [XorTag]s generated from a Sysmac project file
+/// creates an xml file with [ExorTag]s generated from a Sysmac project file
 /// to be imported by JMobile
 Future<void> writeJMobileTagsFile(MeynSysmacProject sysmacProject) async {
   var variables = sysmacProject.globalVariables;
-  List<XorTag> tags = createTags(variables);
-  logger.info('Found ${tags.length} Xor-JMobile tags');
+  List<ExorTag> tags = createTags(variables);
+  logger.info('Found ${tags.length} Exor-JMobile tags');
   String formattedXml = createFormattedTagsXml(tags);
   var outputFile = createOutputFile(sysmacProject, '-JMobileTags.xml');
   await outputFile.create();
@@ -46,7 +46,7 @@ File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   return outputFile;
 }
 
-String createFormattedTagsXml(List<XorTag> tags) {
+String createFormattedTagsXml(List<ExorTag> tags) {
   var document = XmlDocument([
     XmlComment('This code was generated with MeynCraft on ${DateTime.now()}.'),
     XmlComment(
@@ -58,13 +58,13 @@ String createFormattedTagsXml(List<XorTag> tags) {
   return formattedXml;
 }
 
-List<XorTag> createTags(List<Variable> variables) {
+List<ExorTag> createTags(List<Variable> variables) {
   var publicVariables = variables
       .where((v) => v.networkPublish == NetworkPublish.publicationOnly)
       .toList();
-  var tags = <XorTag>[];
+  var tags = <ExorTag>[];
   for (var variable in publicVariables) {
-    var tagNode = XorTagNode.fromVariable(variable);
+    var tagNode = ExorTagNode.fromVariable(variable);
     tags.addAll(tagNode.createTags(skipRules: [skipMeynConnect, skipVetInsp]));
   }
   return tags;
@@ -73,17 +73,17 @@ List<XorTag> createTags(List<Variable> variables) {
 bool skipMeynConnect(String namePath) => namePath.startsWith(RegExp(r'L\d_'));
 bool skipVetInsp(String namePath) => namePath.contains('VET');
 
-/// Represents a tag (reference to some variable in the PLC) for a Xor HMI touch screen
-/// So that it can be imported by JMobile (IDE of Xor HMI)
-class XorTag {
-  final XorDataType xorDataType;
+/// Represents a tag (reference to some variable in the PLC) for a Exor HMI touch screen
+/// So that it can be imported by JMobile (IDE of Exor HMI)
+class ExorTag {
+  final ExorDataType exorDataType;
   final String name;
   late final String tagLocator = 'Ethernet/IP CIP:prot1:uid0:$name';
 
-  XorTag(this.name, this.xorDataType);
+  ExorTag(this.name, this.exorDataType);
 
   @override
-  String toString() => 'XorTag(name: $name, xorDataType: $xorDataType)';
+  String toString() => 'ExorTag(name: $name, ExorDataType: $exorDataType)';
 
   XmlElement toXml() => XmlElement(XmlName('tag'), [], [
     XmlElement(XmlName('name'), [], [XmlText(name)]),
@@ -102,30 +102,29 @@ class XorTag {
     createDecimalDigits(),
     XmlElement(XmlName('castType'), [], []),
     XmlElement(XmlName('default'), [], []),
-    XmlElement(XmlName('min'), [], [XmlText(xorDataType.min)]),
-    XmlElement(XmlName('max'), [], [XmlText(xorDataType.max)]),
+    XmlElement(XmlName('min'), [], [XmlText(exorDataType.min)]),
+    XmlElement(XmlName('max'), [], [XmlText(exorDataType.max)]),
     XmlElement(XmlName('statesText'), [], []),
   ]);
 
-  XmlElement createResourceLocator() => XmlElement(
-    XmlName('resourceLocator'),
-    [],
-    [
-      XmlElement(XmlName('protocolName'), [], [XmlText('ETIP')]),
-      XmlElement(XmlName('slave_id'), [], [XmlText('0')]),
-      XmlElement(XmlName('memory_type'), [], [
-        XmlText(xorDataType.iecTypeName),
-      ]),
-      XmlElement(XmlName('arrayindex'), [], [XmlText('0')]),
-      XmlElement(XmlName('subindex'), [], []),
-      XmlElement(XmlName('data_type'), [], [XmlText(xorDataType.xorTypeName)]),
-      XmlElement(XmlName('arraysize'), [], [XmlText(xorDataType.arraySize)]),
-      XmlElement(XmlName('conversion'), [], []),
-      XmlElement(XmlName('folder_name'), [], []),
-      XmlElement(XmlName('structure_name'), [], []),
-      XmlElement(XmlName('tag_name'), [], [XmlText(name)]),
-    ],
-  );
+  XmlElement createResourceLocator() =>
+      XmlElement(XmlName('resourceLocator'), [], [
+        XmlElement(XmlName('protocolName'), [], [XmlText('ETIP')]),
+        XmlElement(XmlName('slave_id'), [], [XmlText('0')]),
+        XmlElement(XmlName('memory_type'), [], [
+          XmlText(exorDataType.iecTypeName),
+        ]),
+        XmlElement(XmlName('arrayindex'), [], [XmlText('0')]),
+        XmlElement(XmlName('subindex'), [], []),
+        XmlElement(XmlName('data_type'), [], [
+          XmlText(exorDataType.exorTypeName),
+        ]),
+        XmlElement(XmlName('arraysize'), [], [XmlText(exorDataType.arraySize)]),
+        XmlElement(XmlName('conversion'), [], []),
+        XmlElement(XmlName('folder_name'), [], []),
+        XmlElement(XmlName('structure_name'), [], []),
+        XmlElement(XmlName('tag_name'), [], [XmlText(name)]),
+      ]);
 
   XmlElement createSimulator() => XmlElement(XmlName('simulator'), [], [
     XmlElement(XmlName('DataSimulator'), [], [XmlText('Variables')]),
@@ -163,27 +162,27 @@ class XorTag {
   ]);
 }
 
-///TODO investigate if we can use DataTypeBase.findPaths instead of using XorTagNode.
-class XorTagNode {
+///TODO investigate if we can use DataTypeBase.findPaths instead of using ExorTagNode.
+class ExorTagNode {
   final String name;
   final BaseType baseType;
-  final List<XorTagNode> children;
+  final List<ExorTagNode> children;
 
-  XorTagNode.fromVariable(Variable variable)
+  ExorTagNode.fromVariable(Variable variable)
     : name = variable.name,
       baseType = variable.baseType,
       children = createChildren(variable.baseType);
 
-  XorTagNode.fromDataType(DataType dataType)
+  ExorTagNode.fromDataType(DataType dataType)
     : name = dataType.name,
       baseType = dataType.baseType,
       children = createChildren(dataType.baseType);
 
-  static List<XorTagNode> createChildren(BaseType baseType) {
+  static List<ExorTagNode> createChildren(BaseType baseType) {
     if (baseType is DataTypeReference) {
       return baseType.dataType.children
           .map((c) => c as DataType)
-          .map((child) => XorTagNode.fromDataType(child))
+          .map((child) => ExorTagNode.fromDataType(child))
           .toList();
     }
     // baseType has no children
@@ -195,13 +194,13 @@ class XorTagNode {
       baseType is UnknownBaseType ||
       baseType is DataTypeReference;
 
-  List<XorTag> createTags({
+  List<ExorTag> createTags({
     String parentNamePath = '',
     List<bool Function(String namePath)> skipRules = const [],
   }) {
     if (baseType is DataTypeReference &&
         (baseType as DataTypeReference).dataType.baseType is EnumParent) {
-      return [XorTag(createNamePath(parentNamePath), XorEnum())];
+      return [ExorTag(createNamePath(parentNamePath), ExorEnum())];
     }
     String namePath = createNamePath(parentNamePath);
     if (isLeafNode) {
@@ -211,19 +210,19 @@ class XorTagNode {
       // an exception on the rule to reduce the number of tags:
       if (singleArrayRootNode(parentNamePath, baseType)) {
         return [
-          XorTag(
+          ExorTag(
             namePath,
-            XorDataType.findCompatibleTypeWithOneDimensionalArray(baseType),
+            ExorDataType.findCompatibleTypeWithOneDimensionalArray(baseType),
           ),
         ];
       }
       var namePaths = createNamePaths(parentNamePath);
-      var xorDataType = XorDataType.findCompatibleType(baseType);
+      var exorDataType = ExorDataType.findCompatibleType(baseType);
       return namePaths
-          .map((namePath) => XorTag(namePath, xorDataType))
+          .map((namePath) => ExorTag(namePath, exorDataType))
           .toList();
     } else {
-      var tags = <XorTag>[];
+      var tags = <ExorTag>[];
       var namePaths = createNamePaths(parentNamePath);
       for (var namePath in namePaths) {
         for (var child in children) {

@@ -51,7 +51,7 @@ GlobalVariable _createEventGlobalArrayVariable(
     variableName: eventGlobalArrayName,
     variableType: 'ARRAY[0..${sysmacProject.events.length}] OF BOOL',
     comment:
-        'This array is a copy from EventGlobal and is needed for efficient communication with XOR-HMIs or MeynConnect',
+        'This array is a copy from EventGlobal and is needed for efficient communication with Exor-HMIs or MeynConnect',
     networkPublish: NetworkPublish.publicationOnly,
   ),
 );
