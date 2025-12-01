@@ -251,10 +251,10 @@ Cm\EcBusControl\sEvent\HwReset=[io=oEvent,noaddr][prio=critical]
 # in: ENI, iEcNodeNr, iEcNodeEnable, iEventSuppress
 # out: ENO, oEcNodeSts
 # in/out: ioEventHandling
-Cm\EcNodeStatus\sEvent\HwDisconnected=
-Cm\EcNodeStatus\sEvent\HwError=
-Cm\EcNodeStatus\sEvent\PdOkPdoError=
-Cm\EcNodeStatus\sEvent\PdOkMinorError=
+Cm\EcNodeStatus\sEvent\HwDisconnected=[io=iEcNodeNr][prio=critical]
+Cm\EcNodeStatus\sEvent\HwError=[io=iEcNodeNr][prio=critical]
+Cm\EcNodeStatus\sEvent\PdOkPdoError=[io=iEcNodeNr][prio=critical]
+Cm\EcNodeStatus\sEvent\PdOkMinorError=[io=iEcNodeNr][prio=low]
 
 # Code owner: Meyn_Standard
 # function (block): fbFestoCpxTerminal
@@ -418,7 +418,7 @@ Safety\sEventOverrideSwitch\ActiveTimeOut=[prio=critical]
 # in: ENI, iEcNodeStatus, iNumber, iUnitStatus2, iUnitConnected, iEventSuppress
 # out: ENO
 # in/out: ioEventHandling
-Safety\sEventChErr\ChErr=[prio=critical][io=iUnitStatus2,noCompCode][io=oEvent,noAddr]
+Safety\sEventChErr\ChErr=[prio=critical][io=iUnitStatus2,noCompCode][io=oEvent,noAddress]
 
 # Code owner: Meyn_Standard
 # function (block): fbSfStsOutDualChannel

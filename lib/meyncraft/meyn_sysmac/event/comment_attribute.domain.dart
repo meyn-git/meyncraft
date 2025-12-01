@@ -122,6 +122,28 @@ class UnknownAttribute implements CommentAttribute {
   String toString() => '[$expression]';
 }
 
+/// Sets the hardware address of a variable if it does not have one
+class AddressAttribute implements CommentAttribute {
+  final String address;
+  AddressAttribute(this.address);
+
+  static Parser<AddressAttribute> parser =
+      NameEqualsValueParser<AddressAttribute>(nameValueConverter);
+
+  static AddressAttribute nameValueConverter({
+    required String name,
+    required String value,
+  }) {
+    if (name.trim().toLowerCase() != 'address') {
+      throw Exception('invalid name');
+    }
+    if (value.trim().isEmpty) {
+      throw Exception('invalid value');
+    }
+    return AddressAttribute(value);
+  }
+}
+
 /// refers to an in or output argument of a PLC [Function$] or [FunctionBlock]
 /// call so that the PLC Address and component codes can be added to the [Event]
 /// Usage: [io=parameter,flags]
@@ -222,7 +244,6 @@ class IoAttribute implements CommentAttribute {
     throw Exception('invalid value');
   }
 
-  //FIXME change Variable to VariableMember
   static Map<IoAttribute, NodePath> findIoAttributeVariablePaths(
     SysmacProject sysmacProject,
     String eventNamePath,
@@ -258,13 +279,6 @@ class IoAttribute implements CommentAttribute {
         continue;
       }
 
-      ///!!!!
-      // var variable = sysmacProject.globalVariables.firstWhereOrNull(
-      //   (v) => v.name == callParameter.variable,
-      // );
-      if (callParameter.variable == 'EventGlobal.Safety.iServiceModeSw') {
-        print('debug');
-      }
       var variableNamePath = callParameter.variable!.split('.');
       var variablePath = sysmacProject.globalVariables.findFirstNodePath(
         namePathFinder(variableNamePath),
@@ -313,19 +327,32 @@ class IoAttribute implements CommentAttribute {
         continue;
       }
       var variablePath = ioAttributeVariablePaths[ioAttribute]!;
-
-      var address = (variablePath.first as Variable).hardwareAddress;
+      var address = _findAddress(variablePath);
       var variableNamePath = variablePath.map((node) => node.name).join('.');
       if (!ioAttribute.noAddress && address == null || address!.isEmpty) {
         logger.warning(
           'Expected global variable $variableNamePath to have an '
-          'hardware address.',
+          'hardware address (at) or an [address=...] in its comment.',
         );
       } else {
         result[variableNamePath] = address;
       }
     }
     return result;
+  }
+
+  static String? _findAddress(NodePath variablePath) {
+    var addressFromVariable = (variablePath.first as Variable).hardwareAddress;
+    if (addressFromVariable != null && addressFromVariable.isNotEmpty) {
+      return addressFromVariable;
+    }
+    var addressesFromComment = AddressAttribute.parser.allMatches(
+      variablePath.map((node) => node.comment).join('-'),
+    );
+
+    return addressesFromComment.isEmpty
+        ? null
+        : addressesFromComment.last.address;
   }
 
   static List<Call> findCalls(

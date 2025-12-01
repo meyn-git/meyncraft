@@ -182,7 +182,23 @@ Parser<MapEntry<String, String>> slwdAttributeParser =
 
 Parser<String> slwdValueParser = SlwdValueParser();
 
-Parser<String> slwdKeyParser = (letter() | digit()).plus().flatten();
+/// used fixed key names so that other ...= keys (e.g. [CommentAttribute]) are ignored
+Parser<String> slwdKeyParser = ChoiceParser<String>([
+  // group attribute
+  string('GN'),
+  string('GA'),
+  string('GVT'),
+  // variable attributes
+  string('NTP'),
+  string('N'),
+  string('Com'),
+  string('Const'),
+  string('G'),
+  string('D'),
+  string('AT'),
+  string('R'),
+  string('IV'),
+]);
 
 class SlwdValueParser extends Parser<String> {
   @override
