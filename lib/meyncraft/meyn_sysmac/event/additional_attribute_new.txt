@@ -164,10 +164,10 @@ Cm\Ai\sEvent\WrongConfig=[io=ioConfig]
 # in: ENI, iPort1Use, iPort2Use, iPort3Use, iPort4Use, iEventSuppress, iLocationIoLinkMaster, iIoPortStatus, iIoPort1_2ErrorStatus, iIoPort3_4ErrorStatus
 # out: ENO
 # in/out: ioEventHandling, ioHmi, ioFbPort1, ioFbPort2, ioFbPort3, ioFbPort4
-Cm\IoLinkMaster\sEvent\Port1Error=[io=ioFbPort1][io=iPort1Use]
-Cm\IoLinkMaster\sEvent\Port2Error=[io=ioFbPort2][io=iPort2Use]
-Cm\IoLinkMaster\sEvent\Port3Error=[io=ioFbPort3][io=iPort3Use]
-Cm\IoLinkMaster\sEvent\Port4Error=[io=ioFbPort4][io=iPort4Use]
+Cm\IoLinkMaster\sEvent\Port1Error=[io=iLocationIoLinkMaster]
+Cm\IoLinkMaster\sEvent\Port2Error=[io=iLocationIoLinkMaster]
+Cm\IoLinkMaster\sEvent\Port3Error=[io=iLocationIoLinkMaster]
+Cm\IoLinkMaster\sEvent\Port4Error=[io=iLocationIoLinkMaster]
 
 # Code owner: Meyn_MeynConnect1.2
 # function (block): fbCheckLotId
@@ -275,11 +275,11 @@ Cm\FestoCpxTerminal\sEvent\ErrOther=[io=iErrOther]
 # in: ENI, iUnitTemperature, iIoLinkModule, iEventSuppress
 # out: ENO, oFan, oHeater
 # in/out: ioEventHandling, ioHmi, ioFb, ioConfig
-Cm\IoLinkCabinetMon\sEvent\HumidityHigh=
-Cm\IoLinkCabinetMon\sEvent\HumidityInvalid=
-Cm\IoLinkCabinetMon\sEvent\TemperatureHigh=[io=iUnitTemperature]
-Cm\IoLinkCabinetMon\sEvent\TemperatureLow=[io=iUnitTemperature]
-Cm\IoLinkCabinetMon\sEvent\TemperatureInvalid=[io=iUnitTemperature]
+Cm\IoLinkCabinetMon\sEvent\HumidityHigh=[io=oEvent,noaddr][prio=info]
+Cm\IoLinkCabinetMon\sEvent\HumidityInvalid=[io=oEvent,noaddr][prio=info]
+Cm\IoLinkCabinetMon\sEvent\TemperatureHigh=[io=oEvent,noaddr][prio=high]
+Cm\IoLinkCabinetMon\sEvent\TemperatureLow=[io=oEvent,noaddr][prio=info]
+Cm\IoLinkCabinetMon\sEvent\TemperatureInvalid=[io=oEvent,noaddr][prio=info]
 
 # Code owner: Meyn_Standard
 # function (block): fbIoLinkMaster
@@ -339,7 +339,7 @@ Cm\MtrCtrl\sEventVfd\MtrSwDi=[io=iMtrSwOk]
 # out: ENO
 # in/out: ioEventHandling
 Cm\NxbStatus\sEvent\ObservationError=[io=oEvent,noaddr][prio=low]
-Cm\NxbStatus\sEvent\MinorError=[io=oEvent,noaddr][prio=minor]
+Cm\NxbStatus\sEvent\MinorError=[io=oEvent,noaddr][prio=ml]
 Cm\NxbStatus\sEvent\PartialError=[io=oEvent,noaddr][prio=medium]
 Cm\NxbStatus\sEvent\MajorError=[io=oEvent,noaddr][prio=critical]
 
@@ -418,7 +418,7 @@ Safety\sEventOverrideSwitch\ActiveTimeOut=[prio=critical]
 # in: ENI, iEcNodeStatus, iNumber, iUnitStatus2, iUnitConnected, iEventSuppress
 # out: ENO
 # in/out: ioEventHandling
-Safety\sEventChErr\ChErr=[prio=critical][io=iUnitStatus2,noCompCode][io=oEvent,noAddress]
+Safety\sEventChErr\ChErr=[prio=critical][io=iUnitStatus2,noCompCode][io=iNumber,noAddress]
 
 # Code owner: Meyn_Standard
 # function (block): fbSfStsOutDualChannel

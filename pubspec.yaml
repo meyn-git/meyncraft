@@ -9,6 +9,7 @@ environment:
 dependencies:
   archive: ^4.0.7
   collection: ^1.19.1
+  desktop_window: ^0.4.2
   file_picker: ^10.2.0
   fluent_regex: ^1.0.3
   flutter:
