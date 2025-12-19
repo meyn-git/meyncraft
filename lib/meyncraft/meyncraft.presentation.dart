@@ -30,7 +30,7 @@ class _MeynCraftState extends State<MeynCraft> {
       themeMode: ThemeMode.system,
       theme: meynTheme(Brightness.light),
       darkTheme: meynTheme(Brightness.dark),
-      home: Scaffold(body: LogView()),
+      home: LogView(),
     );
   }
 }

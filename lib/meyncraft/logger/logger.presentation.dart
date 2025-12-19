@@ -30,34 +30,33 @@ class _LogViewState extends State<LogView> {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     return Scaffold(
-      body: Expanded(
-        child: Column(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(8),
-                child: Scrollbar(
+      body: Column(
+        children: [
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(8),
+              child: Scrollbar(
+                controller: _scrollController,
+                child: ListView.builder(
                   controller: _scrollController,
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: logger.messages.length,
-                    itemBuilder: (context, index) {
-                      return SelectableText(
-                        logger.messages[index].text,
-                        style: TextStyle(
-                          fontFamily: 'monospace',
-                          color: logger.messages[index].messageType
-                              .colorFunction(theme),
+                  itemCount: logger.messages.length,
+                  itemBuilder: (context, index) {
+                    return SelectableText(
+                      logger.messages[index].text,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        color: logger.messages[index].messageType.colorFunction(
+                          theme,
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
-            if (logger.completed) RestartButtonBar(),
-          ],
-        ),
+          ),
+          if (logger.completed) RestartButtonBar(),
+        ],
       ),
     );
   }

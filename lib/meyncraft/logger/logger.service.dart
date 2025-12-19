@@ -9,12 +9,24 @@ class Logger extends ChangeNotifier {
 
   List<Message> get messages => _messages;
 
-  void info(String message) {
+  void info(String message, {bool unique = false}) {
+    if (unique &&
+        _messages.any(
+          (m) => m.messageType == MessageType.info && m.text == message,
+        )) {
+      return;
+    }
     _messages.add(Message.info(message));
     notifyListeners();
   }
 
-  void warning(String message) {
+  void warning(String message, {bool unique = false}) {
+    if (unique &&
+        _messages.any(
+          (m) => m.messageType == MessageType.warning && m.text == message,
+        )) {
+      return;
+    }
     _messages.add(Message.warning(message));
     notifyListeners();
   }

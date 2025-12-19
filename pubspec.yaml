@@ -35,6 +35,8 @@ msix_config:
   identity_name: nils.ten.hoeve.meyncraft
   msix_version: 1.0.0.0
   logo_path: assets/meyn.ico
+  assets:
+    - assets/additional_attributes.txt
 
 # See .vscode/tasks.json for the build task
 flutter_launcher_icons:
@@ -45,3 +47,5 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets\additional_attributes.txt

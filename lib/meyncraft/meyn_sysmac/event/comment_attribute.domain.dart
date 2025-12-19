@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
@@ -209,6 +210,9 @@ class IoAttribute implements CommentAttribute {
     nameValueConverter,
   );
 
+  static bool experimental =
+      kDebugMode; // TODO remove field after experimenting
+
   static IoAttribute nameValueConverter({
     required String name,
     required String value,
@@ -254,25 +258,35 @@ class IoAttribute implements CommentAttribute {
     var globalVariablePath = parentNamePath(eventNamePath);
     for (var ioAttribute in ioAttributes) {
       var calls = findCalls(sysmacProject, globalVariablePath);
+      //TODO remove debugmode check after testing
       if (calls.isEmpty) {
-        logger.warning(
-          'Could not find a function or function block call that outputs: $eventNamePath',
-        );
+        if (experimental) {
+          logger.warning(
+            'Could not find a function or function block call that outputs: $globalVariablePath',
+            unique: true,
+          );
+        }
         continue;
       } else if (calls.length > 1) {
-        logger.warning(
-          'Found multiple function or function block calls that output to: $eventNamePath'
-          ', calls: ${calls.map((c) => c.name).join(', ')}',
-        );
+        if (experimental) {
+          logger.warning(
+            'Found multiple function or function block calls that output to: $globalVariablePath'
+            ', calls: ${calls.map((c) => c.name).join(', ')}',
+            unique: true,
+          );
+        }
         continue;
       }
       var call = calls.first;
       var callParameter = findCallParameter(call, ioAttribute.callArgumentName);
       if (callParameter == null) {
-        logger.warning(
-          'Function or FunctionBlock ${call.name} '
-          'does not have parameter: ${ioAttribute.callArgumentName}',
-        );
+        if (experimental) {
+          logger.warning(
+            'Function or FunctionBlock ${call.name} '
+            'does not have parameter: ${ioAttribute.callArgumentName}',
+            unique: true,
+          );
+        }
         continue;
       }
       if (callParameter.variable == null) {
@@ -306,11 +320,15 @@ class IoAttribute implements CommentAttribute {
           .allMatches(variableComments)
           .toList();
       var variableNamePath = variablePath.map((node) => node.name).join('.');
+      //TODO remove debugmode check after testing
       if (!ioAttribute.noComponentCodeWarning && componentCodes.isEmpty) {
-        logger.warning(
-          'Expected global variable $variableNamePath to have a '
-          'one or more component code in its comment.',
-        );
+        if (experimental) {
+          logger.warning(
+            'Expected global variable $variableNamePath to have a '
+            'one or more component code in its comment.',
+            unique: true,
+          );
+        }
       } else {
         result[variableNamePath] = componentCodes;
       }
@@ -329,11 +347,15 @@ class IoAttribute implements CommentAttribute {
       var variablePath = ioAttributeVariablePaths[ioAttribute]!;
       var address = _findAddress(variablePath);
       var variableNamePath = variablePath.map((node) => node.name).join('.');
+      //TODO remove debugmode check after testing
       if (!ioAttribute.noAddress && address == null || address!.isEmpty) {
-        logger.warning(
-          'Expected global variable $variableNamePath to have an '
-          'hardware address (at) or an [address=...] in its comment.',
-        );
+        if (experimental) {
+          logger.warning(
+            'Expected global variable $variableNamePath to have an '
+            'hardware address (at) or an [address=...] in its comment.',
+            unique: true,
+          );
+        }
       } else {
         result[variableNamePath] = address;
       }
@@ -503,11 +525,17 @@ class ArrayAttribute implements CommentAttribute, Replaceable {
         ? offSet
         : arrayValues.length - 1 + offSet;
     if (arrayIndex < 0) {
-      logger.warning('Invalid array index: $arrayIndex for event: "$namePath"');
+      logger.warning(
+        'Invalid array index: $arrayIndex for event: "$namePath"',
+        unique: true,
+      );
       return 0;
     }
     if (arrayIndex > arrayValues.length - 1) {
-      logger.warning('Invalid array index: $arrayIndex for event: "$namePath"');
+      logger.warning(
+        'Invalid array index: $arrayIndex for event: "$namePath"',
+        unique: true,
+      );
       return 0;
     }
     return arrayValues[arrayIndex];

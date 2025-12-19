@@ -1,26 +1,32 @@
 import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 
-/// Old style where we dit not have [IoAttribute]s
-var oldAdditionalCommentAttributeMap = _createAdditionalCommentAttributeMap(
-  r'lib\meyncraft\meyn_sysmac\event\additional_attribute_old.txt',
-);
-
-/// New style where we try to get the component codes and PLC addresses
-/// using the parameters of function block calls
-var newAdditionalCommentAttributeMap = _createAdditionalCommentAttributeMap(
-  r'lib\meyncraft\meyn_sysmac\event\additional_attribute_new.txt',
-);
+/// Copies an asset file into the app's writable data directory on first run.
+/// Returns the full path to the copied file.
+File additionalAttributesFile() {
+  const additionalAttributesFileName = 'additional_attributes.txt';
+  final exeDirectoryPath = File(Platform.resolvedExecutable).parent.path;
+  if (kDebugMode) {
+    return File(
+      '${Directory.current.path}${Platform.pathSeparator}assets'
+      '${Platform.pathSeparator}$additionalAttributesFileName',
+    );
+  }
+  return File(
+    '$exeDirectoryPath\\data\\flutter_assets\\'
+    'assets%5Cadditional_attributes.txt',
+  );
+}
 
 /// Creates a Map with [CommentAttribute]s that still need to be added to
 /// The PLC program and standard Meyn Libraries
 /// * Key:  is the [DataType] path of an event, see [createDataTypePath]
 /// * Value: are [CommentAttribute] that still need to be parsed
-Map<String, String> _createAdditionalCommentAttributeMap(String filePath) {
-  var file = File(filePath);
+Map<String, String> createAdditionalCommentAttributeMap() {
+  var file = additionalAttributesFile();
   var input = file.readAsStringSync();
 
   final Map<String, String> result = {};

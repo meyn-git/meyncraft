@@ -23,7 +23,12 @@ List<Event> createEvents(SysmacProject sysmacProject) {
   }
   var eventRootNode = EventNode.fromVariable(eventGlobal);
   var counter = Counter();
-  var events = eventRootNode.createEvents(sysmacProject, counter);
+  var additionalCommentAttributeMap = createAdditionalCommentAttributeMap();
+  var events = eventRootNode.createEvents(
+    sysmacProject,
+    additionalCommentAttributeMap,
+    counter,
+  );
   logger.info('Found ${events.length} events');
   return events;
 }
@@ -92,6 +97,7 @@ class EventNode {
 
   List<Event> createEvents(
     SysmacProject sysmacProject,
+    Map<String, String> additionalCommentAttributeMap,
     Counter counter, {
     String parentNamePath = '',
     String parentCommentPath = '',
@@ -104,7 +110,11 @@ class EventNode {
       var namePaths = createNamePaths(parentNamePath);
       var commentPath = createCommentPath(parentCommentPath);
       for (var namePath in namePaths) {
-        var eventValues = createEventValues(namePath, commentPath);
+        var eventValues = createEventValues(
+          additionalCommentAttributeMap,
+          namePath,
+          commentPath,
+        );
         var acknowledgeNeeded = AcknowledgeAttribute.acknowledge(eventValues);
         var priority = PriorityAttribute.priority(eventValues);
         var ioAttributeVariablePaths = IoAttribute.findIoAttributeVariablePaths(
@@ -152,6 +162,7 @@ class EventNode {
           events.addAll(
             child.createEvents(
               sysmacProject,
+              additionalCommentAttributeMap,
               counter,
               parentNamePath: namePath,
               parentCommentPath: commentPath,
@@ -271,11 +282,14 @@ class EventNode {
     ComponentCodeAddColumnsAttribute(1),
   ];
 
-  List createEventValues(String namePath, String commentPath) {
+  List<dynamic> createEventValues(
+    Map<String, String> additionalCommentAttributeMap,
+    String namePath,
+    String commentPath,
+  ) {
     var additionalAttributes = createAdditionalCommentAttributes(
       this,
-      //oldAdditionalCommentAttributeMap,
-      newAdditionalCommentAttributeMap,
+      additionalCommentAttributeMap,
     );
     var result = commentPathParser.parse(additionalAttributes + commentPath);
     var values = result is Failure ? [] : result.value;
