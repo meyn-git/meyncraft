@@ -14,6 +14,15 @@
             "command": "dart run msix:create",
             "detail": "Results in: build/windows/x64/runner/Release/meyncraft.msix. You might need to do this once to get the signature approved: https://www.youtube.com/watch?v=s40bCNnFUgg",
             "dependsOn": "flutter build windows",
+            "hide": true,
+            "presentation": { "reveal": "never", "echo": false, "focus": false, "showReuseMessage": false, "panel": "shared" }
+        },
+           {
+            "label": "build windows msix installer and copy to installer folder",
+            "type": "shell",
+            "command": "copy build\\windows\\x64\\runner\\Release\\meyncraft.msix installer\\meyncraft.msix",
+            "detail": "Results in: build/windows/x64/runner/Release/meyncraft.msix and copies to installer/meyncraft.msix. You might need to do this once to get the signature approved: https://www.youtube.com/watch?v=s40bCNnFUgg",
+            "dependsOn": "build windows msix installer",
         },
         {
             "label": "build launch icon",
