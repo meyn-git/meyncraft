@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:xml/xml.dart';
@@ -26,13 +28,23 @@ const String variable = 'Variable';
 class ProjectIndexXml extends ArchiveXml {
   final Archive _archive;
 
-  ProjectIndexXml(this._archive)
-    : super.fromArchiveFile(_findOemFile(_archive));
+  ProjectIndexXml(File sysmacProjectFile, this._archive)
+    : super.fromArchiveFile(_findOemFile(sysmacProjectFile, _archive));
 
-  static ArchiveFile _findOemFile(Archive archive) => archive.firstWhere(
-    (ArchiveFile archiveFile) =>
-        archiveFile.isFile && archiveFile.name.endsWith('.oem'),
-  );
+  static ArchiveFile _findOemFile(File sysmacProjectFile, Archive archive) {
+    var oemArchiveFile = archive.firstWhereOrNull(
+      (ArchiveFile archiveFile) =>
+          archiveFile.isFile && archiveFile.name.endsWith('.oem'),
+    );
+    if (oemArchiveFile == null) {
+      throw Exception(
+        'No .oem file found in the provided Sysmac project. '
+        'Please ensure your Sysmac project file can be build '
+        'and re-save it to a file: ${sysmacProjectFile.path}',
+      );
+    }
+    return oemArchiveFile;
+  }
 
   List<DataTypeArchiveXmlFile> dataTypeArchiveXmlFiles() {
     var plcDeviceEntities = _findPlcDeviceEntities();

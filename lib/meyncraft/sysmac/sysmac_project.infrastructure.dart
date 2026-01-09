@@ -15,7 +15,7 @@ class SysmacProjectArchive {
   final ProjectIndexXml projectIndexXml;
 
   SysmacProjectArchive._(this.file, this.archive)
-    : projectIndexXml = ProjectIndexXml(archive);
+    : projectIndexXml = ProjectIndexXml(file, archive);
 
   static Future<SysmacProjectArchive> create(File file) async {
     _validateExtension(file);
