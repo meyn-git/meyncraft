@@ -23,7 +23,7 @@ Future<void> writeSysmacEventFile(MeynSysmacProject sysmacProject) async {
         event.group,
         wrapCommas(componentCodesNewStyle),
         wrapCommas(componentCodesOldStyle),
-        wrapCommas(event.message),
+        wrapCommas(event.messageParts.join('-')),
         event.priority.name,
         event.acknowledgeRequired,
         wrapCommas(variableNameWithAddresses),

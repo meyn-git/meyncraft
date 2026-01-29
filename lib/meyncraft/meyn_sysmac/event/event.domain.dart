@@ -4,7 +4,7 @@ class Event {
   final int number;
   final String namePath;
   final String group;
-  final String message;
+  final List<String> messageParts;
 
   /// global variables related to this Event
   /// so we can get component codes and hardware addresses
@@ -19,7 +19,7 @@ class Event {
     required this.number,
     required this.namePath,
     required this.group,
-    required this.message,
+    required this.messageParts,
     this.ioVariableNamePaths = const <String>[],
     this.componentCodes = const <ComponentCode>[],
     this.variableNameWithComponentCodes = const <String, List<ComponentCode>>{},
@@ -29,7 +29,7 @@ class Event {
   });
 
   String get componentCodesAndMessage =>
-      [...componentCodes.map((c) => c.createCode()), message].join(' ');
+      [...componentCodes.map((c) => c.createCode()), messageParts].join(' ');
 
   @override
   String

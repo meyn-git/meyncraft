@@ -136,7 +136,7 @@ class EventNode {
           //TODO change to ioVariables
           [],
         );
-        var message = createMessage(eventValues);
+        var messageParts = createMessageParts(eventValues);
         var event = Event(
           number: counter.next(),
           namePath: namePath,
@@ -147,7 +147,7 @@ class EventNode {
           componentCodes: componentCodes,
           variableNameWithComponentCodes: variablePathWithComponentCodes,
           variableNameWithHardwareAddress: variableNameWithHardwareAddress,
-          message: message,
+          messageParts: messageParts,
           priority: priority,
           acknowledgeRequired: acknowledgeNeeded,
         );
@@ -194,7 +194,7 @@ class EventNode {
   }
 
   /// normalizes the commentPath to a message.
-  String createMessage(List eventValues) {
+  List<String> createMessageParts(List eventValues) {
     var rawMessage = eventValues
         .where((v) => v is String || v is num)
         .map((v) => v.toString())
@@ -213,7 +213,8 @@ class EventNode {
         .replaceAll('  ', ' ')
         .replaceAll('--', '-')
         .replaceAll(', message instead of alarm event', '')
-        .trim();
+        .trim()
+        .split('-');
   }
 
   List<ComponentCode> findComponentCodes(
