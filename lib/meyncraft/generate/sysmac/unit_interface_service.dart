@@ -95,7 +95,7 @@ List<Variable2> _createInternalUnitVariables(Unit unit) {
     ),
   );
 
-  var dataTypeBases = unit.equipments
+  var dataTypeBases = unit.equipmentModules
       .map((e) => e.interfaceGlobalMember.dataTypeBase)
       .toSet();
   var functionBlockVars = dataTypeBases
@@ -141,8 +141,9 @@ List<LadderSection> _createSections(Unit unit) {
   rungs.add(createResetAllCmdSetAllScRung(rungNr++, unit));
   rungs.add(createSummarizeRung(rungNr++, unit));
   rungs.add(Rung.comment(rungNr++, _equipmentInterfaceComment));
-  for (var equipment in unit.equipments) {
-    for (var arrayValue in equipment.arrayValues) {
+  for (var equipment in unit.equipmentModules) {
+    for (var arrayValue
+        in equipment.interfaceGlobalMember.arrayRanges.toStringList()) {
       var rung = createEquipmentInterfaceRung(
         rungNr++,
         unit,
@@ -174,8 +175,9 @@ String _generatedComment() =>
 
 Rung createUnitStartAllowedRung(int rungNr, Unit unit) {
   var variables = <String>[];
-  for (var equipment in unit.equipments) {
-    for (var arrayValue in equipment.arrayValues) {
+  for (var equipment in unit.equipmentModules) {
+    for (var arrayValue
+        in equipment.interfaceGlobalMember.arrayRanges.toStringList()) {
       variables.add('EqStarted.${equipment.name}$arrayValue');
     }
   }
@@ -192,7 +194,10 @@ String unitStartAllowedVariableName(Unit unit) => '${unit.name}StartAllowed';
 
 Rung createEqStartedMonitorRung(int rungNr, Unit unit) {
   int connectionPointId = 1;
-  var variableNames = _createVariableNames(eqStartedVarName, unit.equipments);
+  var variableNames = _createVariableNames(
+    eqStartedVarName,
+    unit.equipmentModules,
+  );
   return Rung(
     rungNr,
     'Monitor if equipment started (for debugging).\n'
@@ -220,10 +225,14 @@ Rung createEqStartedMonitorRung(int rungNr, Unit unit) {
   );
 }
 
-List<String> _createVariableNames(String preFix, List<Equipment> equipments) {
+List<String> _createVariableNames(
+  String preFix,
+  List<EquipmentModule> equipments,
+) {
   var variableNames = <String>[];
   for (var equipment in equipments) {
-    for (var arrayValue in equipment.arrayValues) {
+    for (var arrayValue
+        in equipment.interfaceGlobalMember.arrayRanges.toStringList()) {
       variableNames.add('$preFix.${equipment.name}$arrayValue');
     }
   }
@@ -232,7 +241,10 @@ List<String> _createVariableNames(String preFix, List<Equipment> equipments) {
 
 Rung createEqAlarmMonitorRung(int rungNr, Unit unit) {
   int connectionPointId = 1;
-  var variableNames = _createVariableNames(eqAlarmVarName, unit.equipments);
+  var variableNames = _createVariableNames(
+    eqAlarmVarName,
+    unit.equipmentModules,
+  );
   return Rung(
     rungNr,
     'Monitor if equipment is in alarm (for debugging)\n'
@@ -344,7 +356,7 @@ Rung createSummarizeRung(int rungNr, Unit unit) {
 Rung createEquipmentInterfaceRung(
   int rungNr,
   Unit unit,
-  Equipment equipment,
+  EquipmentModule equipment,
   String? array,
 ) {
   var functionBlockWithSourcesAndSinks = FunctionBlockWithSourcesAndSinks(

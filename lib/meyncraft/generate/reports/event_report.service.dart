@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 
-Future<void> writeSysmacEventFile(MeynSysmacProject sysmacProject) async {
+Future<void> writeEventReportFile(MeynSysmacProject sysmacProject) async {
   var events = sysmacProject.events;
 
-  var code = StringBuffer();
+  var report = StringBuffer();
   for (var event in events) {
     var componentCodesOldStyle = event.componentCodes.join(', ');
     var componentCodesNewStyle = event.variableNameWithComponentCodes.values
@@ -16,7 +16,7 @@ Future<void> writeSysmacEventFile(MeynSysmacProject sysmacProject) async {
       for (var entry in event.variableNameWithHardwareAddress.entries)
         '${entry.key}:${entry.value}',
     ].join(', ');
-    code.writeln(
+    report.writeln(
       [
         event.number,
         event.namePath,
@@ -31,9 +31,9 @@ Future<void> writeSysmacEventFile(MeynSysmacProject sysmacProject) async {
     );
   }
 
-  var outputFile = createOutputFile(sysmacProject, '-SysmacEvents.csv');
+  var outputFile = createOutputFile(sysmacProject, '-EventReport.csv');
   await outputFile.create();
-  await outputFile.writeAsString(code.toString());
+  await outputFile.writeAsString(report.toString());
 
   logger.info('Created: ${outputFile.path}');
   logger.info(

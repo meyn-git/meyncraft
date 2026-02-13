@@ -34,7 +34,7 @@ Future<void> createFbCheckPackMlScFile(
   );
   structuredText.writeln('');
   structuredText.writeln('IF ENI THEN');
-  structuredText.writeln('\tIndexMax := ${unit.equipments.length};');
+  structuredText.writeln('\tIndexMax := ${unit.equipmentModules.length};');
   structuredText.writeln('\tIndex := 0;');
   structuredText.writeln('\tCASE iUnitPackML.State OF');
   var scPackMlStates = [
@@ -47,8 +47,9 @@ Future<void> createFbCheckPackMlScFile(
     structuredText.writeln('');
     structuredText.writeln('\t${scPackMlState.name.toUpperCase()}:');
     structuredText.writeln('\t\tIF TRUE THEN');
-    for (var equipment in unit.equipments) {
-      for (var arrayValue in equipment.arrayValues) {
+    for (var equipment in unit.equipmentModules) {
+      for (var arrayValue
+          in equipment.interfaceGlobalMember.arrayRanges.toStringList()) {
         structuredText.writeln(
           '\t\t\tIF ConfigGlobal.${unit.name}.${equipment.name}Present$arrayValue'
           ' AND NOT InterfaceGlobal.${equipment.name}$arrayValue.PackML.'

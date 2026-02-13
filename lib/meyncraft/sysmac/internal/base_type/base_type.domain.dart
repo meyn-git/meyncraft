@@ -81,6 +81,12 @@ class ArrayRanges extends DelegatingList<ArrayRange> {
     expression.write('] OF ');
     return expression.toString();
   }
+
+  @override
+  String toString() {
+    if (isEmpty) return '';
+    return super.toString();
+  }
 }
 
 class ArrayRange {

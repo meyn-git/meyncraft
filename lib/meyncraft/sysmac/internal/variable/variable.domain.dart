@@ -74,7 +74,7 @@ class VariableMember {
   final Variable variable;
   final DataTypeBase dataTypeBase;
   final List<String> namePath;
-
+  late final ArrayRanges arrayRanges = _arrayRanges();
   VariableMember(this.variable, this.dataTypeBase, List<String> namePath)
     : namePath = [variable.name, ...namePath];
 
@@ -90,5 +90,12 @@ class VariableMember {
           ]),
         )
         .toList();
+  }
+
+  ArrayRanges _arrayRanges() {
+    if (dataTypeBase is DataType) {
+      return (dataTypeBase as DataType).baseType.arrayRanges;
+    }
+    return ArrayRanges();
   }
 }

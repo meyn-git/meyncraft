@@ -17,7 +17,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.d
 /// | 64 bit               | ULINT            | ULong*1          | usint64        | 0..1.8e19                    |
 /// | 64 bit               | LWORD *3         | ULong*1          | usint64        | 0..1.8e19                    |
 /// | 64 bit               | LREAL            | Double           | double         | 2.2e-308..1.79e308           |
-/// | 64 bit               | TIME             | TimeSpan*2       |                |                              |
+/// | 64 bit               | TIME *4          | TimeSpan*2       |                |                              |
 /// | 64 bit               | DATE             | Date             |                |                              |
 /// | 64 bit               | DATE_AND_TIME
 ///
@@ -25,6 +25,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.d
 /// *1	VB.Net does not have a BCD data type. However unsigned BCD data types values can be represented by unsigned integer data types
 /// *2	TIME has no direct equivalent data type and in VB.Net is represented by the TimeSpan structure. TimeSpans cannot be used in numeric inputs/displays,.
 /// *3	Bitwise operation possible
+/// *4	Omron stores TIME internally as a 64-bit (unsigned?) integer representing the number of nanoseconds.
 ///
 /// Source:
 /// * Omron source:	https://store.omron.com.au/knowledge-base/nxnj-to-na-data-types?srsltid:AfmBOoqIPj1s4ivQTDKOUYhCdUXpw4Qu2o-3vx0MKSpkXmf1Snzd5Dsn
@@ -37,6 +38,11 @@ abstract class ExorDataType {
   final String min;
   final String max;
   final String arraySize;
+  final bool enableScaling;
+  final String s1;
+  final String s2;
+  final String s3;
+  final String castType;
 
   const ExorDataType({
     required this.exorTypeName,
@@ -44,6 +50,13 @@ abstract class ExorDataType {
     required this.comparableOmronTypes,
     required this.min,
     required this.max,
+    this.enableScaling = false,
+    // scale start
+    this.s1 = '1',
+    // scale end
+    this.s2 = '1',
+    this.s3 = '0',
+    this.castType = '',
     this.arraySize = '',
   });
 
@@ -60,6 +73,7 @@ abstract class ExorDataType {
     ExorUnsignedInt64(),
     ExorDouble(),
     ExorString(),
+    ExorTime(),
     ExorDateTime(),
   ];
 
@@ -250,12 +264,30 @@ class ExorString extends ExorDataType {
       );
 }
 
+class ExorTime extends ExorDataType {
+  // Omron TIME is stored as a uint64 or int64 representing nanoseconds
+  ExorTime()
+    : super(
+        exorTypeName: 'uint64',
+        iecTypeName: 'TIME',
+        comparableOmronTypes: [NxTime],
+        min: '-3.40282e+38',
+        max: '3.40282e+38',
+
+        /// scale nanoseconds to seconds
+        enableScaling: true,
+        s2: '1e+09',
+        // converting UInt 64 bit to 32 bit floating point (seconds)
+        castType: 'float',
+      );
+}
+
 class ExorDateTime extends ExorDataType {
   ExorDateTime()
     : super(
         exorTypeName: 'uint64',
         iecTypeName: 'DATE_AND_TIME',
-        comparableOmronTypes: [NxTime, NxDateAndTime],
+        comparableOmronTypes: [NxDateAndTime],
         min: '0',
         max: '18446744073709551615',
       );

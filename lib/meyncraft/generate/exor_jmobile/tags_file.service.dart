@@ -78,9 +78,10 @@ bool skipVetInsp(String namePath) => namePath.contains('VET');
 class ExorTag {
   final ExorDataType exorDataType;
   final String name;
+  final String comment;
   late final String tagLocator = 'Ethernet/IP CIP:prot1:uid0:$name';
 
-  ExorTag(this.name, this.exorDataType);
+  ExorTag({required this.name, this.comment = '', required this.exorDataType});
 
   @override
   String toString() => 'ExorTag(name: $name, ExorDataType: $exorDataType)';
@@ -94,13 +95,11 @@ class ExorTag {
     XmlElement(XmlName('accessMode'), [], [XmlText('READ-WRITE')]),
     XmlElement(XmlName('active'), [], [XmlText('false')]),
     XmlElement(XmlName('TAGLOCATOR'), [], [XmlText(tagLocator)]),
-    XmlElement(XmlName('comment'), [], [
-      XmlText(''),
-    ]), //TODO later: get comment from constructor?
+    XmlElement(XmlName('comment'), [], [XmlText(comment)]),
     createSimulator(),
     createScaling(),
     createDecimalDigits(),
-    XmlElement(XmlName('castType'), [], []),
+    XmlElement(XmlName('castType'), [], [XmlText(exorDataType.castType)]),
     XmlElement(XmlName('default'), [], []),
     XmlElement(XmlName('min'), [], [XmlText(exorDataType.min)]),
     XmlElement(XmlName('max'), [], [XmlText(exorDataType.max)]),
@@ -134,7 +133,9 @@ class ExorTag {
   ]);
 
   XmlElement createScaling() => XmlElement(XmlName('scaling'), [], [
-    XmlElement(XmlName('enableScaling'), [], [XmlText('false')]),
+    XmlElement(XmlName('enableScaling'), [], [
+      XmlText(exorDataType.enableScaling.toString().toLowerCase()),
+    ]),
     XmlElement(XmlName('scalingType'), [], [XmlText('byFormula')]),
     XmlElement(XmlName('enableLimits'), [], [XmlText('false')]),
     createScalingFactors(),
@@ -142,8 +143,8 @@ class ExorTag {
   ]);
 
   XmlElement createScalingFactors() => XmlElement(XmlName('factors'), [], [
-    XmlElement(XmlName('s1'), [], [XmlText('1')]),
-    XmlElement(XmlName('s2'), [], [XmlText('1')]),
+    XmlElement(XmlName('s1'), [], [XmlText(exorDataType.s1)]),
+    XmlElement(XmlName('s2'), [], [XmlText(exorDataType.s2)]),
     XmlElement(XmlName('tagS1'), [], []),
     XmlElement(XmlName('tagS2'), [], []),
     XmlElement(XmlName('tagS3'), [], []),
@@ -165,16 +166,19 @@ class ExorTag {
 ///TODO investigate if we can use DataTypeBase.findPaths instead of using ExorTagNode.
 class ExorTagNode {
   final String name;
+  final String comment;
   final BaseType baseType;
   final List<ExorTagNode> children;
 
   ExorTagNode.fromVariable(Variable variable)
     : name = variable.name,
+      comment = variable.comment,
       baseType = variable.baseType,
       children = createChildren(variable.baseType);
 
   ExorTagNode.fromDataType(DataType dataType)
     : name = dataType.name,
+      comment = dataType.comment,
       baseType = dataType.baseType,
       children = createChildren(dataType.baseType);
 
@@ -200,7 +204,9 @@ class ExorTagNode {
   }) {
     if (baseType is DataTypeReference &&
         (baseType as DataTypeReference).dataType.baseType is EnumParent) {
-      return [ExorTag(createNamePath(parentNamePath), ExorEnum())];
+      return [
+        ExorTag(name: createNamePath(parentNamePath), exorDataType: ExorEnum()),
+      ];
     }
     String namePath = createNamePath(parentNamePath);
     if (isLeafNode) {
@@ -211,15 +217,20 @@ class ExorTagNode {
       if (singleArrayRootNode(parentNamePath, baseType)) {
         return [
           ExorTag(
-            namePath,
-            ExorDataType.findCompatibleTypeWithOneDimensionalArray(baseType),
+            name: namePath,
+            exorDataType:
+                ExorDataType.findCompatibleTypeWithOneDimensionalArray(
+                  baseType,
+                ),
           ),
         ];
       }
       var namePaths = createNamePaths(parentNamePath);
       var exorDataType = ExorDataType.findCompatibleType(baseType);
       return namePaths
-          .map((namePath) => ExorTag(namePath, exorDataType))
+          .map(
+            (namePath) => ExorTag(name: namePath, exorDataType: exorDataType),
+          )
           .toList();
     } else {
       var tags = <ExorTag>[];

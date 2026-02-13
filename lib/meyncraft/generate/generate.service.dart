@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:meyncraft/meyncraft/generate/exor_jmobile/events_file.service.dart';
 import 'package:meyncraft/meyncraft/generate/exor_jmobile/tags_file.service.dart';
+import 'package:meyncraft/meyncraft/generate/reports/isa88_report_service.dart';
 import 'package:meyncraft/meyncraft/generate/sysmac/event_array_code_file.service.dart';
-import 'package:meyncraft/meyncraft/generate/sysmac/event_file.service.dart';
+import 'package:meyncraft/meyncraft/generate/reports/event_report.service.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 
@@ -16,7 +17,8 @@ Future<void> generate(String sysmacProjectFilePath) async {
     await writeJMobileTagsFile(sysmacProject);
     await writeJMobileEventsFile(sysmacProject);
     await writeSysmacEventArrayXmlImportFile(sysmacProject);
-    await writeSysmacEventFile(sysmacProject);
+    await writeEventReportFile(sysmacProject);
+    await writeIsa88ReportFile(sysmacProject);
     // await writeSysmacUnitInterfaceXmlImportFile(sysmacProject);
     // await writeSysmacFbCheckPackMlScFile(sysmacProject);
   } catch (e, s) {

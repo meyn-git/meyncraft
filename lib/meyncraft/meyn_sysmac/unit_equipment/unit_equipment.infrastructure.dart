@@ -83,7 +83,7 @@ List<Unit> _createUnits(
       break;
     }
     var unitConfig = unitConfigs.first;
-    var equipments = <Equipment>[];
+    var equipments = <EquipmentModule>[];
     for (var equipmentInterface in equipmentInterfaces) {
       var nameToFind = '${equipmentInterface.namePath.last}Present';
       var equipmentPresentConfigs = unitConfig.find(
@@ -91,9 +91,10 @@ List<Unit> _createUnits(
       );
       if (equipmentPresentConfigs.isNotEmpty) {
         equipments.add(
-          Equipment(
+          EquipmentModule(
             interfaceGlobalMember: equipmentInterface,
             configGlobalPresentMember: equipmentPresentConfigs.first,
+            controlModules: [],
           ),
         );
         equipmentInterfacesWithoutUnit.remove(equipmentInterface);
@@ -107,7 +108,7 @@ List<Unit> _createUnits(
     var unit = Unit(
       interfaceGlobalMember: unitInterface,
       configGlobalMember: unitConfigs.first,
-      equipments: equipments,
+      equipmentModules: equipments,
     );
     units.add(unit);
   }
@@ -117,7 +118,7 @@ List<Unit> _createUnits(
       '    Could not find a ${configGlobalVar.expression}.<UnitName>.'
       '${equipmentInterfaceWithoutUnit.namePath.last}Present as '
       '${arrayRanges(equipmentInterfaceWithoutUnit.dataTypeBase).toTypeExpression()}BOOL'
-      ', and therefor could not generate code to link it to a Unit!',
+      ', and there for could not generate code to link it to a Unit!',
     );
   }
 
