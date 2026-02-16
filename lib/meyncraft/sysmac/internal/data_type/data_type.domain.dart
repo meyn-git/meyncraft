@@ -1,14 +1,6 @@
 import '../base_type/base_type.domain.dart';
 import '../../node.domain.dart';
 
-// ///Root [Node] of the DataType tree containing [DataTypeBase]s
-// class dataTypes extends DataTypeBase {
-//   dataTypes() : super('$dataTypes');
-
-//   @override
-//   List<DataTypeBase> children = [];
-// }
-
 extension DataTypeBaseListExtension on List<DataTypeBase> {
   List<DataTypeBase> get descendants {
     List<DataTypeBase> all = [];
@@ -26,7 +18,7 @@ extension DataTypeBaseListExtension on List<DataTypeBase> {
         return result;
       }
     }
-    return const [];
+    return const NodePath.empty();
   }
 
   List<NodePath> findAllNodePaths(NodePathsFinder finder) {
@@ -85,6 +77,7 @@ abstract class DataTypeBase extends Node<DataTypeBase> {
     return results;
   }
 
+  //TODO move to NodePath
   List<List<String>> _createNamePaths(
     bool forEachArrayValue,
     List<String> parentNamePath,
@@ -107,11 +100,24 @@ abstract class DataTypeBase extends Node<DataTypeBase> {
         .toList();
   }
 
+  //TODO move to NodePath
   List<String> _arrayValues() {
     if (this is DataType) {
       return (this as DataType).baseType.arrayRanges.toStringList();
     }
     return [];
+  }
+
+  //TODO move to NodePath
+  String get nameWithArrayRanges => '$name$arrayRanges';
+
+  //TODO move to NodePath
+  ArrayRanges get arrayRanges {
+    if (this is DataType) {
+      return (this as DataType).baseType.arrayRanges;
+    }
+    // return empty ArrayRanges
+    return ArrayRanges();
   }
 }
 
@@ -155,8 +161,10 @@ class DataType extends DataTypeBase {
   }
 }
 
+@Deprecated('Use Node.findFirstNodePath or Node.findAllNodePaths instead')
 typedef DataTypeBaseFilter = bool Function(DataTypeBase dataTypeBase);
 
+@Deprecated('Use Node.findFirstNodePath or Node.findAllNodePaths instead')
 class DataTypeBasePaths {
   final List<String> namePath;
   final List<String> commentPath;

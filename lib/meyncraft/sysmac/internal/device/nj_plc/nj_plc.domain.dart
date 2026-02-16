@@ -12,6 +12,8 @@ class NjPlc implements Device, CodeOwner {
   @override
   final String type;
   //TODO IP address?
+
+  /// TODO are libraties owned by the project or by the PLC?
   @override
   final List<Library> libraries;
   @override

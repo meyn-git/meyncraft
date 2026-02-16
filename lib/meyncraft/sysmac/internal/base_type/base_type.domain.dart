@@ -1,5 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:fluent_regex/fluent_regex.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
 import '../data_type/data_type.domain.dart';
 
@@ -33,6 +35,16 @@ abstract class BaseType {
 
 class ArrayRanges extends DelegatingList<ArrayRange> {
   ArrayRanges() : super(<ArrayRange>[]);
+
+  static ArrayRanges of(Node node) {
+    if (node is Variable) {
+      return node.baseType.arrayRanges;
+    } else if (node is DataType) {
+      return node.baseType.arrayRanges;
+    }
+    // return empty ArrayRanges
+    return ArrayRanges();
+  }
 
   /// e.g.
   /// if [ArrayRArrayRanges] represents [ArrayRange(min:2, max:3)  ArrayRange(min:5, max:7)]

@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/pack_ml/pack_ml.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/unit_equipment/unit_equipment.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
 import 'package:recase/recase.dart';
 
 Future<void> writeSysmacFbCheckPackMlScFile(
   MeynSysmacProject sysmacProject,
 ) async {
-  var units = sysmacProject.units;
+  var units = sysmacProject.isa88Nodes.whereType<Unit>();
   for (var unit in units) {
     await createFbCheckPackMlScFile(sysmacProject, unit);
   }
@@ -48,22 +48,30 @@ Future<void> createFbCheckPackMlScFile(
     structuredText.writeln('\t${scPackMlState.name.toUpperCase()}:');
     structuredText.writeln('\t\tIF TRUE THEN');
     for (var equipment in unit.equipmentModules) {
-      for (var arrayValue
-          in equipment.interfaceGlobalMember.arrayRanges.toStringList()) {
-        structuredText.writeln(
-          '\t\t\tIF ConfigGlobal.${unit.name}.${equipment.name}Present$arrayValue'
-          ' AND NOT InterfaceGlobal.${equipment.name}$arrayValue.PackML.'
-          'StateTrans.Sts_${scPackMlState.name.pascalCase}_SC THEN',
-        );
-        structuredText.writeln(
-          "\t\t\t\tModuleNo_SC[Index] := '${equipment.name}$arrayValue';",
-        );
-        structuredText.writeln(
-          "\t\t\t\tIF Index < IndexMax THEN Index := Index + 1; END_IF;",
-        );
-        structuredText.writeln("\t\t\tEND_IF;");
-      }
+      var call = equipment.fbUnitInterfaceCallPath?.call;
+      if (call == null) continue;
+
+      var interfaceExpression = call.parametersIn
+          .firstWhere((parameter) => parameter.argument == 'ioEquipmentPackML')
+          .variable!;
+      var presentExpression = call.parametersIn
+          .firstWhere((parameter) => parameter.argument == 'iConfigPresent')
+          .variable!;
+
+      structuredText.writeln(
+        '\t\t\tIF $presentExpression '
+        'AND NOT $interfaceExpression.'
+        'StateTrans.Sts_${scPackMlState.name.pascalCase}_SC THEN',
+      );
+      structuredText.writeln(
+        "\t\t\t\tModuleNo_SC[Index] := '${equipment.name}';",
+      );
+      structuredText.writeln(
+        "\t\t\t\tIF Index < IndexMax THEN Index := Index + 1; END_IF;",
+      );
+      structuredText.writeln("\t\t\tEND_IF;");
     }
+
     structuredText.writeln('\t\tEND_IF;');
   }
 
@@ -94,7 +102,7 @@ Future<void> createFbCheckPackMlScFile(
 
   var outputFile = createOutputFile(
     sysmacProject,
-    '-${unit.name}-fbCheckPackML_SC.txt',
+    'Sysmac-${unit.name}-fbCheckPackML_SC.txt',
   );
   await outputFile.create();
   await outputFile.writeAsString(structuredText.toString());

@@ -4,8 +4,8 @@ import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.infrastructure.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/identity/identity.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/identity/identity.service.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/unit_equipment/unit_equipment.domain.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/unit_equipment/unit_equipment.infrastructure.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/isa88/isa88.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.infrastructure.dart';
 
@@ -18,7 +18,7 @@ class MeynSysmacProject extends SysmacProject {
 
   late final List<Event> events = createEvents(this);
 
-  late final List<Unit> units = createMeynUnitsAndEquipments(this);
+  late final List<Isa88Node> isa88Nodes = createMeynIsa88Nodes(this);
 
   static Future<MeynSysmacProject> create(File file) async {
     var sysmacProjectArchive = await SysmacProjectArchive.create(file);

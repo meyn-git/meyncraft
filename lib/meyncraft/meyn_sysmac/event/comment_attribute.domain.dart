@@ -4,7 +4,7 @@ import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/component_code.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/device/device.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
@@ -257,7 +257,7 @@ class IoAttribute implements CommentAttribute {
     var ioAttributes = eventValues.whereType<IoAttribute>();
     var globalVariablePath = parentNamePath(eventNamePath);
     for (var ioAttribute in ioAttributes) {
-      var calls = findCalls(sysmacProject, globalVariablePath);
+      var calls = findCallsInLadderPrograms(sysmacProject, globalVariablePath);
       //TODO remove debugmode check after testing
       if (calls.isEmpty) {
         if (experimental) {
@@ -377,15 +377,15 @@ class IoAttribute implements CommentAttribute {
         : addressesFromComment.last.address;
   }
 
-  static List<Call> findCalls(
+  static List<Call> findCallsInLadderPrograms(
     SysmacProject sysmacProject,
     String globalVariableMemberToFind,
   ) {
     var devices = sysmacProject.devices;
-    var plcs = devices.whereType<NjPlc>();
+    var codeOwners = devices.whereType<CodeOwner>();
     var calls = <Call>[];
-    for (var plc in plcs) {
-      for (var program in plc.programs.whereType<LadderProgram>()) {
+    for (var codeOwner in codeOwners) {
+      for (var program in codeOwner.programs.whereType<LadderProgram>()) {
         for (var section in program) {
           for (var rung in section.rungs) {
             for (var call in rung.ladderObjects.whereType<Call>()) {

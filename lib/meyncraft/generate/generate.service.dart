@@ -17,10 +17,10 @@ Future<void> generate(String sysmacProjectFilePath) async {
     await writeJMobileTagsFile(sysmacProject);
     await writeJMobileEventsFile(sysmacProject);
     await writeSysmacEventArrayXmlImportFile(sysmacProject);
+    // await writeSysmacFbCheckPackMlScFile(sysmacProject);
+    // await writeSysmacUnitInterfaceXmlImportFile(sysmacProject);
     await writeEventReportFile(sysmacProject);
     await writeIsa88ReportFile(sysmacProject);
-    // await writeSysmacUnitInterfaceXmlImportFile(sysmacProject);
-    // await writeSysmacFbCheckPackMlScFile(sysmacProject);
   } catch (e, s) {
     logger.info('Error while generating files for $sysmacProjectFilePath:');
     logger.info(e.toString());

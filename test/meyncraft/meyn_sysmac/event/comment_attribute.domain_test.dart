@@ -399,7 +399,7 @@ void main() {
         sysmacProjectFile.file,
       );
 
-      var call = IoAttribute.findCalls(
+      var call = IoAttribute.findCallsInLadderPrograms(
         sysmacProject,
         'EventGlobal.CropperBrushMtr',
       );
@@ -415,7 +415,7 @@ void main() {
           sysmacProjectFile.file,
         );
 
-        var calls = IoAttribute.findCalls(
+        var calls = IoAttribute.findCallsInLadderPrograms(
           sysmacProject,
           'EventGlobal.CropperBrushMtr',
         );

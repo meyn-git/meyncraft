@@ -1,13 +1,15 @@
 import 'package:collection/collection.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 
 /// A named [Node] for building tree models.
-abstract class Node<T extends Node<T>> {
+abstract class Node<CHILD_TYPE extends Node<CHILD_TYPE>> {
   String get name;
   String get comment;
-  List<T> get children;
+  List<CHILD_TYPE> get children;
 
-  List<T> get descendants {
-    List<T> all = [];
+  List<CHILD_TYPE> get descendants {
+    List<CHILD_TYPE> all = [];
     for (var child in children) {
       all.add(child);
       all.addAll(child.descendants);
@@ -38,29 +40,123 @@ abstract class Node<T extends Node<T>> {
     return string;
   }
 
-  NodePath findFirstNodePath(NodePathFinder finder) => finder(this);
+  T findFirstNodePath<T extends NodePath>(NodePathFinder<T> finder) =>
+      finder(this);
 
-  List<NodePath> findAllNodePaths(NodePathsFinder finder) => finder(this);
+  List<T> findAllNodePaths<T extends NodePath>(NodePathsFinder<T> finder) =>
+      finder(this);
 }
 
-typedef NodePath = List<Node>;
+/// FIXME:
+/// find one solution for:
+/// * [Node.findFirstNodePath]
+/// * [Node.findAllNodePaths]
+/// * [DataTypeBase.findPaths] and [DataTypeBasePaths]  (replace with [Node.findFirstNodePath] and [Node.findAllNodePaths])?
+/// * [VariableMember]
 
-typedef NodePathFinder = NodePath Function(Node node);
+class NodePath extends DelegatingList<Node> {
+  NodePath(super.base);
 
-typedef NodePathsFinder = List<NodePath> Function(Node node);
+  const NodePath.empty() : super(const []);
 
-/// returns the first [NodePath] for the first matching name path
-NodePathFinder namePathFinder(
+  List<String> get namePath => map((node) => node.name).toList();
+
+  List<String> get namePathWithArrayRanges => [
+    for (var node in this) '${node.name}${ArrayRanges.of(node)}',
+  ];
+
+  List<String> get commentPath => map((node) => node.name).toList();
+}
+
+class NodePathWithIndexes extends NodePath {
+  /// arrayIndexes[x] is the array index value (e.g. null, [2] or [2,5,3]) for each NodePath[x]
+  final List<String?> arrayIndexes;
+
+  NodePathWithIndexes(super.base, this.arrayIndexes) {
+    if (length != arrayIndexes.length) {
+      throw ArgumentError(
+        'The number of nodes and the number of '
+        'arrayIndexes must be the same length',
+      );
+    }
+  }
+
+  const NodePathWithIndexes.empty() : arrayIndexes = const [], super.empty();
+
+  List<String> get namePathWithArrayIndexes => [
+    for (var index = 0; index < length; index++)
+      '${this[index].name}${arrayIndexes[index] ?? ''}',
+  ];
+}
+
+// extension NodePathExtension on List<Node> {
+//   String get namePathWithArrayRanges => [
+//     for (var node in this)
+//       (node is DataTypeBase) ? node.nameWithArrayRanges : node.name,
+//   ].join('.');
+// }
+
+typedef NodePathFinder<T extends NodePath> = T Function(Node node);
+
+typedef NodePathsFinder<T extends NodePath> = List<T> Function(Node node);
+
+/// NodePathFinder for an expression like InterfaceGlobal.CrusherMod[1]
+/// It returns a [NodePathWithIndexes]
+NodePathFinder<NodePathWithIndexes> namePathWithIndexesFinder(
+  /// e.g. ['InterfaceGlobal', 'CrusherMod[1]'].
+  /// Note that:
+  /// * the name may be indexed
+  /// * the index is not validated
   Iterable<String> namePath, {
   bool caseSensitive = true,
-  NodePath precedingPath = const [],
+  NodePathWithIndexes precedingPath = const NodePathWithIndexes.empty(),
 }) => (Node node) {
-  var currentPath = [...precedingPath, node];
   if (namePath.isEmpty) {
-    return [];
+    return const NodePathWithIndexes.empty();
+  }
+  // Match: [...] followed optionally by a trailing dot, then end-of-string
+  final arrayValueRegExp = RegExp(r"\[(\s*-?\d+(?:\s*,\s*-?\d+)*)\]\s*\.?\s*$");
+  var match = arrayValueRegExp.firstMatch(namePath.first);
+  var arrayValue = match?.group(0)!;
+  var nameWithoutArrayIndex = namePath.first.replaceAll(arrayValueRegExp, '');
+
+  if (!equalNames(nameWithoutArrayIndex, node.name, caseSensitive)) {
+    return NodePathWithIndexes.empty();
+  }
+  var currentPath = NodePathWithIndexes(
+    [...precedingPath, node],
+    [...precedingPath.arrayIndexes, arrayValue],
+  );
+  if (namePath.length == 1) {
+    return currentPath;
+  }
+
+  /// find recursively in children
+  var finder = namePathWithIndexesFinder(
+    namePath.skip(1),
+    precedingPath: currentPath,
+  );
+  for (var child in node.children) {
+    var found = finder(child as Node);
+    if (found.isNotEmpty) {
+      return found;
+    }
+  }
+  return const NodePathWithIndexes.empty();
+};
+
+/// returns the first [NodePath] for the first matching name path
+NodePathFinder<NodePath> namePathFinder(
+  Iterable<String> namePath, {
+  bool caseSensitive = true,
+  NodePath precedingPath = const NodePath.empty(),
+}) => (Node node) {
+  var currentPath = NodePath([...precedingPath, node]);
+  if (namePath.isEmpty) {
+    return const NodePath.empty();
   }
   if (!equalNames(namePath.first, node.name, caseSensitive)) {
-    return [];
+    return const NodePath.empty();
   }
   if (namePath.length == 1) {
     return currentPath;
@@ -72,27 +168,28 @@ NodePathFinder namePathFinder(
       return found;
     }
   }
-  return [];
+  return const NodePath.empty();
 };
 
 /// returns the first [NodePath] for the first matching name path
-NodePathsFinder leafPathsFinder({NodePath precedingPath = const []}) =>
-    (Node node) {
-      var currentPath = [...precedingPath, node];
-      if (node.children.isEmpty) {
-        return [currentPath];
-      }
+NodePathsFinder<NodePath> leafPathsFinder({
+  NodePath precedingPath = const NodePath.empty(),
+}) => (Node node) {
+  var currentPath = NodePath([...precedingPath, node]);
+  if (node.children.isEmpty) {
+    return [currentPath];
+  }
 
-      var nodePaths = <NodePath>[];
-      var finder = leafPathsFinder(precedingPath: currentPath);
-      for (var child in node.children) {
-        var foundNodePaths = finder(child as Node);
-        if (foundNodePaths.isNotEmpty) {
-          nodePaths.addAll(foundNodePaths);
-        }
-      }
-      return nodePaths;
-    };
+  var nodePaths = <NodePath>[];
+  var finder = leafPathsFinder(precedingPath: currentPath);
+  for (var child in node.children) {
+    var foundNodePaths = finder(child as Node);
+    if (foundNodePaths.isNotEmpty) {
+      nodePaths.addAll(foundNodePaths);
+    }
+  }
+  return nodePaths;
+};
 
 bool equalNames(String name1, String name2, bool caseSensitive) =>
     caseSensitive ? name1 == name2 : name1.toLowerCase() == name2.toLowerCase();

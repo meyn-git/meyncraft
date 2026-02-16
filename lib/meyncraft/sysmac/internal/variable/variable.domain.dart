@@ -42,7 +42,7 @@ extension VariableListExtension on List<Variable> {
         return result;
       }
     }
-    return const [];
+    return const NodePath.empty();
   }
 
   List<NodePath> findAllNodePaths(NodePathsFinder finder) {
@@ -69,12 +69,12 @@ enum VariableGroup {
 enum VariableDirection { in$, out, inOut }
 
 /// contains information of a member somewhere in a [variable]
-/// TODO can we do without?
+/// TODO can we replace this with [NodePath]? Answer no: [NodePath] can not store array values for e.g.: InterfaceGlobal.CrusherMod[1]
+/// We cant replace this with a [NodePath] because
 class VariableMember {
   final Variable variable;
   final DataTypeBase dataTypeBase;
   final List<String> namePath;
-  late final ArrayRanges arrayRanges = _arrayRanges();
   VariableMember(this.variable, this.dataTypeBase, List<String> namePath)
     : namePath = [variable.name, ...namePath];
 
@@ -90,12 +90,5 @@ class VariableMember {
           ]),
         )
         .toList();
-  }
-
-  ArrayRanges _arrayRanges() {
-    if (dataTypeBase is DataType) {
-      return (dataTypeBase as DataType).baseType.arrayRanges;
-    }
-    return ArrayRanges();
   }
 }

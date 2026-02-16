@@ -156,6 +156,7 @@ class Parameter {
 
 enum ParameterType { parameter, inOutConnection }
 
+/// A Call to a [Function] or a [FunctionBlock]
 abstract class Call implements LadderObject {
   String get name;
   int get index;
