@@ -8,7 +8,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function_block
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 
-/// Creates a creates a first draft for a additional comment attributes file
+/// Creates a first draft for a additional comment attributes file
 /// by analyzing a [SysmacProject].
 /// See: lib\meyncraft\meyn_sysmac\event\additional_attribute_new.txt
 /// These files are a temporary solution until all dataType event structures
