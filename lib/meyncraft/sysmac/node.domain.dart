@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 
 /// A named [Node] for building tree models.
 abstract class Node<CHILD_TYPE extends Node<CHILD_TYPE>> {
