@@ -44,11 +44,11 @@ void write(
       write(report, level: level + 1, node: equipmentModule);
     }
   } else if (node is EquipmentModule) {
-    for (var child in node.children.entries) {
+    for (var child in node.argumentsAndModules.entries) {
       write(report, level: level + 1, parameter: child.key, node: child.value);
     }
   } else if (node is ControlModule) {
-    for (var controlModule in node.controlModules.entries) {
+    for (var controlModule in node.argumentsAndControlModules.entries) {
       write(
         report,
         level: level + 1,

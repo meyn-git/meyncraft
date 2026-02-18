@@ -1,5 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/device.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/program/program.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
@@ -8,13 +11,13 @@ import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dar
 
 /// See [Isa88Node]
 List<Isa88Node> createMeynIsa88Nodes(SysmacProject sysmacProject) {
-  var callPaths = findCallPaths(sysmacProject);
+  var allCallPaths = findAllCallPaths(sysmacProject);
   var isa88Nodes = <Isa88Node>[];
 
-  var fbUnitControlCallPaths = callPaths.where(isFbUnitControl);
+  var fbUnitControlCallPaths = allCallPaths.where(isFbUnitControl);
 
   for (var fbUnitControlCallPath in fbUnitControlCallPaths) {
-    var unit = createUnit(sysmacProject, callPaths, fbUnitControlCallPath);
+    var unit = createUnit(sysmacProject, allCallPaths, fbUnitControlCallPath);
     if (unit != null) {
       isa88Nodes.add(unit);
     }
@@ -52,9 +55,9 @@ NodePathWithIndexes? _variableToEquipment(
 List<EquipmentModule> _createEquipmentModules(
   List<Variable> globalVariables,
   NodePathWithIndexes variableFromUnit,
-  List<CallPath> callPaths,
+  List<CallPath> allCallPaths,
 ) {
-  var fbUnitInterfaceCallPaths = callPaths.where(
+  var fbUnitInterfaceCallPaths = allCallPaths.where(
     (callPath) =>
         isFbUnitInterface(callPath) &&
         isLinkedToUnit(
@@ -72,13 +75,17 @@ List<EquipmentModule> _createEquipmentModules(
     if (variableToEquipment == null) continue;
 
     var equipmentCallPath = findEquipmentCallPath(
-      callPaths,
+      allCallPaths,
       variableToEquipment,
     );
 
     if (equipmentCallPath != null &&
         equipmentCallPath.call.name != 'fbEventHandling') {
-      var controlModules = createParameterNamesAndControlModules();
+      var argumentsAndControlModules = createArgumentsAndControlModules(
+        globalVariables,
+        allCallPaths,
+        equipmentCallPath,
+      );
 
       var name =
           '${variableToEquipment.last.name}'
@@ -89,7 +96,7 @@ List<EquipmentModule> _createEquipmentModules(
         variableFromParent: variableToEquipment,
         fbUnitInterfaceCallPath: fbUnitInterfaceCallPath,
         callPath: equipmentCallPath,
-        children: controlModules,
+        argumentsAndModules: argumentsAndControlModules,
       );
       equipmentModules.add(equipmentModule);
     }
@@ -97,7 +104,93 @@ List<EquipmentModule> _createEquipmentModules(
   return equipmentModules;
 }
 
-Map<String, ControlModule> createParameterNamesAndControlModules() => {};
+/// Key: function (block) parameter argument tied to the [ControlModule]
+/// Value: [ControlModule]
+Map<String, ControlModule> createArgumentsAndControlModules(
+  List<Variable> globalVariables,
+  List<CallPath> allCallPaths,
+  CallPath equipmentCallPath,
+) {
+  var argumentsAndVariableExpressions = <String, String>{
+    for (var parameterIn in equipmentCallPath.call.parametersIn)
+      parameterIn.argument: parameterIn.variable ?? '',
+    for (var parameterOut in equipmentCallPath.call.parametersOut)
+      parameterOut.argument: parameterOut.variable ?? '',
+  };
+
+  /// TODO: we need a relation with the scope of callPaths
+  var variables = [
+    // callPath = allCallPaths where((callPath) => callPath.program==equipmentCallPath.program)
+    ...equipmentCallPath.program.internalVariables,
+    // callPath = allCallPaths
+    ...globalVariables,
+  ];
+
+  var argumentsAndVariables = Map.fromEntries(
+    argumentsAndVariableExpressions
+        .map(
+          (argument, variableExpression) => MapEntry(
+            argument,
+            variables.findFirstNodePath(
+              namePathWithIndexesFinder(variableExpression.split('.')),
+            ),
+          ),
+        )
+        .entries
+        .where(
+          (entry) =>
+              entry.value.isNotEmpty && entry.value is NodePathWithIndexes,
+        ),
+  ).map((key, value) => MapEntry(key, value as NodePathWithIndexes));
+
+  var argumentsAndControlVariables = Map.fromEntries(
+    argumentsAndVariables.entries.where(
+      (entry) => isControlModuleVariable(entry.value),
+    ),
+  );
+
+  var argumentsAndControlModules = Map.fromEntries(
+    argumentsAndControlVariables
+        .map(
+          (argument, controlVariable) => MapEntry(
+            argument,
+            createControlModule(allCallPaths, controlVariable),
+          ),
+        )
+        .entries
+        .where((entry) => entry.value != null)
+        .map((entry) => MapEntry(entry.key, entry.value as ControlModule)),
+  );
+
+  return argumentsAndControlModules;
+}
+
+ControlModule? createControlModule(
+  List<CallPath> allCallPaths,
+  NodePathWithIndexes controlVariable,
+) {
+  var variableExpression = controlVariable.namePathWithArrayIndexes.join('.');
+
+  /// TODO: limit the callPaths to a specific program if variableExpression is a internal variable
+  var callPath = allCallPaths.firstWhereOrNull(
+    (callPath) => callPath.call.parametersIn.any(
+      (parameter) => parameter.variable == variableExpression,
+    ),
+  );
+
+  if (callPath == null) return null;
+
+  var name =
+      '${controlVariable.last.name}'
+      '${controlVariable.arrayIndexes.last ?? ""}';
+
+  return ControlModule(
+    name: name,
+    variableFromParent: controlVariable,
+    callPath: callPath,
+    argumentsAndControlModules: {},
+  );
+}
 
 CallPath? findEquipmentCallPath(
   List<CallPath> callPaths,
@@ -121,7 +214,7 @@ var packMlSuffix = RegExp(r'\.PackML$', caseSensitive: false);
 
 Unit? createUnit(
   SysmacProject sysmacProject,
-  List<CallPath> callPaths,
+  List<CallPath> allCallPaths,
   CallPath unitCallPath,
 ) {
   var interfaceExpression = unitCallPath.call.parametersIn
@@ -146,7 +239,7 @@ Unit? createUnit(
   var equipmentModules = _createEquipmentModules(
     sysmacProject.globalVariables,
     unitToEquipmentModuleInterface,
-    callPaths,
+    allCallPaths,
   );
 
   return Unit(
@@ -157,7 +250,7 @@ Unit? createUnit(
   );
 }
 
-List<CallPath> findCallPaths(SysmacProject sysmacProject) {
+List<CallPath> findAllCallPaths(SysmacProject sysmacProject) {
   var codeOwners = sysmacProject.devices.whereType<CodeOwner>();
   var callPaths = <CallPath>[];
   for (var codeOwner in codeOwners) {
@@ -197,3 +290,16 @@ bool isLinkedToUnit(String unitEquipmentInterface, CallPath callPath) =>
           : parameter.variable!.replaceAll(packMlSuffix, '') ==
                 unitEquipmentInterface),
     );
+
+bool isControlModuleVariable(NodePath variablePath) {
+  BaseType baseType;
+  if (variablePath.last is Variable) {
+    baseType = (variablePath.last as Variable).baseType;
+  } else if (variablePath.last is! DataType) {
+    baseType = (variablePath.last as DataType).baseType;
+  } else {
+    return false;
+  }
+  if (baseType is! DataTypeReference) return false;
+  return baseType.namePathWithBackSlashes.toLowerCase().startsWith(r'cm\');
+}

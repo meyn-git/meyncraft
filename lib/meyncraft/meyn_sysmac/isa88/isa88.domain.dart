@@ -57,7 +57,7 @@ class EquipmentModule implements ModuleNode {
     /// Either a [EquipmentModule] or [ControlModule]
     ModuleNode
   >
-  children;
+  argumentsAndModules;
 
   @override
   final String name;
@@ -67,7 +67,7 @@ class EquipmentModule implements ModuleNode {
     required this.variableFromParent,
     this.fbUnitInterfaceCallPath,
     required this.callPath,
-    required this.children,
+    required this.argumentsAndModules,
   });
 
   @override
@@ -89,7 +89,7 @@ class ControlModule implements ModuleNode {
     String,
     ControlModule
   >
-  controlModules;
+  argumentsAndControlModules;
 
   @override
   final String name;
@@ -98,12 +98,12 @@ class ControlModule implements ModuleNode {
     required this.name,
     required this.variableFromParent,
     required this.callPath,
-    required this.controlModules,
+    required this.argumentsAndControlModules,
   });
 
   @override
   String toString() =>
-      'ControlModule(name: $name'
+      'ControlModule(name: $name, '
       'variableFromParent: ${variableFromParent.namePathWithArrayIndexes.join('.')}, '
       'callPath: $callPath )';
 }
