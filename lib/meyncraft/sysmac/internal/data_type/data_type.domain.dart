@@ -43,6 +43,7 @@ abstract class DataTypeBase extends Node<DataTypeBase> {
   DataTypeBase(this.name, [this.comment = '']);
 }
 
+/// [NameSpace] is a [DataType] with a name and comment only
 class NameSpace extends DataTypeBase {
   NameSpace(super.name, [super.comment]);
 
@@ -52,7 +53,6 @@ class NameSpace extends DataTypeBase {
 
 /// A [DataType] is a custom data type that is made of [BaseType]s
 class DataType extends DataTypeBase {
-  // DataType? parent;
   BaseType baseType;
 
   final List<DataTypeBase> _children = [];
