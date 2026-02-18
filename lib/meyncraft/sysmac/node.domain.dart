@@ -47,13 +47,6 @@ abstract class Node<CHILD_TYPE extends Node<CHILD_TYPE>> {
       finder(this);
 }
 
-/// FIXME:
-/// find one solution for:
-/// * [Node.findFirstNodePath]
-/// * [Node.findAllNodePaths]
-/// * [DataTypeBase.findPaths] and [DataTypeBasePaths]  (replace with [Node.findFirstNodePath] and [Node.findAllNodePaths])?
-/// * [VariableMember]
-
 class NodePath extends DelegatingList<Node> {
   NodePath(super.base);
 

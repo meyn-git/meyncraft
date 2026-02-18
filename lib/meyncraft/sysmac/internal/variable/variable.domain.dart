@@ -67,28 +67,3 @@ enum VariableGroup {
 }
 
 enum VariableDirection { in$, out, inOut }
-
-/// contains information of a member somewhere in a [variable]
-/// TODO can we replace this with [NodePath]? Answer no: [NodePath] can not store array values for e.g.: InterfaceGlobal.CrusherMod[1]
-/// We cant replace this with a [NodePath] because
-class VariableMember {
-  final Variable variable;
-  final DataTypeBase dataTypeBase;
-  final List<String> namePath;
-  VariableMember(this.variable, this.dataTypeBase, List<String> namePath)
-    : namePath = [variable.name, ...namePath];
-
-  late final String expression = namePath.join('.');
-
-  List<VariableMember> find(bool Function(DataTypeBase base) filter) {
-    var paths = dataTypeBase.findPaths(filter, forEachArrayValue: false);
-    return paths
-        .map(
-          (p) => VariableMember(variable, p.dataTypeBase, [
-            ...namePath.skip(1),
-            ...p.namePath.skip(1),
-          ]),
-        )
-        .toList();
-  }
-}
