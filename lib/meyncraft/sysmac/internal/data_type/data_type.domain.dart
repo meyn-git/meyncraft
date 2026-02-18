@@ -63,7 +63,7 @@ class DataType extends DataTypeBase {
   @override
   List<DataTypeBase> get children {
     if (baseType is DataTypeReference) {
-      return (baseType as DataTypeReference).dataType.children;
+      return (baseType as DataTypeReference).children.cast<DataTypeBase>();
     } else {
       return _children;
     }

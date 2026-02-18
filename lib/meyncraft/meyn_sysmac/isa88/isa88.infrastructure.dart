@@ -301,5 +301,8 @@ bool isControlModuleVariable(NodePath variablePath) {
     return false;
   }
   if (baseType is! DataTypeReference) return false;
-  return baseType.namePathWithBackSlashes.toLowerCase().startsWith(r'cm\');
+  return _startsWithControlModuleNameSpace(baseType);
 }
+
+bool _startsWithControlModuleNameSpace(DataTypeReference baseType) =>
+    baseType.dataTypePath.first.name.toLowerCase() == 'cm';

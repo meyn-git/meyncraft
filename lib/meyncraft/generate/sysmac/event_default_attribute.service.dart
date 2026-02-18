@@ -76,8 +76,8 @@ String write(CodeOwner codeOwner, String name, List<Variable> variables) {
 
   for (var eventOutput in eventOutputs) {
     var dataTypeReference = (eventOutput.baseType as DataTypeReference);
-    var parentPath = dataTypeReference.namePathWithBackSlashes;
-    for (var child in dataTypeReference.dataType.children) {
+    var parentPath = dataTypeReference.dataTypePath.namePath.join(r'\');
+    for (var child in dataTypeReference.children) {
       var dataTypePath = '$parentPath\\${child.name}';
       var attributes = createAttributes(
         dataTypePath,
@@ -182,7 +182,7 @@ bool isEventOutput(Variable variable) =>
     (variable.direction == VariableDirection.inOut ||
         variable.direction == VariableDirection.out) &&
     variable.baseType is DataTypeReference &&
-    (variable.baseType as DataTypeReference).namePathWithBackSlashes.contains(
+    (variable.baseType as DataTypeReference).dataTypePath.namePath.contains(
       'sEvent',
     );
 

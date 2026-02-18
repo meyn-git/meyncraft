@@ -15,7 +15,7 @@ import '../../../../test_resource.dart';
 void main() {
   GetIt.I.registerSingleton<Logger>(Logger());
 
-  group('createdataTypes function', () {
+  group('createDataTypes function', () {
     late SysmacProjectArchive sysmacProjectArchive;
     late List<DataTypeBase> dataTypes;
     setUp(() async {
@@ -45,9 +45,10 @@ void main() {
         );
         globalEvent.should.not.beNull();
         globalEvent!.baseType.should.beOfType<DataTypeReference>();
-        (globalEvent.baseType as DataTypeReference).dataType.name.should.be(
-          'sEvent',
-        );
+        (globalEvent.baseType as DataTypeReference).dataTypePath.namePath
+            .join('.')
+            .should
+            .be('sEvent');
       },
     );
 

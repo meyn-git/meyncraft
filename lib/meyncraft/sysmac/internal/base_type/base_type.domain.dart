@@ -145,15 +145,20 @@ class ArrayRange {
   }
 }
 
-/// A [BaseType] that refers to an existing [DataType]:
+/// A [BaseType] that refers to an existing [dataTypePath].
+///
+/// It is different from a [DataType] since:
+/// * it refers to a [DataType] or one of its children, see [dataTypePath]
+/// * it can have [arrayRanges]
 class DataTypeReference extends BaseType {
-  final DataType dataType;
-  final String namePathWithBackSlashes;
+  final NodePath dataTypePath;
+
+  late final List<DataTypeBase> children = dataTypePath.last.children
+      .cast<DataTypeBase>();
 
   DataTypeReference({
-    required this.dataType,
+    required this.dataTypePath,
     required ArrayRanges arrayRanges,
-    required this.namePathWithBackSlashes,
   }) {
     this.arrayRanges.clear();
     this.arrayRanges.addAll(arrayRanges);

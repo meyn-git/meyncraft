@@ -33,15 +33,10 @@ class BaseTypeFactory {
       );
       if (dataTypePath.isNotEmpty) {
         return DataTypeReference(
-          dataType: dataTypePath.last as DataType,
+          dataTypePath: dataTypePath,
           arrayRanges: baseType.arrayRanges,
-          namePathWithBackSlashes: typeExpression,
         );
       }
-      // logger.warning(
-      //   'Could not find base type for expression: $typeExpression',
-      // );
-      //Note that the baseType could still be UnknownBaseType
     }
     return baseType;
   }

@@ -60,7 +60,7 @@ class EventNode {
 
   static List<EventNode> createChildren(EventNode parent, BaseType baseType) =>
       baseType is DataTypeReference
-      ? baseType.dataType.children
+      ? baseType.children
             .map((c) => c as DataType)
             .map((c) => EventNode.fromDataType(c, parent))
             .toList()

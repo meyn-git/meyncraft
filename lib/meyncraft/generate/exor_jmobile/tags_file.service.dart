@@ -184,7 +184,7 @@ class ExorTagNode {
 
   static List<ExorTagNode> createChildren(BaseType baseType) {
     if (baseType is DataTypeReference) {
-      return baseType.dataType.children
+      return baseType.children
           .map((c) => c as DataType)
           .map((child) => ExorTagNode.fromDataType(child))
           .toList();
@@ -203,7 +203,8 @@ class ExorTagNode {
     List<bool Function(String namePath)> skipRules = const [],
   }) {
     if (baseType is DataTypeReference &&
-        (baseType as DataTypeReference).dataType.baseType is EnumParent) {
+        ((baseType as DataTypeReference).dataTypePath.last as DataType).baseType
+            is EnumParent) {
       return [
         ExorTag(name: createNamePath(parentNamePath), exorDataType: ExorEnum()),
       ];

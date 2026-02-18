@@ -18,7 +18,7 @@ class Variable extends Node<DataTypeBase> {
 
   @override
   late final List<DataTypeBase> children = baseType is DataTypeReference
-      ? (baseType as DataTypeReference).dataType.children
+      ? (baseType as DataTypeReference).children
       : [];
 
   Variable({
