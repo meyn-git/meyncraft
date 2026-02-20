@@ -60,13 +60,13 @@ void main() {
         var dataTypePaths = sysmacProjectFile.dataTypes.findAllNodePaths(
           leafPathsFinder(),
         );
-        expect(dataTypePaths.length, 53260);
+        expect(dataTypePaths.length, 54609);
       });
     });
 
     group('property: globalVariables', () {
       test('finds globalVariableService with variable', () {
-        expect(sysmacProjectFile.globalVariables.length, 1730);
+        expect(sysmacProjectFile.globalVariables.length, 1738);
       });
     });
   });

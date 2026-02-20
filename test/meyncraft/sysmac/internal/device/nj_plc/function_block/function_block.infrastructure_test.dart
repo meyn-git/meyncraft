@@ -40,7 +40,7 @@ void main() {
       });
 
       test('should return 5 functionBlocks', () {
-        functionBlocks.length.should.be(23);
+        functionBlocks.length.should.be(25);
       });
 
       test(
@@ -64,11 +64,11 @@ void main() {
           'first functionBlock should be StructuredTextFunctionBlock with correct properties',
           () {
             firstFunction.should.beOfType<StructuredTextFunctionBlock>();
-            firstFunction.name.should.be('fbFFAutoTune');
+            firstFunction.name.should.be('fbVenneGateway');
             firstFunction.codeType.should.be(CodeType.structuredText);
-            firstFunction.internalVariables.length.should.be(8);
+            firstFunction.internalVariables.length.should.be(27);
             firstFunction.externalVariables.length.should.be(0);
-            firstFunction.inOutVariables.length.should.be(10);
+            firstFunction.inOutVariables.length.should.be(19);
             (firstFunction as StructuredTextFunctionBlock).structuredText.should
                 .startWith('(* Header');
           },

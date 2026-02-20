@@ -39,8 +39,8 @@ void main() {
         functions = createFunctions(sysmacProject, plcElement);
       });
 
-      test('should return 5 functions', () {
-        functions.length.should.be(5);
+      test('should return 6 functions', () {
+        functions.length.should.be(6);
       });
 
       test(
@@ -83,13 +83,13 @@ void main() {
           'last function should be a StructuredTextFunction with correct properties',
           () {
             lastFunction.should.beOfType<StructuredTextFunction>();
-            lastFunction.name.should.be('fBannerStatusLight');
+            lastFunction.name.should.be('fAngleCalculation');
             lastFunction.codeType.should.be(CodeType.structuredText);
-            lastFunction.internalVariables.length.should.be(11);
+            lastFunction.internalVariables.length.should.be(5);
             lastFunction.externalVariables.length.should.be(0);
-            lastFunction.inOutVariables.length.should.be(5);
+            lastFunction.inOutVariables.length.should.be(9);
             (lastFunction as StructuredTextFunction).structuredText.should
-                .endWith('oOutputData02[1] := OutputData1[0];');
+                .endWith('fAngleCalculation := TRUE;');
           },
         );
       });

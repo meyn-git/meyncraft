@@ -188,6 +188,7 @@ class ArrayFactory extends BaseTypeSubFactory {
   static final rangeName = 'range';
   static final typeName = 'type';
   static final RegExp _regex = FluentRegex()
+      .ignoreCase(true)
       .startOfLine()
       .literal('ARRAY')
       .literal('[')
@@ -199,6 +200,7 @@ class ArrayFactory extends BaseTypeSubFactory {
       .literal(']')
       .group(
         FluentRegex()
+            .ignoreCase(true)
             .literal(' OF ')
             .group(
               FluentRegex()

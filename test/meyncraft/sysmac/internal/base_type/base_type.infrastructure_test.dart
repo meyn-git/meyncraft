@@ -396,12 +396,12 @@ void main() {
       });
       test('invalid arrays', () {
         expect(
-          baseTypeFactory.createFromExpression('array[1..2] OF INT'),
+          baseTypeFactory.createFromExpression('array[1A..2] OF INT'),
           isA<UnknownBaseType>(),
         );
         expect(
           baseTypeFactory
-              .createFromExpression('array[1..2] OF INT')
+              .createFromExpression('array[1..2b] OF INT')
               .arrayRanges
               .length,
           0,

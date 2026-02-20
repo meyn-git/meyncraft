@@ -57,7 +57,10 @@ class NodePath extends DelegatingList<Node> {
     for (var node in this) '${node.name}${ArrayRanges.of(node)}',
   ];
 
-  List<String> get commentPath => map((node) => node.name).toList();
+  List<String> get commentPath => map((node) => node.comment).toList();
+
+  @override
+  String toString() => namePath.join('.');
 }
 
 class NodePathWithIndexes extends NodePath {
@@ -79,6 +82,9 @@ class NodePathWithIndexes extends NodePath {
     for (var index = 0; index < length; index++)
       '${this[index].name}${arrayIndexes[index] ?? ''}',
   ];
+
+  @override
+  String toString() => namePathWithArrayIndexes.join('.');
 }
 
 // extension NodePathExtension on List<Node> {

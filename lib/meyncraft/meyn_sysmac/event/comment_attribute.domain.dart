@@ -461,7 +461,7 @@ class AcknowledgeAttribute implements CommentAttribute {
 
 enum ArrayIndexType { first, last }
 
-/// An events is generated for each array value.
+/// An event is generated for each array value.
 /// e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q7 Motor overload tripped" will generate the following alarms:
 /// * 20Q7 Motor overload tripped
 /// * 20Q8 Motor overload tripped
@@ -474,13 +474,11 @@ enum ArrayIndexType { first, last }
 /// * 21Q1 Motor 3 overload tripped
 ///
 /// The expression defines which array value from the name path will be used
-/// e.g. namePath=plucker[2,5].cabinet[1].row[3]
-///
-/// then:
-/// * array(first)   or array(0) or array(last-3) returns 2
-/// * array(first+1) or array(1) or array(last-2) returns 5
-/// * array(first+2) or array(2) or array(last-1) returns 1
-/// * array(first+3) or array(3) or array(last)   returns 3
+/// For example for expression: plucker[2,5].cabinet[1].row[3]
+/// * [array(first)]   or [array(0)] or [array(last-3)] is replaced with: 2
+/// * [array(first+1)] or [array(1)] or [array(last-2)] is replaced with: 5
+/// * [array(first+2)] or [array(2)] or [array(last-1)] is replaced with: 1
+/// * [array(first+3)] or [array(3)] or [array(last)]   is replaced with: 3
 
 class ArrayAttribute implements CommentAttribute, Replaceable {
   final ArrayIndexType indexType;
@@ -601,8 +599,10 @@ class PriorityAttribute implements CommentAttribute {
 /// * 20Q8 Motor overload tripped
 /// * 21Q1 Motor overload tripped
 ///
-/// Add [ccc=+2] if the components codes skip columns. e.g.:
+/// Add the following to control the next component code:
+/// * [ccc=0] the next component code will be te same
 /// * [ccc=+0.1] the next component code will be 0.1 columns higher, e.g. 100U3.1, 100U4, 100U4.1, 100U5 etc
+/// * [ccc=+1] the next component code will be 1 columns higher. This is the default: you do not have to add this in the comment if you want this.
 /// * [ccc=+2] the next component code will be 2 columns higher
 /// * [ccc=+3] the next component code will be 3 columns higher
 /// * [ccc=+4] the next component code will be 4 columns higher

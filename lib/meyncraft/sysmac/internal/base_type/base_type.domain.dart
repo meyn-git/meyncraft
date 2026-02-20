@@ -47,17 +47,17 @@ class ArrayRanges extends DelegatingList<ArrayRange> {
   }
 
   /// e.g.
-  /// if [ArrayRArrayRanges] represents [ArrayRange(min:2, max:3)  ArrayRange(min:5, max:7)]
-  /// then outputs: [[2,3] [5,6,7]]
-  List<List<int>> toValueLists() => map(
+  /// if [ArrayRanges] represents [ArrayRange(min:2, max:3), ArrayRange(min:5, max:7)]
+  /// then outputs: [[2,3], [5,6,7]]
+  List<List<int>> toIntLists() => map(
     (range) => List.generate(range.max - range.min + 1, (i) => range.min + i),
   ).toList();
 
   /// e.g.
-  /// if [ArrayRArrayRanges] represents [ArrayRange(min:2, max:3)  ArrayRange(min:5, max:7)]
+  /// if [ArrayRanges] represents [ArrayRange(min:2, max:3), ArrayRange(min:5, max:7)]
   /// then outputs: ['[2,5]','[2,6]','[2,7]','[3,5]','[3,6]','[3,7]']
   List<String> toStringList() {
-    final valueLists = toValueLists();
+    final valueLists = toIntLists();
     final combinations = _cartesianProduct(valueLists);
     return combinations.map((combo) => '[${combo.join(',')}]').toList();
   }

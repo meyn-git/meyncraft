@@ -30,7 +30,7 @@ void main() {
         sysmacProjectArchive,
         dataTypes,
       );
-      globalVariables.length.should.be(1730);
+      globalVariables.length.should.be(1738);
     });
 
     test(

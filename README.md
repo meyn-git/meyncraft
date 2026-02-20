@@ -40,9 +40,12 @@ MeynCraft can create touch screen events (alarm lists) from a Omron Sysmac file:
     * Open the events window from the left menu Configuration\Alarms
     * Click on the "import alarms button" in the toolbar
     * Select the generated *JMobileEvents.xml file
+
 * You can add additional information to the variable or structure comments to create the events:
+
   * No Acknowledgement needed: [noAck]<br>
     Events need to be acknowledged by default. Add [noAck] to the comments if an event is only informational and therefore does not have to be acknowledged by the operator.
+
   * Adding columns to a component code: [ccc=+x]<br>
     An event is generated for each array value. 
     e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q7 Motor overload tripped" will generate the following alarms:
@@ -50,33 +53,44 @@ MeynCraft can create touch screen events (alarm lists) from a Omron Sysmac file:
     * 20Q8 Motor overload tripped
     * 21Q1 Motor overload tripped
 
-    Add [ccc=+2] if the components codes skip columns. e.g.: 
+    Add the following to control the next component code: 
+    * [ccc=0] the next component code will be te same
+    * [ccc=+0.1] the next component code will be 0.1 columns higher, e.g. 100U3.1, 100U4, 100U4.1, 100U5 etc
+    * [ccc=+1] the next component code will be 1 columns higher. This is the default: you do not have to add this in the comment if you want this.
     * [ccc=+2] the next component code will be 2 columns higher
     * [ccc=+3] the next component code will be 3 columns higher
     * [ccc=+4] the next component code will be 4 columns higher
     * etc
-
+    
     e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q5 [ccc=+4] Motor overload tripped" will generate the following alarms:
     * 20Q5 Motor overload tripped
     * 21Q1 Motor overload tripped
     * 21Q5 Motor overload tripped
+
   * Adding pages to a component code: [ccp=+x]<br>
     e.g. comment: "20Q7 Motor overload tripped [ccp=+10]" will generate the following alarm:"30Q7 Motor overload tripped"
-    This could be handy when you have an equipment module that is repeated every x pages in the electrical diagram.
-  * Using the current array number: [arrayNr]<br>
-    An events is generated for each array value. 
+    This can be used for example when you have an equipment module that is repeated every x pages in the electrical diagram.
+
+  * Using the current array number: [array(expression)]<br>
+    An event is generated for each array value. 
     e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q7 Motor overload tripped" will generate the following alarms:
     * 20Q7 Motor overload tripped
     * 20Q8 Motor overload tripped
     * 21Q1 Motor overload tripped
     
-    Add [array(last)] if you need the array number in the event message: 
+    Add [array(expression)] if you need the array number in the event message: 
     e.g.: a structure "Array[1..3] of MotorOverload" with comment "20Q7 Motor[array(last)] overload tripped" will generate the following alarms:
     * 20Q7 Motor1 overload tripped
     * 20Q8 Motor2 overload tripped
     * 21Q1 Motor3 overload tripped
     
-    Note that the array value of the last array in the structure can be used.
+    The expression defines which array value from the name path will be used
+    For example for expression: plucker[2,5].cabinet[1].row[3]
+    * [array(first)]   or [array(0)] or [array(last-3)] is replaced with: 2
+    * [array(first+1)] or [array(1)] or [array(last-2)] is replaced with: 5
+    * [array(first+2)] or [array(2)] or [array(last-1)] is replaced with: 1
+    * [array(first+3)] or [array(3)] or [array(last)]   is replaced with: 3
+
   * Event priority (named severity in Exor): [prio=m]<br>
     Event priorities indicate to an operator on what to focus on first.
     Events get a medium priority by default. Add [pri=<abbreviation>] to the comments if an event needs a different priority.

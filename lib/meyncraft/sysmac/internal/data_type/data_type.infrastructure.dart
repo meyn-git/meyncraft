@@ -29,7 +29,6 @@ List<DataTypeBase> _createChildren(SysmacProjectArchive sysmacProjectArchive) {
     var newDataTypes = dataTypeArchiveXmlFile.toDataTypes();
     var nameSpacePath = dataTypeArchiveXmlFile.nameSpacePath.split(r'\');
     var newDataTypesWithNameSpace = addNameSpace(nameSpacePath, newDataTypes);
-
     merge(dataTypes, newDataTypesWithNameSpace);
   }
   return dataTypes;
@@ -105,6 +104,7 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
 
   DataType _createDataType(XmlNode dataTypeElement) {
     String name = dataTypeElement.getAttribute(nameAttribute)!;
+
     String baseTypeExpression = dataTypeElement.getAttribute(
       baseTypeAttribute,
     )!;
@@ -114,6 +114,7 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     BaseType baseType = enumValue == null || enumValue.isEmpty
         ? _baseTypeFactory.createFromExpression(baseTypeExpression)
         : EnumChild(int.parse(enumValue));
+
     String comment = dataTypeElement.getAttribute(commentAttribute)!;
     var dataType = DataType(name: name, baseType: baseType, comment: comment);
 
