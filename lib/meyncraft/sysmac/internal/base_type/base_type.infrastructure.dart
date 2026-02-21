@@ -77,7 +77,7 @@ class EnumParentFactory extends BaseTypeSubFactory {
 }
 
 class NxTypeFactory extends BaseTypeSubFactory {
-  final NxType _nxType;
+  final IecType _nxType;
   final RegExp _regex;
 
   NxTypeFactory(this._nxType)
@@ -98,7 +98,7 @@ class NxTypeFactory extends BaseTypeSubFactory {
           .endOfLine();
 
   @override
-  NxType create(String expression) => _nxType;
+  IecType create(String expression) => _nxType;
 
   @override
   RegExp get regex => _regex;
@@ -107,26 +107,26 @@ class NxTypeFactory extends BaseTypeSubFactory {
 class NxTypeFactories extends DelegatingList<NxTypeFactory> {
   NxTypeFactories()
     : super([
-        NxTypeFactory(NxInt()),
-        NxTypeFactory(NxDInt()),
-        NxTypeFactory(NxLInt()),
-        NxTypeFactory(NxUInt()),
-        NxTypeFactory(NxWord()),
-        NxTypeFactory(NxUDInt()),
-        NxTypeFactory(NxDWord()),
-        NxTypeFactory(NxULInt()),
-        NxTypeFactory(NxLWord()),
-        NxTypeFactory(NxReal()),
-        NxTypeFactory(NxLReal()),
-        NxTypeFactory(NxBool()),
-        NxTypeFactory.withOptionalLength(NxString()),
-        NxTypeFactory(NxSInt()),
-        NxTypeFactory(NxUSInt()),
-        NxTypeFactory(NxByte()),
-        NxTypeFactory(NxTime()),
-        NxTypeFactory(NxDate()),
-        NxTypeFactory(NxDateAndTime()),
-        NxTypeFactory(NxTimeOfDay()),
+        NxTypeFactory(IecInt()),
+        NxTypeFactory(IecDInt()),
+        NxTypeFactory(IecLInt()),
+        NxTypeFactory(IecUInt()),
+        NxTypeFactory(IecWord()),
+        NxTypeFactory(IecUDInt()),
+        NxTypeFactory(IecDWord()),
+        NxTypeFactory(IecULInt()),
+        NxTypeFactory(IecLWord()),
+        NxTypeFactory(IecReal()),
+        NxTypeFactory(IecLReal()),
+        NxTypeFactory(IecBool()),
+        NxTypeFactory.withOptionalLength(IecString()),
+        NxTypeFactory(IecSInt()),
+        NxTypeFactory(IecUSInt()),
+        NxTypeFactory(IecByte()),
+        NxTypeFactory(IecTime()),
+        NxTypeFactory(IecDate()),
+        NxTypeFactory(IecDateAndTime()),
+        NxTypeFactory(IecTimeOfDay()),
       ]);
 }
 
@@ -222,7 +222,7 @@ class ArrayFactory extends BaseTypeSubFactory {
     var typeExpression = _regex.firstMatch(expression)!.namedGroup(typeName);
     if (typeExpression == null) {
       /// if nothing is specified, lets assume it is an array of bool
-      return NxBool();
+      return IecBool();
     }
 
     return baseTypeFactory.createFromExpression(typeExpression);

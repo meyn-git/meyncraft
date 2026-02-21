@@ -124,7 +124,7 @@ class ExorBoolean extends ExorDataType {
     : super(
         exorTypeName: 'boolean',
         iecTypeName: 'BOOL',
-        comparableOmronTypes: [VbBoolean, NxBool],
+        comparableOmronTypes: [VbBoolean, IecBool],
         min: '0',
         max: '1',
       );
@@ -135,7 +135,7 @@ class ExorByte extends ExorDataType {
     : super(
         exorTypeName: 'byte',
         iecTypeName: 'SINT',
-        comparableOmronTypes: [NxSInt, VbSByte],
+        comparableOmronTypes: [IecSInt, VbSByte],
         min: '-128',
         max: '127',
       );
@@ -146,7 +146,7 @@ class ExorUnsignedByte extends ExorDataType {
     : super(
         exorTypeName: 'unsignedByte',
         iecTypeName: 'USINT',
-        comparableOmronTypes: [NxUSInt, NxByte, VbByte],
+        comparableOmronTypes: [IecUSInt, IecByte, VbByte],
         min: '0',
         max: '255',
       );
@@ -157,7 +157,7 @@ class ExorShort extends ExorDataType {
     : super(
         exorTypeName: 'short',
         iecTypeName: 'INT',
-        comparableOmronTypes: [NxInt, VbShort],
+        comparableOmronTypes: [IecInt, VbShort],
         min: '-32768',
         max: '32767',
       );
@@ -168,7 +168,7 @@ class ExorUnsignedShort extends ExorDataType {
     : super(
         exorTypeName: 'unsignedShort',
         iecTypeName: 'UINT',
-        comparableOmronTypes: [NxUInt, NxWord, VbUShort],
+        comparableOmronTypes: [IecUInt, IecWord, VbUShort],
         min: '0',
         max: '65535',
       );
@@ -179,7 +179,7 @@ class ExorInt extends ExorDataType {
     : super(
         exorTypeName: 'int',
         iecTypeName: 'DINT',
-        comparableOmronTypes: [NxDInt, VbInteger],
+        comparableOmronTypes: [IecDInt, VbInteger],
         min: '-2147483648',
         max: '2147483647',
       );
@@ -190,7 +190,7 @@ class UnsignedInt extends ExorDataType {
     : super(
         exorTypeName: 'unsignedInt',
         iecTypeName: 'UDINT',
-        comparableOmronTypes: [NxUDInt, NxDWord, VbUInteger],
+        comparableOmronTypes: [IecUDInt, IecDWord, VbUInteger],
         min: '0',
         max: '4294967295',
       );
@@ -201,7 +201,7 @@ class ExorFloat extends ExorDataType {
     : super(
         exorTypeName: 'float',
         iecTypeName: 'REAL',
-        comparableOmronTypes: [NxReal, VbSingle],
+        comparableOmronTypes: [IecReal, VbSingle],
         min: '-3.40282e+38',
         max: '3.40282e+38',
       );
@@ -212,7 +212,7 @@ class ExorInt64 extends ExorDataType {
     : super(
         exorTypeName: 'int64',
         iecTypeName: 'LINT',
-        comparableOmronTypes: [NxLInt, VbLong],
+        comparableOmronTypes: [IecLInt, VbLong],
         min: '-9.2e18',
         max: '9.2e18',
       );
@@ -223,7 +223,7 @@ class ExorUnsignedInt64 extends ExorDataType {
     : super(
         exorTypeName: 'uint64',
         iecTypeName: 'ULINT',
-        comparableOmronTypes: [NxULInt, NxLWord, VbULong],
+        comparableOmronTypes: [IecULInt, IecLWord, VbULong],
         min: '0',
         max: '1.8e19',
       );
@@ -246,7 +246,7 @@ class ExorDouble extends ExorDataType {
     : super(
         exorTypeName: 'double',
         iecTypeName: 'LREAL',
-        comparableOmronTypes: [NxLReal, VbDouble],
+        comparableOmronTypes: [IecLReal, VbDouble],
         min: '2.2e-308',
         max: '1.79e308',
       );
@@ -257,7 +257,7 @@ class ExorString extends ExorDataType {
     : super(
         exorTypeName: 'string',
         iecTypeName: 'STRING',
-        comparableOmronTypes: [NxString, VbString],
+        comparableOmronTypes: [IecString, VbString],
         min: '',
         max: '',
         arraySize: '255',
@@ -270,7 +270,7 @@ class ExorTime extends ExorDataType {
     : super(
         exorTypeName: 'uint64',
         iecTypeName: 'TIME',
-        comparableOmronTypes: [NxTime],
+        comparableOmronTypes: [IecTime],
         min: '-3.40282e+38',
         max: '3.40282e+38',
 
@@ -287,7 +287,7 @@ class ExorDateTime extends ExorDataType {
     : super(
         exorTypeName: 'uint64',
         iecTypeName: 'DATE_AND_TIME',
-        comparableOmronTypes: [NxDateAndTime],
+        comparableOmronTypes: [IecDateAndTime],
         min: '0',
         max: '18446744073709551615',
       );

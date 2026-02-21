@@ -175,8 +175,8 @@ class EventNode {
   }
 
   bool _isBoolOrArrayOfBool(BaseType baseType) =>
-      baseType is NxBool ||
-      baseType is ArrayType && baseType.baseType is NxBool;
+      baseType is IecBool ||
+      baseType is ArrayType && baseType.baseType is IecBool;
 
   /// e.g. returns GizzardPump1 if namePath == EventGlobal.GizzardPump[1].MtrProt
   String createGroupName(String namePath) {

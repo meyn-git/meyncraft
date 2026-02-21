@@ -31,7 +31,7 @@ Future<void> main() async {
       eventPath.should.not.beEmpty();
       eventPath.last.name.should.be('Alarm0');
       eventPath.last.should.beOfType<DataType>();
-      (eventPath.last as DataType).baseType.should.beOfType<NxBool>();
+      (eventPath.last as DataType).baseType.should.beOfType<IecBool>();
     });
   });
 

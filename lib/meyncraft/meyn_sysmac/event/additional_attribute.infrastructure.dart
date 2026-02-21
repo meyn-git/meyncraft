@@ -61,7 +61,7 @@ String createAdditionalCommentAttributes(
 }
 
 String? createDataTypePath(EventNode eventNode) {
-  if (eventNode.baseType is! NxBool) {
+  if (eventNode.baseType is! IecBool) {
     return null;
   }
   var parent = eventNode.parent;

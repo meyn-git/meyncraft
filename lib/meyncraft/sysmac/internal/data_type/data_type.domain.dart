@@ -33,8 +33,11 @@ extension DataTypeBaseListExtension on List<DataTypeBase> {
   }
 }
 
+/// Types that the programmer defines, or that Sysmac creates automatically.
+abstract interface class CustomType implements BaseType {}
+
 /// Abstract base type of [DataType]s and [NameSpace]s
-abstract class DataTypeBase extends Node<DataTypeBase> {
+abstract class DataTypeBase extends Node<DataTypeBase> implements CustomType {
   @override
   final String name;
   @override

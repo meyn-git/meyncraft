@@ -4,25 +4,25 @@ import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
 import '../data_type/data_type.domain.dart';
 
-/// In Omron (Sysmac Studio)[https://industrial.omron.eu/en/products/sysmac-platform],
-/// a [BaseType] refers to the fundamental data type used
-/// to define variables, structures, arrays, enums and other elements in a PLC program.
-/// These are the building blocks for (more complex) data types and are essential
-/// for memory allocation, data manipulation, and interfacing with hardware.
-abstract class BaseType {
-  @override
-  String toString() => runtimeType.toString();
-
-  // @override
-  // bool operator ==(Object other) =>
-  //     identical(this, other) ||
-  //     other is BaseType &&
-  //         runtimeType == other.runtimeType &&
-  //         toString() == other.toString();
-
-  // @override
-  // int get hashCode => toString().hashCode;
-}
+/// Base for all IEC 61131-3 data types
+///
+/// Hierarchy:
+/// * BaseType
+///   * [UnknownBaseType]
+///   * [ArrayType]
+///   * [BasicType]
+///     * [IecType]
+///     * [VbType]
+///   * [CustomType]
+///     * [DataTypeBase]
+///       * [NameSpace]
+///       * [DataType]
+///         * [DataTypeReference]
+///         * [Struct]
+///         * [EnumParent]
+///         * Union
+/// See [https://www.myomron.com/index.php?action=kb&article=1628] for Omron's list of "Basic Data Types"
+abstract interface class BaseType {}
 
 /// Wraps a [BaseType] in an [ArrayType] with the given [arrayRanges]
 class ArrayType extends BaseType {
@@ -173,82 +173,86 @@ class EnumChild extends BaseType {
   EnumChild(this.index);
 }
 
-/// Nx PLC [BaseType] e.g.: a NJ PLC data type
+/// All built‑in types supported by Sysmac Studio.
+/// Omron explicitly lists these as “Basic Data Types.”
+abstract interface class BasicType implements BaseType {}
+
+/// These are the built‑in types defined by IEC 61131‑3 and directly supported by Sysmac Studio.
 /// See [https://www.myomron.com/index.php?action=kb&article=1628]
-abstract class NxType extends BaseType {
+abstract class IecType extends BasicType {
   String get name =>
-      runtimeType.toString().replaceFirst('Nx', '').toUpperCase();
+      runtimeType.toString().replaceFirst('Iec', '').toUpperCase();
 }
 
 /// true or false
-class NxBool extends NxType {}
+class IecBool extends IecType {}
 
 /// 8 bit signed
-class NxSInt extends NxType {}
+class IecSInt extends IecType {}
 
 /// 8 bit un-signed, bit operation possible
-class NxUSInt extends NxType {}
+class IecUSInt extends IecType {}
 
 /// 16 bit signed
-class NxByte extends NxType {}
+class IecByte extends IecType {}
 
 /// 16 bit signed
-class NxInt extends NxType {}
+class IecInt extends IecType {}
 
 /// 16 bit un-signed
-class NxUInt extends NxType {}
+class IecUInt extends IecType {}
 
 /// 16 bit un-signed, bit operation possible
-class NxWord extends NxType {}
+class IecWord extends IecType {}
 
 /// 32 bit signed
-class NxDInt extends NxType {}
+class IecDInt extends IecType {}
 
 /// 32 bit un-signed
-class NxUDInt extends NxType {}
+class IecUDInt extends IecType {}
 
 /// 32 bit un-signed, bit operation possible
-class NxDWord extends NxType {}
+class IecDWord extends IecType {}
 
 /// 32 bit floating point
-class NxReal extends NxType {}
+class IecReal extends IecType {}
 
 /// 64 bit signed
-class NxLInt extends NxType {}
+class IecLInt extends IecType {}
 
 /// 64 bit un-signed
-class NxULInt extends NxType {}
+class IecULInt extends IecType {}
 
 /// 64 bit un-signed, bit operation possible
-class NxLWord extends NxType {}
+class IecLWord extends IecType {}
 
 /// 64 bit floating point
-class NxLReal extends NxType {}
+class IecLReal extends IecType {}
 
 /// 8 bits per character
-class NxString extends NxType {}
+class IecString extends IecType {}
 
 /// 64 bit
-class NxTime extends NxType {}
+class IecTime extends IecType {}
 
 /// 64 bit
-class NxDate extends NxType {}
+class IecDate extends IecType {}
 
 /// 64 bit
-class NxDateAndTime extends NxType {
+class IecDateAndTime extends IecType {
   @override
   String get name => 'DATE_AND_TIME';
 }
 
 /// 64 bit
-class NxTimeOfDay extends NxType {
+class IecTimeOfDay extends IecType {
   @override
   String get name => 'TIME_OF_DAY';
 }
 
 /// A Visual Basic [BaseType] e.g.:a HMI data type
 /// See [https://www.myomron.com/index.php?action=kb&article=1628]
-abstract class VbType extends BaseType {
+abstract class VbType extends BasicType {
   String get name => runtimeType.toString().replaceFirst('Vb', '');
 }
 

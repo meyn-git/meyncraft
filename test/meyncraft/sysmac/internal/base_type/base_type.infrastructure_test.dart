@@ -44,113 +44,116 @@ void main() {
         );
       });
     });
-    group('${NxType}s', () {
+    group('${IecType}s', () {
       test('INT', () {
-        expect(baseTypeFactory.createFromExpression('INT'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('INT'), isA<NxInt>());
+        expect(baseTypeFactory.createFromExpression('INT'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('INT'), isA<IecInt>());
         expect(
           baseTypeFactory.createFromExpression('int'),
           isA<UnknownBaseType>(),
         );
       });
       test('DINT', () {
-        expect(baseTypeFactory.createFromExpression('DINT'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('DINT'), isA<NxDInt>());
+        expect(baseTypeFactory.createFromExpression('DINT'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('DINT'), isA<IecDInt>());
         expect(
           baseTypeFactory.createFromExpression('dint'),
           isA<UnknownBaseType>(),
         );
       });
       test('LINT', () {
-        expect(baseTypeFactory.createFromExpression('LINT'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('LINT'), isA<NxLInt>());
+        expect(baseTypeFactory.createFromExpression('LINT'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('LINT'), isA<IecLInt>());
         expect(
           baseTypeFactory.createFromExpression('lint'),
           isA<UnknownBaseType>(),
         );
       });
       test('UINT', () {
-        expect(baseTypeFactory.createFromExpression('UINT'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('UINT'), isA<NxUInt>());
+        expect(baseTypeFactory.createFromExpression('UINT'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('UINT'), isA<IecUInt>());
         expect(
           baseTypeFactory.createFromExpression('uint'),
           isA<UnknownBaseType>(),
         );
       });
       test('WORD', () {
-        expect(baseTypeFactory.createFromExpression('WORD'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('WORD'), isA<NxWord>());
+        expect(baseTypeFactory.createFromExpression('WORD'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('WORD'), isA<IecWord>());
         expect(
           baseTypeFactory.createFromExpression('word'),
           isA<UnknownBaseType>(),
         );
       });
       test('UDINT', () {
-        expect(baseTypeFactory.createFromExpression('UDINT'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('UDINT'), isA<NxUDInt>());
+        expect(baseTypeFactory.createFromExpression('UDINT'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('UDINT'), isA<IecUDInt>());
         expect(
           baseTypeFactory.createFromExpression('udint'),
           isA<UnknownBaseType>(),
         );
       });
       test('DWORD', () {
-        expect(baseTypeFactory.createFromExpression('DWORD'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('DWORD'), isA<NxDWord>());
+        expect(baseTypeFactory.createFromExpression('DWORD'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('DWORD'), isA<IecDWord>());
         expect(
           baseTypeFactory.createFromExpression('dword'),
           isA<UnknownBaseType>(),
         );
       });
       test('ULINT', () {
-        expect(baseTypeFactory.createFromExpression('ULINT'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('ULINT'), isA<NxULInt>());
+        expect(baseTypeFactory.createFromExpression('ULINT'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('ULINT'), isA<IecULInt>());
         expect(
           baseTypeFactory.createFromExpression('ulint'),
           isA<UnknownBaseType>(),
         );
       });
       test('LWORD', () {
-        expect(baseTypeFactory.createFromExpression('LWORD'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('LWORD'), isA<NxLWord>());
+        expect(baseTypeFactory.createFromExpression('LWORD'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('LWORD'), isA<IecLWord>());
         expect(
           baseTypeFactory.createFromExpression('lword'),
           isA<UnknownBaseType>(),
         );
       });
       test('REAL', () {
-        expect(baseTypeFactory.createFromExpression('REAL'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('REAL'), isA<NxReal>());
+        expect(baseTypeFactory.createFromExpression('REAL'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('REAL'), isA<IecReal>());
         expect(
           baseTypeFactory.createFromExpression('real'),
           isA<UnknownBaseType>(),
         );
       });
       test('LREAL', () {
-        expect(baseTypeFactory.createFromExpression('LREAL'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('LREAL'), isA<NxLReal>());
+        expect(baseTypeFactory.createFromExpression('LREAL'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('LREAL'), isA<IecLReal>());
         expect(
           baseTypeFactory.createFromExpression('lreal'),
           isA<UnknownBaseType>(),
         );
       });
       test('BOOL', () {
-        expect(baseTypeFactory.createFromExpression('BOOL'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('BOOL'), isA<NxBool>());
+        expect(baseTypeFactory.createFromExpression('BOOL'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('BOOL'), isA<IecBool>());
         expect(
           baseTypeFactory.createFromExpression('bool'),
           isA<UnknownBaseType>(),
         );
       });
       test('STRING', () {
-        expect(baseTypeFactory.createFromExpression('STRING'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('STRING'), isA<NxString>());
+        expect(baseTypeFactory.createFromExpression('STRING'), isA<IecType>());
         expect(
-          baseTypeFactory.createFromExpression('STRING[123]'),
-          isA<NxType>(),
+          baseTypeFactory.createFromExpression('STRING'),
+          isA<IecString>(),
         );
         expect(
           baseTypeFactory.createFromExpression('STRING[123]'),
-          isA<NxString>(),
+          isA<IecType>(),
+        );
+        expect(
+          baseTypeFactory.createFromExpression('STRING[123]'),
+          isA<IecString>(),
         );
         expect(
           baseTypeFactory.createFromExpression('string'),
@@ -158,40 +161,40 @@ void main() {
         );
       });
       test('SINT', () {
-        expect(baseTypeFactory.createFromExpression('SINT'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('SINT'), isA<NxSInt>());
+        expect(baseTypeFactory.createFromExpression('SINT'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('SINT'), isA<IecSInt>());
         expect(
           baseTypeFactory.createFromExpression('sint'),
           isA<UnknownBaseType>(),
         );
       });
       test('USINT', () {
-        expect(baseTypeFactory.createFromExpression('USINT'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('USINT'), isA<NxUSInt>());
+        expect(baseTypeFactory.createFromExpression('USINT'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('USINT'), isA<IecUSInt>());
         expect(
           baseTypeFactory.createFromExpression('usint'),
           isA<UnknownBaseType>(),
         );
       });
       test('BYTE', () {
-        expect(baseTypeFactory.createFromExpression('BYTE'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('BYTE'), isA<NxByte>());
+        expect(baseTypeFactory.createFromExpression('BYTE'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('BYTE'), isA<IecByte>());
         expect(
           baseTypeFactory.createFromExpression('byte'),
           isA<UnknownBaseType>(),
         );
       });
       test('TIME', () {
-        expect(baseTypeFactory.createFromExpression('TIME'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('TIME'), isA<NxTime>());
+        expect(baseTypeFactory.createFromExpression('TIME'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('TIME'), isA<IecTime>());
         expect(
           baseTypeFactory.createFromExpression('time'),
           isA<UnknownBaseType>(),
         );
       });
       test('DATE', () {
-        expect(baseTypeFactory.createFromExpression('DATE'), isA<NxType>());
-        expect(baseTypeFactory.createFromExpression('DATE'), isA<NxDate>());
+        expect(baseTypeFactory.createFromExpression('DATE'), isA<IecType>());
+        expect(baseTypeFactory.createFromExpression('DATE'), isA<IecDate>());
         expect(
           baseTypeFactory.createFromExpression('date'),
           isA<UnknownBaseType>(),
@@ -200,11 +203,11 @@ void main() {
       test('DATE_AND_TIME', () {
         expect(
           baseTypeFactory.createFromExpression('DATE_AND_TIME'),
-          isA<NxType>(),
+          isA<IecType>(),
         );
         expect(
           baseTypeFactory.createFromExpression('DATE_AND_TIME'),
-          isA<NxDateAndTime>(),
+          isA<IecDateAndTime>(),
         );
         expect(
           baseTypeFactory.createFromExpression('date_and_time'),
@@ -214,11 +217,11 @@ void main() {
       test('TIME_OF_DAY', () {
         expect(
           baseTypeFactory.createFromExpression('TIME_OF_DAY'),
-          isA<NxType>(),
+          isA<IecType>(),
         );
         expect(
           baseTypeFactory.createFromExpression('TIME_OF_DAY'),
-          isA<NxTimeOfDay>(),
+          isA<IecTimeOfDay>(),
         );
         expect(
           baseTypeFactory.createFromExpression('time_of_day'),
@@ -389,7 +392,7 @@ void main() {
 
     group('Arrays', () {
       test('INT', () {
-        baseTypeFactory.createFromExpression('INT').should.beOfType<NxInt>();
+        baseTypeFactory.createFromExpression('INT').should.beOfType<IecInt>();
       });
       test('invalid arrays', () {
         expect(
@@ -456,7 +459,7 @@ void main() {
         );
         baseType.should.beOfType<ArrayType>();
         var arrayType = baseType as ArrayType;
-        arrayType.baseType.should.beOfType<NxInt>();
+        arrayType.baseType.should.beOfType<IecInt>();
         arrayType.arrayRanges.length.should.be(1);
         arrayType.arrayRanges[0].min.should.be(1);
         arrayType.arrayRanges[0].max.should.be(2);
@@ -468,7 +471,7 @@ void main() {
         );
         baseType.should.beOfType<ArrayType>();
         var arrayType = baseType as ArrayType;
-        arrayType.baseType.should.beOfType<NxBool>();
+        arrayType.baseType.should.beOfType<IecBool>();
         arrayType.arrayRanges.length.should.be(2);
         arrayType.arrayRanges[0].min.should.be(2);
         arrayType.arrayRanges[0].max.should.be(3);
@@ -482,7 +485,7 @@ void main() {
         );
         baseType.should.beOfType<ArrayType>();
         var arrayType = baseType as ArrayType;
-        arrayType.baseType.should.beOfType<NxBool>();
+        arrayType.baseType.should.beOfType<IecBool>();
         arrayType.arrayRanges.length.should.be(3);
         arrayType.arrayRanges[0].min.should.be(2);
         arrayType.arrayRanges[0].max.should.be(3);
@@ -495,7 +498,7 @@ void main() {
         var baseType = baseTypeFactory.createFromExpression('ARRAY[1..2]');
         baseType.should.beOfType<ArrayType>();
         var arrayType = baseType as ArrayType;
-        arrayType.baseType.should.beOfType<NxBool>();
+        arrayType.baseType.should.beOfType<IecBool>();
         arrayType.arrayRanges.length.should.be(1);
         arrayType.arrayRanges[0].min.should.be(1);
         arrayType.arrayRanges[0].max.should.be(2);
@@ -576,7 +579,7 @@ void main() {
       dataTypePath.should.not.beEmpty();
       dataTypePath.last.name.should.be('Alarm0');
       dataTypePath.last.should.beOfType<DataType>();
-      (dataTypePath.last as DataType).baseType.should.beOfType<NxBool>();
+      (dataTypePath.last as DataType).baseType.should.beOfType<IecBool>();
     });
   });
 }
