@@ -61,7 +61,7 @@ List<EquipmentModule> _createEquipmentModules(
     (callPath) =>
         isFbUnitInterface(callPath) &&
         isLinkedToUnit(
-          variableFromUnit.namePathWithArrayIndexes.join('.'),
+          variableFromUnit.toNamePathWithArrayIndexes().join('.'),
           callPath,
         ),
   );
@@ -169,7 +169,9 @@ ControlModule? createControlModule(
   List<CallPath> allCallPaths,
   NodePathWithIndexes controlVariable,
 ) {
-  var variableExpression = controlVariable.namePathWithArrayIndexes.join('.');
+  var variableExpression = controlVariable.toNamePathWithArrayIndexes().join(
+    '.',
+  );
 
   /// TODO: limit the callPaths to a specific program if variableExpression is a internal variable
   var callPath = allCallPaths.firstWhereOrNull(
@@ -197,8 +199,8 @@ CallPath? findEquipmentCallPath(
   NodePath unitEquipmentInterface,
 ) {
   var interface = (unitEquipmentInterface is NodePathWithIndexes)
-      ? unitEquipmentInterface.namePathWithArrayIndexes.join('.')
-      : unitEquipmentInterface.namePath.join('.');
+      ? unitEquipmentInterface.toNamePathWithArrayIndexes().join('.')
+      : unitEquipmentInterface.toNamePath().join('.');
   for (var callPath in callPaths) {
     if (callPath.call.name != 'fbUnitInterface' &&
         callPath.call.parametersIn.any(

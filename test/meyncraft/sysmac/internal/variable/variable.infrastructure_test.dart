@@ -45,7 +45,8 @@ void main() {
         );
         globalEvent.should.not.beNull();
         globalEvent!.baseType.should.beOfType<DataTypeReference>();
-        (globalEvent.baseType as DataTypeReference).dataTypePath.namePath
+        (globalEvent.baseType as DataTypeReference).dataTypePath
+            .toNamePath()
             .join('.')
             .should
             .be('sEvent');

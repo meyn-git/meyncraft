@@ -71,5 +71,5 @@ String? createDataTypePath(EventNode eventNode) {
   if (parent.baseType is! DataTypeReference) {
     return null;
   }
-  return '${(parent.baseType as DataTypeReference).dataTypePath.namePath.join(r'\')}\\${eventNode.name}';
+  return '${(parent.baseType as DataTypeReference).dataTypePath.toNamePath().join(r'\')}\\${eventNode.name}';
 }

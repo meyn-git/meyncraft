@@ -14,6 +14,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dar
 /// These files are a temporary solution until all dataType event structures
 /// In the PLC program and standard libraries have gotten additional [CommentAttribute]s
 
+/// FIXME remove this when no longer needed
 Future<void> main(List<String> args) async {
   var file = File(r'test\9062DE02-Evisceration-021-002.smc2');
   var project = await MeynSysmacProject.create(file);
@@ -76,7 +77,7 @@ String write(CodeOwner codeOwner, String name, List<Variable> variables) {
 
   for (var eventOutput in eventOutputs) {
     var dataTypeReference = (eventOutput.baseType as DataTypeReference);
-    var parentPath = dataTypeReference.dataTypePath.namePath.join(r'\');
+    var parentPath = dataTypeReference.dataTypePath.toNamePath().join(r'\');
     for (var child in dataTypeReference.children) {
       var dataTypePath = '$parentPath\\${child.name}';
       var attributes = createAttributes(
@@ -182,7 +183,7 @@ bool isEventOutput(Variable variable) =>
     (variable.direction == VariableDirection.inOut ||
         variable.direction == VariableDirection.out) &&
     variable.baseType is DataTypeReference &&
-    (variable.baseType as DataTypeReference).dataTypePath.namePath.contains(
+    (variable.baseType as DataTypeReference).dataTypePath.toNamePath().contains(
       'sEvent',
     );
 

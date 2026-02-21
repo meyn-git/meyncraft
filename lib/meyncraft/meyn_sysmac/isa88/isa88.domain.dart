@@ -33,7 +33,7 @@ class Unit implements Isa88Node {
   @override
   String toString() =>
       'Unit(name: $name, '
-      'variableToEquipment: ${variableToEquipment.namePathWithArrayIndexes.join('.')}, '
+      'variableToEquipment: ${variableToEquipment.toNamePathWithArrayIndexes().join('.')}, '
       'callPath: $callPath )';
 }
 
@@ -73,7 +73,7 @@ class EquipmentModule implements ModuleNode {
   @override
   String toString() =>
       'EquipmentModule(name: $name, '
-      'variableFromParent: ${variableFromParent.namePathWithArrayIndexes.join('.')}, '
+      'variableFromParent: ${variableFromParent.toNamePathWithArrayIndexes().join('.')}, '
       'callPath: $callPath )';
 }
 
@@ -104,7 +104,7 @@ class ControlModule implements ModuleNode {
   @override
   String toString() =>
       'ControlModule(name: $name, '
-      'variableFromParent: ${variableFromParent.namePathWithArrayIndexes.join('.')}, '
+      'variableFromParent: ${variableFromParent.toNamePathWithArrayIndexes().join('.')}, '
       'callPath: $callPath )';
 }
 
