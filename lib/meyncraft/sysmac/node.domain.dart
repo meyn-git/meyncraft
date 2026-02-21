@@ -54,7 +54,10 @@ class NodePath extends DelegatingList<Node> {
   List<String> get namePath => map((node) => node.name).toList();
 
   List<String> get namePathWithArrayRanges => [
-    for (var node in this) '${node.name}${ArrayRanges.of(node)}',
+    for (var node in this)
+      (node is ArrayType)
+          ? '${node.name}${(node as ArrayType).arrayRanges}'
+          : node.name,
   ];
 
   List<String> get commentPath => map((node) => node.comment).toList();

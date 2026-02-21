@@ -21,24 +21,19 @@ class BaseTypeFactory {
     return factory.create(typeExpression);
   }
 
-  BaseType createFromExpressionIncludingCustomTypes(
+  BaseType tryToResolveDataTypeRefBaseType(
     String typeExpression,
     List<DataTypeBase> dataTypes,
   ) {
-    var baseType = createFromExpression(typeExpression);
-    if (baseType is UnknownBaseType) {
-      //var dataType = dataTypes.findNamePathString(typeExpression);
-      var dataTypePath = dataTypes.findFirstNodePath(
-        namePathFinder(typeExpression.split(r'\'), caseSensitive: false),
-      );
-      if (dataTypePath.isNotEmpty) {
-        return DataTypeReference(
-          dataTypePath: dataTypePath,
-          arrayRanges: baseType.arrayRanges,
-        );
-      }
+    // try to find a path for the data type reference
+    var dataTypePath = dataTypes.findFirstNodePath(
+      namePathFinder(typeExpression.split(r'\'), caseSensitive: false),
+    );
+    if (dataTypePath.isNotEmpty) {
+      return DataTypeReference(dataTypePath: dataTypePath);
+    } else {
+      return UnknownBaseType(typeExpression);
     }
-    return baseType;
   }
 }
 
@@ -220,9 +215,7 @@ class ArrayFactory extends BaseTypeSubFactory {
   BaseType create(String expression) {
     var baseType = _createBaseType(expression);
     var arrayRanges = _createArrayRanges(expression);
-    baseType.arrayRanges.clear();
-    baseType.arrayRanges.addAll(arrayRanges);
-    return baseType;
+    return ArrayType(baseType: baseType, arrayRanges: arrayRanges);
   }
 
   BaseType _createBaseType(String expression) {
@@ -237,7 +230,7 @@ class ArrayFactory extends BaseTypeSubFactory {
 
   late final baseTypeFactory = BaseTypeFactory();
 
-  List<ArrayRange> _createArrayRanges(String expression) {
+  ArrayRanges _createArrayRanges(String expression) {
     var rangeExpressions = ArrayRange.regex.allMatches(expression);
 
     var ranges = rangeExpressions
@@ -245,7 +238,8 @@ class ArrayFactory extends BaseTypeSubFactory {
           (match) => ArrayRange(expression.substring(match.start, match.end)),
         )
         .toList();
-    return ranges;
+
+    return ArrayRanges(ranges);
   }
 
   @override
@@ -254,18 +248,13 @@ class ArrayFactory extends BaseTypeSubFactory {
 
 /// Replaces all the [UnknownBaseType]s with [DataTypeReference]s
 /// when the path can be found
-void replaceDataTypeReferencesWherePossible(List<DataTypeBase> dataTypes) {
+void tryToResolveDataTypeRefBaseType(List<DataTypeBase> dataTypes) {
   for (var child in dataTypes.descendants.whereType<DataType>()) {
     var baseType = child.baseType;
     if (baseType is UnknownBaseType) {
-      var dataTypeReference = _baseTypeFactory
-          .createFromExpressionIncludingCustomTypes(
-            baseType.expression,
-            dataTypes,
-          );
-      dataTypeReference.arrayRanges.clear();
-      dataTypeReference.arrayRanges.addAll(baseType.arrayRanges);
-      child.baseType = dataTypeReference;
+      var possiblyResolvedDataTypeRef = _baseTypeFactory
+          .tryToResolveDataTypeRefBaseType(baseType.expression, dataTypes);
+      child.baseType = possiblyResolvedDataTypeRef;
     }
   }
 }

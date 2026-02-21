@@ -389,10 +389,7 @@ void main() {
 
     group('Arrays', () {
       test('INT', () {
-        expect(
-          baseTypeFactory.createFromExpression('INT').arrayRanges,
-          isEmpty,
-        );
+        baseTypeFactory.createFromExpression('INT').should.beOfType<NxInt>();
       });
       test('invalid arrays', () {
         expect(
@@ -400,11 +397,9 @@ void main() {
           isA<UnknownBaseType>(),
         );
         expect(
-          baseTypeFactory
-              .createFromExpression('array[1..2b] OF INT')
-              .arrayRanges
-              .length,
-          0,
+          baseTypeFactory.createFromExpression('array[1..2b] OF INT'),
+
+          isA<UnknownBaseType>(),
         );
 
         expect(
@@ -412,11 +407,8 @@ void main() {
           isA<UnknownBaseType>(),
         );
         expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..] OF INT')
-              .arrayRanges
-              .length,
-          0,
+          baseTypeFactory.createFromExpression('ARRAY[1..] OF INT'),
+          isA<UnknownBaseType>(),
         );
 
         expect(
@@ -424,35 +416,23 @@ void main() {
           isA<UnknownBaseType>(),
         );
         expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[..2] OF INT')
-              .arrayRanges
-              .length,
-          0,
+          baseTypeFactory.createFromExpression('ARRAY[..2] OF INT'),
+          isA<UnknownBaseType>(),
         );
 
         expect(
           baseTypeFactory.createFromExpression('ARRAY[2] OF INT'),
           isA<UnknownBaseType>(),
         );
+
         expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2] OF INT')
-              .arrayRanges
-              .length,
-          0,
+          baseTypeFactory.createFromExpression('ARRAY[2] OF INT'),
+          isA<UnknownBaseType>(),
         );
 
         expect(
           baseTypeFactory.createFromExpression('ARRAY[1..2]OF INT'),
           isA<UnknownBaseType>(),
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..2]OF INT')
-              .arrayRanges
-              .length,
-          0,
         );
 
         expect(
@@ -460,202 +440,76 @@ void main() {
           isA<UnknownBaseType>(),
         );
         expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..2] OFINT')
-              .arrayRanges
-              .length,
-          0,
+          baseTypeFactory.createFromExpression('ARRAY[1..2] OFINT'),
+          isA<UnknownBaseType>(),
         );
 
         expect(
           baseTypeFactory.createFromExpression('ARRAY[1..2] OF'),
           isA<UnknownBaseType>(),
         );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..2] OF')
-              .arrayRanges
-              .length,
-          0,
-        );
       });
 
       test('ARRAY[1..2] OF INT', () {
-        expect(
-          baseTypeFactory.createFromExpression('ARRAY[1..2] OF INT'),
-          isA<NxType>(),
+        var baseType = baseTypeFactory.createFromExpression(
+          'ARRAY[1..2] OF INT',
         );
-        expect(
-          baseTypeFactory.createFromExpression('ARRAY[1..2] OF INT'),
-          isA<NxInt>(),
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..2] OF INT')
-              .arrayRanges
-              .length,
-          1,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..2] OF INT')
-              .arrayRanges[0]
-              .min,
-          1,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..2] OF INT')
-              .arrayRanges[0]
-              .max,
-          2,
-        );
+        baseType.should.beOfType<ArrayType>();
+        var arrayType = baseType as ArrayType;
+        arrayType.baseType.should.beOfType<NxInt>();
+        arrayType.arrayRanges.length.should.be(1);
+        arrayType.arrayRanges[0].min.should.be(1);
+        arrayType.arrayRanges[0].max.should.be(2);
       });
 
       test('ARRAY[2..3,4..5] OF BOOL', () {
-        expect(
-          baseTypeFactory.createFromExpression('ARRAY[2..3,4..5] OF BOOL'),
-          isA<NxType>(),
+        var baseType = baseTypeFactory.createFromExpression(
+          'ARRAY[2..3,4..5] OF BOOL',
         );
-        expect(
-          baseTypeFactory.createFromExpression('ARRAY[2..3,4..5] OF BOOL'),
-          isA<NxBool>(),
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5] OF BOOL')
-              .arrayRanges
-              .length,
-          2,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5] OF BOOL')
-              .arrayRanges[0]
-              .min,
-          2,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5] OF BOOL')
-              .arrayRanges[0]
-              .max,
-          3,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5] OF BOOL')
-              .arrayRanges[1]
-              .min,
-          4,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5] OF BOOL')
-              .arrayRanges[1]
-              .max,
-          5,
-        );
+        baseType.should.beOfType<ArrayType>();
+        var arrayType = baseType as ArrayType;
+        arrayType.baseType.should.beOfType<NxBool>();
+        arrayType.arrayRanges.length.should.be(2);
+        arrayType.arrayRanges[0].min.should.be(2);
+        arrayType.arrayRanges[0].max.should.be(3);
+        arrayType.arrayRanges[1].min.should.be(4);
+        arrayType.arrayRanges[1].max.should.be(5);
       });
 
       test('ARRAY[2..3,4..5,7..10] OF BOOL', () {
-        expect(
-          baseTypeFactory.createFromExpression('ARRAY[2..3,4..5] OF BOOL'),
-          isA<NxType>(),
+        var baseType = baseTypeFactory.createFromExpression(
+          'ARRAY[2..3,4..5,7..10] OF BOOL',
         );
-        expect(
-          baseTypeFactory.createFromExpression('ARRAY[2..3,4..5] OF BOOL'),
-          isA<NxBool>(),
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5,7..10] OF BOOL')
-              .arrayRanges
-              .length,
-          3,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5,7..10] OF BOOL')
-              .arrayRanges[0]
-              .min,
-          2,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5,7..10] OF BOOL')
-              .arrayRanges[0]
-              .max,
-          3,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5,7..10] OF BOOL')
-              .arrayRanges[1]
-              .min,
-          4,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5,7..10] OF BOOL')
-              .arrayRanges[1]
-              .max,
-          5,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5,7..10] OF BOOL')
-              .arrayRanges[2]
-              .min,
-          7,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[2..3,4..5,7..10] OF BOOL')
-              .arrayRanges[2]
-              .max,
-          10,
-        );
+        baseType.should.beOfType<ArrayType>();
+        var arrayType = baseType as ArrayType;
+        arrayType.baseType.should.beOfType<NxBool>();
+        arrayType.arrayRanges.length.should.be(3);
+        arrayType.arrayRanges[0].min.should.be(2);
+        arrayType.arrayRanges[0].max.should.be(3);
+        arrayType.arrayRanges[1].min.should.be(4);
+        arrayType.arrayRanges[1].max.should.be(5);
+        arrayType.arrayRanges[2].min.should.be(7);
+        arrayType.arrayRanges[2].max.should.be(10);
       });
       test('ARRAY[1..2]', () {
-        expect(
-          baseTypeFactory.createFromExpression('ARRAY[1..2]'),
-          isA<NxType>(),
-        );
-        expect(
-          baseTypeFactory.createFromExpression('ARRAY[1..2]'),
-          isA<NxBool>(),
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..2]')
-              .arrayRanges
-              .length,
-          1,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..2]')
-              .arrayRanges[0]
-              .min,
-          1,
-        );
-        expect(
-          baseTypeFactory
-              .createFromExpression('ARRAY[1..2]')
-              .arrayRanges[0]
-              .max,
-          2,
-        );
+        var baseType = baseTypeFactory.createFromExpression('ARRAY[1..2]');
+        baseType.should.beOfType<ArrayType>();
+        var arrayType = baseType as ArrayType;
+        arrayType.baseType.should.beOfType<NxBool>();
+        arrayType.arrayRanges.length.should.be(1);
+        arrayType.arrayRanges[0].min.should.be(1);
+        arrayType.arrayRanges[0].max.should.be(2);
       });
       test('ARRAY[1..6] OF Equipment\\LineModuleWash_v11\\sInterface', () {
-        var result = baseTypeFactory.createFromExpression(
+        var baseType = baseTypeFactory.createFromExpression(
           'ARRAY[1..6] OF Equipment\\LineModuleWash_v11\\sInterface',
         );
-        result.should.beOfType<UnknownBaseType>();
-        result.arrayRanges.length.should.be(1);
-        result.arrayRanges[0].min.should.be(1);
-        result.arrayRanges[0].max.should.be(6);
+        baseType.should.beOfType<ArrayType>();
+        var arrayType = baseType as ArrayType;
+        arrayType.baseType.should.beOfType<UnknownBaseType>();
+        baseType.arrayRanges.length.should.be(1);
+        baseType.arrayRanges[0].min.should.be(1);
+        baseType.arrayRanges[0].max.should.be(6);
       });
     });
     group('Custom types', () {
@@ -666,8 +520,10 @@ void main() {
             SysmacProjectTestResource().file,
           );
           var dataTypes = createDataTypes(sysmacProjectArchive);
-          var sEventType = baseTypeFactory
-              .createFromExpressionIncludingCustomTypes('sEvent', dataTypes);
+          var sEventType = baseTypeFactory.tryToResolveDataTypeRefBaseType(
+            'sEvent',
+            dataTypes,
+          );
           sEventType.should.beOfType<DataTypeReference>();
         },
       );
@@ -714,11 +570,13 @@ void main() {
 
     test('"Common.Alarm0" should not be an array', () {
       var dataTypes = createDataTypes(sysmacProjectArchive);
-      var common = dataTypes.firstWhere((v) => v.name == 'Common');
-      var sEvent = common.children.firstWhere((v) => v.name == 'sEvent');
-      var alarm0 = sEvent.children.firstWhere((v) => v.name == 'Alarm0');
-      var baseType = (alarm0 as DataType).baseType;
-      baseType.arrayRanges.should.beEmpty();
+      var dataTypePath = dataTypes.findFirstNodePath(
+        namePathFinder(['Common', 'sEvent', 'Alarm0']),
+      );
+      dataTypePath.should.not.beEmpty();
+      dataTypePath.last.name.should.be('Alarm0');
+      dataTypePath.last.should.beOfType<DataType>();
+      (dataTypePath.last as DataType).baseType.should.beOfType<NxBool>();
     });
   });
 }

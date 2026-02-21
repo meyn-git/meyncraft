@@ -16,7 +16,7 @@ const String nameSpacePathSeparator = '\\';
 
 List<DataTypeBase> createDataTypes(SysmacProjectArchive sysmacProjectArchive) {
   var dataTypes = _createChildren(sysmacProjectArchive);
-  replaceDataTypeReferencesWherePossible(dataTypes);
+  tryToResolveDataTypeRefBaseType(dataTypes);
   return dataTypes;
 }
 

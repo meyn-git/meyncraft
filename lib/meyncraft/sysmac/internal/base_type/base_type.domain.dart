@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:fluent_regex/fluent_regex.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
 import '../data_type/data_type.domain.dart';
@@ -11,40 +10,35 @@ import '../data_type/data_type.domain.dart';
 /// These are the building blocks for (more complex) data types and are essential
 /// for memory allocation, data manipulation, and interfacing with hardware.
 abstract class BaseType {
-  final arrayRanges = ArrayRanges();
+  @override
+  String toString() => runtimeType.toString();
+
+  // @override
+  // bool operator ==(Object other) =>
+  //     identical(this, other) ||
+  //     other is BaseType &&
+  //         runtimeType == other.runtimeType &&
+  //         toString() == other.toString();
+
+  // @override
+  // int get hashCode => toString().hashCode;
+}
+
+/// Wraps a [BaseType] in an [ArrayType] with the given [arrayRanges]
+class ArrayType extends BaseType {
+  final BaseType baseType;
+  final ArrayRanges arrayRanges;
+
+  ArrayType({required this.baseType, required this.arrayRanges});
 
   @override
   String toString() {
-    if (arrayRanges.isEmpty) {
-      return runtimeType.toString();
-    } else {
-      return 'ARRAY$arrayRanges OF $runtimeType';
-    }
+    return 'ARRAY$arrayRanges OF $baseType';
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is BaseType &&
-          runtimeType == other.runtimeType &&
-          toString() == other.toString();
-
-  @override
-  int get hashCode => toString().hashCode;
 }
 
 class ArrayRanges extends DelegatingList<ArrayRange> {
-  ArrayRanges() : super(<ArrayRange>[]);
-
-  static ArrayRanges of(Node node) {
-    if (node is Variable) {
-      return node.baseType.arrayRanges;
-    } else if (node is DataType) {
-      return node.baseType.arrayRanges;
-    }
-    // return empty ArrayRanges
-    return ArrayRanges();
-  }
+  ArrayRanges([super.arrayRanges = const <ArrayRange>[]]);
 
   /// e.g.
   /// if [ArrayRanges] represents [ArrayRange(min:2, max:3), ArrayRange(min:5, max:7)]
@@ -145,39 +139,27 @@ class ArrayRange {
   }
 }
 
-/// A [BaseType] that refers to an existing [dataTypePath].
-///
-/// It is different from a [DataType] since:
-/// * it refers to a [DataType] or one of its children, see [dataTypePath]
-/// * it can have [arrayRanges]
+/// [DataTypeReference] is a [Struct] child or a [Union] child that refers to an Basic type or DataType or one of its children.
 class DataTypeReference extends BaseType {
+  /// Either:
+  /// * a single List element to a BaseType (e.g. NxBool, optionally wrapped in a [ArrayType])
+  /// * a path to a DataType or one of its children
   final NodePath dataTypePath;
 
   late final List<DataTypeBase> children = dataTypePath.last.children
       .cast<DataTypeBase>();
 
-  DataTypeReference({
-    required this.dataTypePath,
-    required ArrayRanges arrayRanges,
-  }) {
-    this.arrayRanges.clear();
-    this.arrayRanges.addAll(arrayRanges);
-  }
+  late final BaseType baseType = (dataTypePath.last is DataTypeReference)
+      ? (dataTypePath.last as DataTypeReference).baseType
+      : dataTypePath.last as BaseType;
+
+  DataTypeReference({required this.dataTypePath});
 }
 
 class UnknownBaseType extends BaseType {
   final String expression;
 
   UnknownBaseType(this.expression);
-
-  @override
-  String toString() {
-    if (arrayRanges.isEmpty) {
-      return expression;
-    } else {
-      return 'ARRAY$arrayRanges OF $expression';
-    }
-  }
 }
 
 class Struct extends BaseType {}

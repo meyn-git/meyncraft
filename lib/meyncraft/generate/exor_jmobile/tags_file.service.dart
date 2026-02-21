@@ -253,11 +253,11 @@ class ExorTagNode {
   /// * or a path for each array value
   List<String> createNamePaths(String preceedingPath) {
     var path = createNamePath(preceedingPath);
-    var arrayValues = baseType.arrayRanges.toStringList();
-    if (arrayValues.isEmpty) {
-      return <String>[path];
+    if (baseType is ArrayType) {
+      var arrayIndexes = (baseType as ArrayType).arrayRanges.toStringList();
+      return arrayIndexes.map((arrayValue) => path + arrayValue).toList();
     } else {
-      return arrayValues.map((arrayValue) => path + arrayValue).toList();
+      return [path];
     }
   }
 
@@ -267,8 +267,9 @@ class ExorTagNode {
 
   /// an exception on the rule: to reduce the number of tags
   bool singleArrayRootNode(String preceedingPath, BaseType baseType) =>
-      preceedingPath.isEmpty && baseType.arrayRanges.length == 1;
+      preceedingPath.isEmpty &&
+      baseType is ArrayType &&
+      baseType.arrayRanges.length == 1;
 
   bool get isLeafNode => children.isEmpty;
-  bool get isOneDimensionalArray => baseType.arrayRanges.length == 1;
 }

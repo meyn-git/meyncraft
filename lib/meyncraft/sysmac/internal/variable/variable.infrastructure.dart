@@ -96,7 +96,7 @@ Variable createVariable(
   var hardwareAddress = attributes['AT'];
   var networkPublish = NetworkPublish.ofValue(attributes['NTP']);
   var typeExpression = attributes['D']!;
-  var baseType = _baseTypeFactory.createFromExpressionIncludingCustomTypes(
+  var baseType = _baseTypeFactory.tryToResolveDataTypeRefBaseType(
     typeExpression,
     dataTypes,
   );

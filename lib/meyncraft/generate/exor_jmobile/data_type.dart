@@ -89,7 +89,7 @@ abstract class ExorDataType {
   static ExorDataType findCompatibleTypeWithOneDimensionalArray(
     BaseType baseType,
   ) {
-    var compatibleType = findCompatibleType(baseType);
+    var compatibleType = findCompatibleType((baseType as ArrayType).baseType);
     return ExorOneDimensionalArray(compatibleType, baseType.arrayRanges.first);
   }
 }

@@ -77,11 +77,11 @@ class EventNode {
   /// * or a path for each array value
   List<String> createNamePaths(String parentNamePath) {
     var path = createNamePath(parentNamePath);
-    var arrayValues = baseType.arrayRanges.toStringList();
-    if (arrayValues.isEmpty) {
-      return <String>[path];
+    if (baseType is ArrayType) {
+      var arrayIndexes = (baseType as ArrayType).arrayRanges.toStringList();
+      return arrayIndexes.map((a) => path + a).toList();
     } else {
-      return arrayValues.map((a) => path + a).toList();
+      return [path];
     }
   }
 
@@ -104,7 +104,7 @@ class EventNode {
   }) {
     var events = <Event>[];
     if (children.isEmpty) {
-      if (baseType is! NxBool) {
+      if (!_isBoolOrArrayOfBool(baseType)) {
         return events;
       }
       var namePaths = createNamePaths(parentNamePath);
@@ -173,6 +173,10 @@ class EventNode {
     }
     return events;
   }
+
+  bool _isBoolOrArrayOfBool(BaseType baseType) =>
+      baseType is NxBool ||
+      baseType is ArrayType && baseType.baseType is NxBool;
 
   /// e.g. returns GizzardPump1 if namePath == EventGlobal.GizzardPump[1].MtrProt
   String createGroupName(String namePath) {
