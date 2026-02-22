@@ -17,33 +17,6 @@ void main() {
   group('class: $BaseTypeFactory', () {
     var baseTypeFactory = BaseTypeFactory();
 
-    group('${BaseType}s', () {
-      var structType = 'STRUCT';
-      test(structType, () {
-        expect(
-          baseTypeFactory.createFromExpression(structType),
-          isA<BaseType>(),
-        );
-        expect(baseTypeFactory.createFromExpression(structType), isA<Struct>());
-        expect(
-          baseTypeFactory.createFromExpression(structType.toLowerCase()),
-          isA<UnknownBaseType>(),
-        );
-      });
-
-      var enumType = 'ENUM';
-      test(enumType, () {
-        expect(baseTypeFactory.createFromExpression(enumType), isA<BaseType>());
-        expect(
-          baseTypeFactory.createFromExpression(enumType),
-          isA<EnumParent>(),
-        );
-        expect(
-          baseTypeFactory.createFromExpression(enumType.toLowerCase()),
-          isA<UnknownBaseType>(),
-        );
-      });
-    });
     group('${IecType}s', () {
       test('INT', () {
         expect(baseTypeFactory.createFromExpression('INT'), isA<IecType>());
@@ -524,8 +497,10 @@ void main() {
           );
           var dataTypes = createDataTypes(sysmacProjectArchive);
           var sEventType = baseTypeFactory.tryToResolveDataTypeRefBaseType(
-            'sEvent',
-            dataTypes,
+            dataTypes: dataTypes,
+            typeExpression: 'sEvent',
+            name: 'Not Important',
+            comment: 'Not Important',
           );
           sEventType.should.beOfType<DataTypeReference>();
         },
@@ -578,8 +553,9 @@ void main() {
       );
       dataTypePath.should.not.beEmpty();
       dataTypePath.last.name.should.be('Alarm0');
-      dataTypePath.last.should.beOfType<DataType>();
-      (dataTypePath.last as DataType).baseType.should.beOfType<IecBool>();
+      dataTypePath.last.should.beOfType<DataTypeReference>();
+      (dataTypePath.last as DataTypeReference).baseType.should
+          .beOfType<IecBool>();
     });
   });
 }

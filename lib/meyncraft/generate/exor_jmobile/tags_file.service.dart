@@ -176,17 +176,17 @@ class ExorTagNode {
       baseType = variable.baseType,
       children = createChildren(variable.baseType);
 
-  ExorTagNode.fromDataType(DataType dataType)
-    : name = dataType.name,
-      comment = dataType.comment,
-      baseType = dataType.baseType,
-      children = createChildren(dataType.baseType);
+  ExorTagNode.fromDataTypeRef(DataTypeReference dataTypeRef)
+    : name = dataTypeRef.name,
+      comment = dataTypeRef.comment,
+      baseType = dataTypeRef.baseType,
+      children = createChildren(dataTypeRef.baseType);
 
   static List<ExorTagNode> createChildren(BaseType baseType) {
     if (baseType is DataTypeReference) {
       return baseType.children
-          .map((c) => c as DataType)
-          .map((child) => ExorTagNode.fromDataType(child))
+          .whereType<DataTypeReference>()
+          .map((dataTypeRef) => ExorTagNode.fromDataTypeRef(dataTypeRef))
           .toList();
     }
     // baseType has no children
@@ -194,7 +194,7 @@ class ExorTagNode {
   }
 
   static bool isNoTag(BaseType baseType) =>
-      baseType is EnumChild ||
+      baseType is EnumerationMember ||
       baseType is UnknownBaseType ||
       baseType is DataTypeReference;
 
@@ -203,8 +203,7 @@ class ExorTagNode {
     List<bool Function(String namePath)> skipRules = const [],
   }) {
     if (baseType is DataTypeReference &&
-        ((baseType as DataTypeReference).dataTypePath.last as DataType).baseType
-            is EnumParent) {
+        ((baseType as DataTypeReference).baseType) is EnumerationMember) {
       return [
         ExorTag(name: createNamePath(parentNamePath), exorDataType: ExorEnum()),
       ];

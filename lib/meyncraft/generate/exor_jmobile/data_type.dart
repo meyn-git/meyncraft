@@ -1,4 +1,5 @@
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 
 /// | Memory Space         | NX/NJ Data Type  | NA Data Type     | JMobile        | JMobile Limits               |
 /// |----------------------|------------------|------------------|----------------|------------------------------|
@@ -99,7 +100,7 @@ class ExorEnum extends ExorDataType {
     : super(
         exorTypeName: 'int',
         iecTypeName: 'DINT',
-        comparableOmronTypes: [EnumParent],
+        comparableOmronTypes: [EnumerationMember],
         min: '-32768',
         max: '32767',
       );

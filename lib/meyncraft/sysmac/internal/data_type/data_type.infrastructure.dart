@@ -1,6 +1,6 @@
 import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:xml/xml.dart';
 
@@ -26,7 +26,7 @@ List<DataTypeBase> _createChildren(SysmacProjectArchive sysmacProjectArchive) {
       .dataTypeArchiveXmlFiles();
 
   for (var dataTypeArchiveXmlFile in dataTypeArchiveXmlFiles) {
-    var newDataTypes = dataTypeArchiveXmlFile.toDataTypes();
+    var newDataTypes = dataTypeArchiveXmlFile.toDataTypeBases();
     var nameSpacePath = dataTypeArchiveXmlFile.nameSpacePath.split(r'\');
     var newDataTypesWithNameSpace = addNameSpace(nameSpacePath, newDataTypes);
     merge(dataTypes, newDataTypesWithNameSpace);
@@ -46,10 +46,10 @@ List<DataTypeBase> addNameSpace(
   NameSpace? last;
   for (var nameSpace in nameSpacePath) {
     if (root == null) {
-      root = NameSpace(nameSpace);
+      root = NameSpace(name: nameSpace);
       last = root;
     } else {
-      var newNameSpace = NameSpace(nameSpace);
+      var newNameSpace = NameSpace(name: nameSpace);
       last!.children.add(newNameSpace);
       last = newNameSpace;
     }
@@ -90,45 +90,103 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     required String xml,
   }) : super.fromXml(xml);
 
-  List<DataTypeBase> toDataTypes() {
+  List<DataTypeBase> toDataTypeBases() {
     var dataElement = xmlDocument.firstElementChild!;
     var dataTypeRootElement = dataElement.firstElementChild!;
     var dataTypes = <DataTypeBase>[];
     dataTypes.addAll(
-      dataTypeRootElement.children
-          .where((node) => isDataTypeElement(node))
-          .map((node) => _createDataType(node)),
+      dataTypeRootElement.childElements
+          .where((element) => element.name.local == 'DataType')
+          .map((element) => _createDataType(element)),
     );
     return dataTypes;
   }
 
-  DataType _createDataType(XmlNode dataTypeElement) {
-    String name = dataTypeElement.getAttribute(nameAttribute)!;
-
+  DataTypeBase _createDataType(XmlElement dataTypeElement) {
     String baseTypeExpression = dataTypeElement.getAttribute(
       baseTypeAttribute,
     )!;
 
-    String? enumValue = dataTypeElement.getAttribute(enumValueAttribute);
-
-    BaseType baseType = enumValue == null || enumValue.isEmpty
-        ? _baseTypeFactory.createFromExpression(baseTypeExpression)
-        : EnumChild(int.parse(enumValue));
-
-    String comment = dataTypeElement.getAttribute(commentAttribute)!;
-    var dataType = DataType(name: name, baseType: baseType, comment: comment);
-
-    // recursively creating children
-    var children = dataTypeElement.children
-        .where((node) => isDataTypeElement(node))
-        .map((node) => _createDataType(node))
-        .toList();
-    dataType.children.addAll(children);
-    return dataType;
+    if (baseTypeExpression == 'ENUM') {
+      return _createEnum(dataTypeElement);
+    }
+    if (baseTypeExpression == 'STRUCT') {
+      return _createStructure(dataTypeElement);
+    }
+    if (baseTypeExpression == 'UNION') {
+      return _createUnion(dataTypeElement);
+    }
+    logger.warning(
+      'Unknown base type expression "$baseTypeExpression" for xml element: $dataTypeElement',
+    );
+    return UnknownDataTypeBase(
+      name: dataTypeElement.getAttribute(nameAttribute)!,
+      comment: dataTypeElement.getAttribute(commentAttribute)!,
+      typeExpression: baseTypeExpression,
+    );
   }
 
   final _baseTypeFactory = BaseTypeFactory();
 
-  bool isDataTypeElement(XmlNode node) =>
-      node is XmlElement && node.name.local == 'DataType';
+  Enumeration _createEnum(XmlElement dataTypeElement) {
+    String name = dataTypeElement.getAttribute(nameAttribute)!;
+    String comment = dataTypeElement.getAttribute(commentAttribute)!;
+    var children = dataTypeElement.childElements
+        .where((element) => element.name.local == 'DataType')
+        .map((element) => _createEnumMember(element))
+        .toList();
+    return Enumeration(name: name, comment: comment, children: children);
+  }
+
+  EnumerationMember _createEnumMember(XmlElement dataTypeElement) {
+    String name = dataTypeElement.getAttribute(nameAttribute)!;
+    String comment = dataTypeElement.getAttribute(commentAttribute)!;
+    String baseTypeExpression = dataTypeElement.getAttribute(
+      baseTypeAttribute,
+    )!;
+    int index = int.parse(dataTypeElement.getAttribute(enumValueAttribute)!);
+    var baseType = _baseTypeFactory.createFromExpression(baseTypeExpression);
+    return EnumerationMember(
+      name: name,
+      comment: comment,
+      baseType: baseType,
+      index: index,
+    );
+  }
+
+  Structure _createStructure(XmlElement dataTypeElement) {
+    String name = dataTypeElement.getAttribute(nameAttribute)!;
+    String comment = dataTypeElement.getAttribute(commentAttribute)!;
+    var members = dataTypeElement.childElements
+        .where((element) => element.name.local == 'DataType')
+        .map((element) => _createDataTypeReference(element))
+        .toList();
+    return Structure(name: name, comment: comment, children: members);
+  }
+
+  DataType _createDataTypeReference(XmlElement dataTypeElement) {
+    String name = dataTypeElement.getAttribute(nameAttribute)!;
+    String comment = dataTypeElement.getAttribute(commentAttribute)!;
+    String typeExpression = dataTypeElement.getAttribute(baseTypeAttribute)!;
+
+    /// We create an UnknownDataTypeBase as the base type,
+    /// which will be replaced with the correct BaseType later
+    /// when we have all the data types available
+    /// and can find the path to the base type
+    return UnknownDataTypeBase(
+      name: name,
+      comment: comment,
+      typeExpression: typeExpression,
+    );
+  }
+
+  DataType _createUnion(XmlElement dataTypeElement) {
+    String name = dataTypeElement.getAttribute(nameAttribute)!;
+    String comment = dataTypeElement.getAttribute(commentAttribute)!;
+    var members = dataTypeElement.childElements
+        .where((element) => element.name.local == 'DataType')
+        .map((element) => _createDataTypeReference(element))
+        .toList();
+    return Union(name: name, comment: comment, children: members);
+  }
 }

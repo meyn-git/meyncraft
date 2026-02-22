@@ -297,8 +297,8 @@ bool isControlModuleVariable(NodePath variablePath) {
   BaseType baseType;
   if (variablePath.last is Variable) {
     baseType = (variablePath.last as Variable).baseType;
-  } else if (variablePath.last is! DataType) {
-    baseType = (variablePath.last as DataType).baseType;
+  } else if (variablePath.last is! DataTypeReference) {
+    baseType = (variablePath.last as DataTypeReference).baseType;
   } else {
     return false;
   }

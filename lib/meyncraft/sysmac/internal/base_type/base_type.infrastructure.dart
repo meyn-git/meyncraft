@@ -7,8 +7,6 @@ import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 class BaseTypeFactory {
   final List<BaseTypeSubFactory> baseTypeSubFactories = [
     ArrayFactory(),
-    StructFactory(),
-    EnumParentFactory(),
     ...NxTypeFactories(),
     ...VbTypeFactories(),
     UnknownBaseTypeFactory(),
@@ -21,18 +19,36 @@ class BaseTypeFactory {
     return factory.create(typeExpression);
   }
 
-  BaseType tryToResolveDataTypeRefBaseType(
-    String typeExpression,
-    List<DataTypeBase> dataTypes,
-  ) {
+  BaseType tryToResolveDataTypeRefBaseType({
+    required List<DataTypeBase> dataTypes,
+    required String name,
+    required String comment,
+    required String typeExpression,
+  }) {
+    var baseType = createFromExpression(typeExpression);
+    if (baseType is BasicType) {
+      return DataTypeReference.forBasicType(
+        name: name,
+        comment: comment,
+        basicType: baseType,
+      );
+    }
     // try to find a path for the data type reference
     var dataTypePath = dataTypes.findFirstNodePath(
       namePathFinder(typeExpression.split(r'\'), caseSensitive: false),
     );
     if (dataTypePath.isNotEmpty) {
-      return DataTypeReference(dataTypePath: dataTypePath);
+      return DataTypeReference.forDataTypePath(
+        name: name,
+        comment: comment,
+        dataTypePath: dataTypePath,
+      );
     } else {
-      return UnknownBaseType(typeExpression);
+      return UnknownDataTypeBase(
+        name: name,
+        comment: comment,
+        typeExpression: typeExpression,
+      );
     }
   }
 }
@@ -49,31 +65,6 @@ class UnknownBaseTypeFactory extends BaseTypeSubFactory {
 
   @override
   BaseType create(String expression) => UnknownBaseType(expression);
-}
-
-class StructFactory extends BaseTypeSubFactory {
-  final Struct _struct = Struct();
-  final RegExp _regex = FluentRegex()
-      .startOfLine()
-      .literal('$Struct'.toUpperCase())
-      .endOfLine();
-
-  @override
-  RegExp get regex => _regex;
-
-  @override
-  BaseType create(String expression) => _struct;
-}
-
-class EnumParentFactory extends BaseTypeSubFactory {
-  static final _enumParent = EnumParent();
-  final RegExp _regex = FluentRegex().startOfLine().literal('ENUM').endOfLine();
-
-  @override
-  RegExp get regex => _regex;
-
-  @override
-  BaseType create(String expression) => _enumParent;
 }
 
 class NxTypeFactory extends BaseTypeSubFactory {
@@ -249,12 +240,32 @@ class ArrayFactory extends BaseTypeSubFactory {
 /// Replaces all the [UnknownBaseType]s with [DataTypeReference]s
 /// when the path can be found
 void tryToResolveDataTypeRefBaseType(List<DataTypeBase> dataTypes) {
-  for (var child in dataTypes.descendants.whereType<DataType>()) {
-    var baseType = child.baseType;
-    if (baseType is UnknownBaseType) {
-      var possiblyResolvedDataTypeRef = _baseTypeFactory
-          .tryToResolveDataTypeRefBaseType(baseType.expression, dataTypes);
-      child.baseType = possiblyResolvedDataTypeRef;
+  var dataTypesWithUnresolvedChildren = dataTypes.descendants.where(
+    (dataTypeBase) =>
+        dataTypeBase is DataType &&
+        dataTypeBase.children.any((child) => child is UnknownDataTypeBase),
+  );
+  for (var dataTypeWithUnresolvedChildren in dataTypesWithUnresolvedChildren) {
+    for (
+      var childIndex = 0;
+      childIndex < dataTypeWithUnresolvedChildren.children.length;
+      childIndex++
+    ) {
+      var child = dataTypeWithUnresolvedChildren.children[childIndex];
+      if (child is UnknownDataTypeBase) {
+        var possiblyResolvedDataTypeRef = _baseTypeFactory
+            .tryToResolveDataTypeRefBaseType(
+              dataTypes: dataTypes,
+              name: child.name,
+              comment: child.comment,
+              typeExpression: child.typeExpression,
+            );
+        if (possiblyResolvedDataTypeRef is DataTypeReference) {
+          // replace the UnknownDataTypeBase with the resolved DataTypeReference
+          dataTypeWithUnresolvedChildren.children[childIndex] =
+              possiblyResolvedDataTypeRef;
+        }
+      }
     }
   }
 }

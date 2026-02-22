@@ -39,7 +39,7 @@ class EventNode {
   final EventNode? parent;
   final String name;
   final String comment;
-  final BaseType baseType;
+  late final BaseType baseType;
   late final List<EventNode> children;
 
   EventNode.fromVariable(Variable variable)
@@ -53,21 +53,26 @@ class EventNode {
 
   EventNode.fromDataType(DataType dataType, [this.parent])
     : name = dataType.name,
-      comment = dataType.comment,
-      baseType = dataType.baseType {
-    children = createChildren(this, dataType.baseType);
+      comment = dataType.comment {
+    if (dataType is DataTypeReference) {
+      baseType = dataType.baseType;
+      children = createChildren(this, dataType);
+    } else {
+      baseType = dataType;
+      children = createChildren(this, dataType);
+    }
   }
 
   static List<EventNode> createChildren(EventNode parent, BaseType baseType) =>
-      baseType is DataTypeReference
+      baseType is DataType
       ? baseType.children
-            .map((c) => c as DataType)
-            .map((c) => EventNode.fromDataType(c, parent))
+            .whereType<DataType>()
+            .map((child) => EventNode.fromDataType(child, parent))
             .toList()
       : [];
 
   static bool skip(BaseType baseType) =>
-      baseType is EnumChild ||
+      baseType is EnumerationMember ||
       baseType is UnknownBaseType ||
       baseType is DataTypeReference;
 

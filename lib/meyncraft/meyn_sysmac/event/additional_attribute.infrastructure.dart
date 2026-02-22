@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 
 /// Copies an asset file into the app's writable data directory on first run.
 /// Returns the full path to the copied file.

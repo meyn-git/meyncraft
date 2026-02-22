@@ -97,8 +97,10 @@ Variable createVariable(
   var networkPublish = NetworkPublish.ofValue(attributes['NTP']);
   var typeExpression = attributes['D']!;
   var baseType = _baseTypeFactory.tryToResolveDataTypeRefBaseType(
-    typeExpression,
-    dataTypes,
+    dataTypes: dataTypes,
+    name: name,
+    comment: comment,
+    typeExpression: typeExpression,
   );
 
   // var unknownAttributes = {...attributes};

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
@@ -75,7 +74,7 @@ Future<void> main() async {
       var dataTypes = DataTypeArchiveXmlFile.fromXml(
         nameSpacePath: 'Test\\NameSpace',
         xml: xml,
-      ).toDataTypes();
+      ).toDataTypeBases();
 
       test('5 main DataTypes in test xml', () {
         expect(dataTypes, hasLength(11));
@@ -88,7 +87,7 @@ Future<void> main() async {
           expect(dataTypes[0].comment, 'Event');
         });
         test('baseType==UnknownBaseType', () {
-          expect((dataTypes[0] as DataType).baseType is Struct, true);
+          dataTypes[0].should.beOfType<Structure>();
         });
         test('children.length==2', () {
           expect(dataTypes[0].children, hasLength(2));

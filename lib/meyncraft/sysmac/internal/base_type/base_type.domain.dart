@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:fluent_regex/fluent_regex.dart';
-import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
 import '../data_type/data_type.domain.dart';
 
@@ -9,8 +8,8 @@ import '../data_type/data_type.domain.dart';
 /// Hierarchy:
 /// * BaseType
 ///   * [UnknownBaseType]
-///   * [ArrayType]
 ///   * [BasicType]
+///     * [ArrayType]
 ///     * [IecType]
 ///     * [VbType]
 ///   * [CustomType]
@@ -18,14 +17,27 @@ import '../data_type/data_type.domain.dart';
 ///       * [NameSpace]
 ///       * [DataType]
 ///         * [DataTypeReference]
-///         * [Struct]
-///         * [EnumParent]
-///         * Union
+///         * [Structure]
+///         * [Enumeration]
+///         * [Union]
 /// See [https://www.myomron.com/index.php?action=kb&article=1628] for Omron's list of "Basic Data Types"
 abstract interface class BaseType {}
 
+class UnknownBaseType extends BaseType {
+  final String typeExpression;
+
+  UnknownBaseType(this.typeExpression);
+
+  @override
+  String toString() => 'UnknownBaseType($typeExpression)';
+}
+
+/// All built‑in types supported by Sysmac Studio.
+/// Omron explicitly lists these as “Basic Data Types.”
+abstract interface class BasicType implements BaseType {}
+
 /// Wraps a [BaseType] in an [ArrayType] with the given [arrayRanges]
-class ArrayType extends BaseType {
+class ArrayType extends BasicType {
   final BaseType baseType;
   final ArrayRanges arrayRanges;
 
@@ -138,44 +150,6 @@ class ArrayRange {
     return int.parse(value);
   }
 }
-
-/// [DataTypeReference] is a [Struct] child or a [Union] child that refers to an Basic type or DataType or one of its children.
-class DataTypeReference extends BaseType {
-  /// Either:
-  /// * a single List element to a BaseType (e.g. NxBool, optionally wrapped in a [ArrayType])
-  /// * a path to a DataType or one of its children
-  final NodePath dataTypePath;
-
-  late final List<DataTypeBase> children = dataTypePath.last.children
-      .cast<DataTypeBase>();
-
-  late final BaseType baseType = (dataTypePath.last is DataTypeReference)
-      ? (dataTypePath.last as DataTypeReference).baseType
-      : dataTypePath.last as BaseType;
-
-  DataTypeReference({required this.dataTypePath});
-}
-
-class UnknownBaseType extends BaseType {
-  final String expression;
-
-  UnknownBaseType(this.expression);
-}
-
-class Struct extends BaseType {}
-
-class EnumParent extends BaseType {
-  EnumParent();
-}
-
-class EnumChild extends BaseType {
-  final int index;
-  EnumChild(this.index);
-}
-
-/// All built‑in types supported by Sysmac Studio.
-/// Omron explicitly lists these as “Basic Data Types.”
-abstract interface class BasicType implements BaseType {}
 
 /// These are the built‑in types defined by IEC 61131‑3 and directly supported by Sysmac Studio.
 /// See [https://www.myomron.com/index.php?action=kb&article=1628]
