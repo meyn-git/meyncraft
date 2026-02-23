@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 
@@ -25,38 +26,32 @@ File additionalAttributesFile() {
 /// * Key:  is the [DataType] path of an event, see [createDataTypePath]
 /// * Value: are [CommentAttribute] that still need to be parsed
 Map<String, String> createAdditionalCommentAttributeMap() {
-  var file = additionalAttributesFile();
-  var input = file.readAsStringSync();
+  try {
+    var file = additionalAttributesFile();
+    var input = file.readAsStringSync();
 
-  final Map<String, String> result = {};
+    final Map<String, String> result = {};
 
-  // Split by lines and iterate
-  final lines = input.split('\n');
-  for (var line in lines) {
-    line = line.trim();
+    // Split by lines and iterate
+    final lines = input.split('\n');
+    for (var line in lines) {
+      line = line.trim();
 
-    if (_skipLine(line)) continue;
+      if (_skipLine(line)) continue;
 
-    // Match pattern: key=value
-    if (line.contains('=')) {
-      final eqIndex = line.indexOf('=');
-      final key = line.substring(0, eqIndex).trim();
-      final value = line.substring(eqIndex + 1).trim();
-      result[key] = value;
+      // Match pattern: key=value
+      if (line.contains('=')) {
+        final eqIndex = line.indexOf('=');
+        final key = line.substring(0, eqIndex).trim();
+        final value = line.substring(eqIndex + 1).trim();
+        result[key] = value;
+      }
     }
+    return result;
+  } on Exception catch (e) {
+    logger.warning('   $e');
+    return {};
   }
-  return result;
 }
 
 bool _skipLine(String line) => line.isEmpty || line.startsWith('#');
-
-// String createAdditionalCommentAttributes(
-//   NodePathWithIndexes eventPath,
-//   Map<String, String> commentAttributeMap,
-// ) {
-//   // The key in the additional attributes map is the name path without array indexes,
-//   // e.g. 'EventGlobal.VentCutCamPosGateway.NodeCommTimeout'
-//   var key = eventPath.toNamePath().join(r'\');
-//   var attributes = commentAttributeMap[key] ?? '';
-//   return attributes;
-// }
