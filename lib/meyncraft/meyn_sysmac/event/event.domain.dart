@@ -28,8 +28,10 @@ class Event {
     required this.acknowledgeRequired,
   });
 
-  String get componentCodesAndMessage =>
-      [...componentCodes.map((c) => c.createCode()), messageParts].join(' ');
+  String get componentCodesAndMessage => [
+    ...componentCodes.map((c) => c.createCode()),
+    messageParts.join('-'),
+  ].join(' ');
 
   @override
   String
