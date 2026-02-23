@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 
 /// Copies an asset file into the app's writable data directory on first run.
@@ -52,25 +50,13 @@ Map<String, String> createAdditionalCommentAttributeMap() {
 
 bool _skipLine(String line) => line.isEmpty || line.startsWith('#');
 
-String createAdditionalCommentAttributes(
-  EventNode eventNode,
-  Map<String, String> commentAttributeMap,
-) {
-  var dataTypePath = createDataTypePath(eventNode);
-  var attributes = commentAttributeMap[dataTypePath] ?? '';
-  return attributes;
-}
-
-String? createDataTypePath(EventNode eventNode) {
-  if (eventNode.baseType is! IecBool) {
-    return null;
-  }
-  var parent = eventNode.parent;
-  if (parent == null) {
-    return null;
-  }
-  if (parent.baseType is! DataTypeReference) {
-    return null;
-  }
-  return '${(parent.baseType as DataTypeReference).dataTypePath.toNamePath().join(r'\')}\\${eventNode.name}';
-}
+// String createAdditionalCommentAttributes(
+//   NodePathWithIndexes eventPath,
+//   Map<String, String> commentAttributeMap,
+// ) {
+//   // The key in the additional attributes map is the name path without array indexes,
+//   // e.g. 'EventGlobal.VentCutCamPosGateway.NodeCommTimeout'
+//   var key = eventPath.toNamePath().join(r'\');
+//   var attributes = commentAttributeMap[key] ?? '';
+//   return attributes;
+// }

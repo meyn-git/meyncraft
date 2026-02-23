@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.infrastructure.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
@@ -30,26 +31,22 @@ Future<void> main() async {
       );
       eventPath.should.not.beEmpty();
       eventPath.last.name.should.be('Alarm0');
-      eventPath.last.should.beOfType<DataTypeReference>();
-      (eventPath.last as DataTypeReference).baseType.should.beOfType<IecBool>();
+      eventPath.last.should.beOfType<DataTypeMember>();
+      (eventPath.last as DataTypeMember).baseType.should.beOfType<IecBool>();
     });
   });
 
   group('function: eventPathFinder', () {
     test('eventPathFinder should return the correct NodePathWithIndexes', () {
-      // FIXME
-      // var eventGlobal = sysmacProject.globalVariables.firstWhereOrNull(
-      //   (v) => v.name == eventGlobalVariableName,
-      // );
-      // var eventPaths = eventGlobal.findAllNodePaths<NodePathWithIndexes>(
-      //   eventPathFinder(),
-      // );
-      // var eventExpressions = eventPaths.map(
-      //   (eventPath) => eventPath.namePathWithArrayIndexes.join('.'),
-      // );
-
-      var events = sysmacProject.events;
-      var eventExpressions = events.map((e) => e.namePath).toList();
+      var eventGlobal = sysmacProject.globalVariables.firstWhere(
+        (v) => v.name == eventGlobalVariableName,
+      );
+      var eventPaths = eventGlobal.findAllNodePaths<NodePathWithIndexes>(
+        eventPathFinder(),
+      );
+      var eventExpressions = eventPaths.map(
+        (eventPath) => eventPath.toNamePathWithArrayIndexes().join('.'),
+      );
 
       eventExpressions.should.contain(
         'EventGlobal.VentCutCamPosGateway.GatewayCommTimeout',
@@ -72,6 +69,8 @@ Future<void> main() async {
       eventExpressions.should.contain(
         'EventGlobal.VentCutCamPosGateway.NodeBatteryLow[15]',
       );
+      eventExpressions.should.contain('EventGlobal.BirdBrushMtr[1].MtrSw');
+      eventExpressions.should.contain('EventGlobal.BirdBrushMtr[2].MtrSw');
     });
   });
 }

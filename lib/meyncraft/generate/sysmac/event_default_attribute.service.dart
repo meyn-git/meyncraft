@@ -76,9 +76,10 @@ String write(CodeOwner codeOwner, String name, List<Variable> variables) {
   lines.writeln('# in/out: ${inOutVarNames.join(', ')}');
 
   for (var eventOutput in eventOutputs) {
-    var dataTypeReference = (eventOutput.baseType as DataTypeReference);
+    var dataTypeMember = (eventOutput.baseType as DataTypeMember);
+    var dataTypeReference = (dataTypeMember.baseType as DataTypeReference);
     var parentPath = dataTypeReference.dataTypePath.toNamePath().join(r'\');
-    for (var child in dataTypeReference.children) {
+    for (var child in dataTypeMember.children) {
       var dataTypePath = '$parentPath\\${child.name}';
       var attributes = createAttributes(
         dataTypePath,
@@ -138,9 +139,6 @@ bool comparable(String name1, String name2) {
     name1.toLowerCase(),
     name2.toLowerCase(),
   );
-  // print(
-  //   ' $name1 $name2 $longestSequentialMatch2  ${(name1.length + name2.length) / 2}',
-  // );
   return longestSequentialMatch2 >= (name1.length + name2.length) / 4;
 }
 
@@ -182,10 +180,12 @@ bool hasEventsOutput(List<Variable> variables) => variables.any(isEventOutput);
 bool isEventOutput(Variable variable) =>
     (variable.direction == VariableDirection.inOut ||
         variable.direction == VariableDirection.out) &&
-    variable.baseType is DataTypeReference &&
-    (variable.baseType as DataTypeReference).dataTypePath.toNamePath().contains(
-      'sEvent',
-    );
+    variable.baseType is DataTypeMember &&
+    (variable.baseType as DataTypeMember).baseType is DataTypeReference &&
+    ((variable.baseType as DataTypeMember).baseType as DataTypeReference)
+        .dataTypePath
+        .toNamePath()
+        .contains('sEvent');
 
 File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   var sysmacFile = sysmacProject.identity.projectFile;

@@ -490,23 +490,6 @@ void main() {
     });
     group('Custom types', () {
       test(
-        'createDataTypes should contain custom dataType path "sEvent"',
-        () async {
-          var sysmacProjectArchive = await SysmacProjectArchive.create(
-            SysmacProjectTestResource().file,
-          );
-          var dataTypes = createDataTypes(sysmacProjectArchive);
-          var sEventType = baseTypeFactory.tryToResolveDataTypeRefBaseType(
-            dataTypes: dataTypes,
-            typeExpression: 'sEvent',
-            name: 'Not Important',
-            comment: 'Not Important',
-          );
-          sEventType.should.beOfType<DataTypeReference>();
-        },
-      );
-
-      test(
         'createDataTypes should have a single "sEvent.Common" dataType path',
         () async {
           var sysmacProjectArchive = await SysmacProjectArchive.create(
@@ -546,16 +529,60 @@ void main() {
       sysmacProjectArchive = await SysmacProjectArchive.create(file);
     });
 
-    test('"Common.Alarm0" should not be an array', () {
+    test('DataType "Common.sEvent.Alarm0" should exist and be correct', () {
       var dataTypes = createDataTypes(sysmacProjectArchive);
       var dataTypePath = dataTypes.findFirstNodePath(
         namePathFinder(['Common', 'sEvent', 'Alarm0']),
       );
       dataTypePath.should.not.beEmpty();
       dataTypePath.last.name.should.be('Alarm0');
-      dataTypePath.last.should.beOfType<DataTypeReference>();
-      (dataTypePath.last as DataTypeReference).baseType.should
-          .beOfType<IecBool>();
+      dataTypePath.last.should.beOfType<DataTypeMember>();
+      (dataTypePath.last as DataTypeMember).baseType.should.beOfType<IecBool>();
+    });
+
+    test(
+      'baseType of DataType "sEvent.BirdBrushMtr" should be an array[1..2]',
+      () {
+        var dataTypes = createDataTypes(sysmacProjectArchive);
+        var dataTypePath = dataTypes.findFirstNodePath(
+          namePathFinder(['sEvent', 'BirdBrushMtr']),
+        );
+        dataTypePath.should.not.beEmpty();
+        var birdBrushMtr = dataTypePath.last;
+        birdBrushMtr.should.beOfType<DataTypeMember>();
+        var birdBrushMtrBaseType = (birdBrushMtr as DataTypeMember).baseType;
+        birdBrushMtrBaseType.should.beOfType<ArrayType>();
+        var birdBrushMtrArrayType = birdBrushMtrBaseType as ArrayType;
+        birdBrushMtrArrayType.arrayRanges.toString().should.be('[1..2]');
+      },
+    );
+
+    test('DataType "sEvent.BirdBrushMtr" should have 5 children', () {
+      var dataTypes = createDataTypes(sysmacProjectArchive);
+      var dataTypePath = dataTypes.findFirstNodePath(
+        namePathFinder(['sEvent', 'BirdBrushMtr']),
+      );
+      dataTypePath.should.not.beEmpty();
+      var birdBrushMtr = dataTypePath.last;
+      birdBrushMtr.should.beOfType<DataTypeMember>();
+      birdBrushMtr.children.length.should.be(5);
+    });
+
+    test('DataType "sEvent.BirdBrushMtr" first child should be correct', () {
+      var dataTypes = createDataTypes(sysmacProjectArchive);
+      var dataTypePath = dataTypes.findFirstNodePath(
+        namePathFinder(['sEvent', 'BirdBrushMtr']),
+      );
+      dataTypePath.should.not.beEmpty();
+      var birdBrushMtr = dataTypePath.last;
+      birdBrushMtr.should.beOfType<DataTypeMember>();
+      birdBrushMtr.children.should.not.beEmpty();
+      birdBrushMtr.children[0].should.beOfType<DataTypeMember>();
+      var firstChild = birdBrushMtr.children[0] as DataTypeMember;
+      firstChild.name.should.be('MtrSw');
+      firstChild.comment.should.be('Switched off');
+      firstChild.baseType.should.beOfType<IecBool>();
+      firstChild.children.should.beEmpty();
     });
   });
 }

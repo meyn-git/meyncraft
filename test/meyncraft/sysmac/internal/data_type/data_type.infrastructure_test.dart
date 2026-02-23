@@ -102,7 +102,7 @@ Future<void> main() async {
       var sysmacProjectArchive = await SysmacProjectArchive.create(file);
       var dataTypes = createDataTypes(sysmacProjectArchive);
       var dataTypeLeafPaths = dataTypes.findAllNodePaths(leafPathsFinder());
-      dataTypeLeafPaths.length.should.be(47888);
+      dataTypeLeafPaths.length.should.be(54609);
     });
 
     test('should not contain HMI dataTypes', () async {

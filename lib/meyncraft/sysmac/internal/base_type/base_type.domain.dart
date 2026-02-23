@@ -16,7 +16,7 @@ import '../data_type/data_type.domain.dart';
 ///     * [DataTypeBase]
 ///       * [NameSpace]
 ///       * [DataType]
-///         * [DataTypeReference]
+///         * [DataTypeMember]
 ///         * [Structure]
 ///         * [Enumeration]
 ///         * [Union]
@@ -32,13 +32,33 @@ class UnknownBaseType extends BaseType {
   String toString() => 'UnknownBaseType($typeExpression)';
 }
 
+/// Variables and some BaseTypes have a baseType
+/// Note that [baseType] is not final because when it is an [UnknownBaseType]
+/// it might need to be replaced with a  [DataTypeMember] in a later stage.
+/// See [BaseTypeFactory.]
+abstract interface class BaseTypeOwner {
+  BaseType get baseType;
+  set baseType(BaseType baseType);
+}
+
+/// Finds the last baseType in a baseType tree
+BaseType baseTypeLeaf(BaseType baseType) {
+  if (baseType is BaseTypeOwner) {
+    /// recursively get last baseType in tree
+    return baseTypeLeaf((baseType as BaseTypeOwner).baseType);
+  } else {
+    return baseType;
+  }
+}
+
 /// All built‑in types supported by Sysmac Studio.
 /// Omron explicitly lists these as “Basic Data Types.”
 abstract interface class BasicType implements BaseType {}
 
 /// Wraps a [BaseType] in an [ArrayType] with the given [arrayRanges]
-class ArrayType extends BasicType {
-  final BaseType baseType;
+class ArrayType implements BasicType, BaseTypeOwner {
+  @override
+  BaseType baseType;
   final ArrayRanges arrayRanges;
 
   ArrayType({required this.baseType, required this.arrayRanges});

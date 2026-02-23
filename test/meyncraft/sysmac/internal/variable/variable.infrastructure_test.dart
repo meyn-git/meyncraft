@@ -43,12 +43,10 @@ void main() {
           (v) => v.name == 'EventGlobal',
         );
         globalEvent.should.not.beNull();
-        globalEvent!.baseType.should.beOfType<DataTypeReference>();
-        (globalEvent.baseType as DataTypeReference).dataTypePath
-            .toNamePath()
-            .join('.')
-            .should
-            .be('sEvent');
+        var globalEventBaseType = globalEvent!.baseType;
+        globalEventBaseType.should.beOfType<DataTypeReference>();
+        var globalEventRef = globalEventBaseType as DataTypeReference;
+        globalEventRef.dataTypePath.toNamePath().join('.').should.be('sEvent');
       },
     );
 

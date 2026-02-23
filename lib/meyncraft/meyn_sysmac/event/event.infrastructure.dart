@@ -21,314 +21,285 @@ List<Event> createEvents(SysmacProject sysmacProject) {
     logger.warning('Could not find a global variable with name: $eventGlobal');
     return [];
   }
-  var eventRootNode = EventNode.fromVariable(eventGlobal);
+  var eventPaths = eventGlobal.findAllNodePaths<NodePathWithIndexes>(
+    eventPathFinder(),
+  );
   var counter = Counter();
   var additionalCommentAttributeMap = createAdditionalCommentAttributeMap();
-  var events = eventRootNode.createEvents(
-    sysmacProject,
-    additionalCommentAttributeMap,
-    counter,
-  );
+  var events = eventPaths
+      .map(
+        (eventPath) => createEvent(
+          sysmacProject,
+          counter,
+          eventPath,
+          additionalCommentAttributeMap,
+        ),
+      )
+      .toList();
   logger.info('Found ${events.length} events');
   return events;
 }
 
-///TODO investigate if we can use DataTypeBase.findPaths instead of using EventNode.
-/// Used to creates Events from [Variable] and [DataType]
-class EventNode {
-  final EventNode? parent;
-  final String name;
-  final String comment;
-  late final BaseType baseType;
-  late final List<EventNode> children;
+bool isLeafNode(Node<Node<dynamic>> node) => node.children.isEmpty;
 
-  EventNode.fromVariable(Variable variable)
-    : parent = null,
-      name = variable.name,
-      // The comment of the GlobalEvent variable is not needed
-      comment = '',
-      baseType = variable.baseType {
-    children = createChildren(this, variable.baseType);
+bool isDataTypeRefWithBaseTypeBoolOrArrayOfBool(Node<Node<dynamic>> node) {
+  if (node is! DataTypeMember) {
+    return false;
   }
-
-  EventNode.fromDataType(DataType dataType, [this.parent])
-    : name = dataType.name,
-      comment = dataType.comment {
-    if (dataType is DataTypeReference) {
-      baseType = dataType.baseType;
-      children = createChildren(this, dataType);
-    } else {
-      baseType = dataType;
-      children = createChildren(this, dataType);
-    }
-  }
-
-  static List<EventNode> createChildren(EventNode parent, BaseType baseType) =>
-      baseType is DataType
-      ? baseType.children
-            .whereType<DataType>()
-            .map((child) => EventNode.fromDataType(child, parent))
-            .toList()
-      : [];
-
-  static bool skip(BaseType baseType) =>
-      baseType is EnumerationMember ||
-      baseType is UnknownBaseType ||
-      baseType is DataTypeReference;
-
-  /// creates a name path of this node.
-  /// returns a list with:
-  /// * one path if there is no array.
-  /// * or a path for each array value
-  List<String> createNamePaths(String parentNamePath) {
-    var path = createNamePath(parentNamePath);
-    if (baseType is ArrayType) {
-      var arrayIndexes = (baseType as ArrayType).arrayRanges.toStringList();
-      return arrayIndexes.map((a) => path + a).toList();
-    } else {
-      return [path];
-    }
-  }
-
-  /// creates a name path for this node without array values
-  String createNamePath(String parentNamePath) => parentNamePath.isEmpty
-      ? name.trim()
-      : [parentNamePath, name.trim()].join('.');
-
-  String createCommentPath(String parentCommentPath) =>
-      parentCommentPath.isEmpty
-      ? comment.trim()
-      : [parentCommentPath, _uppercaseFirstLetter(comment.trim())].join('-');
-
-  List<Event> createEvents(
-    SysmacProject sysmacProject,
-    Map<String, String> additionalCommentAttributeMap,
-    Counter counter, {
-    String parentNamePath = '',
-    String parentCommentPath = '',
-  }) {
-    var events = <Event>[];
-    if (children.isEmpty) {
-      if (!_isBoolOrArrayOfBool(baseType)) {
-        return events;
-      }
-      var namePaths = createNamePaths(parentNamePath);
-      var commentPath = createCommentPath(parentCommentPath);
-      for (var namePath in namePaths) {
-        var eventValues = createEventValues(
-          additionalCommentAttributeMap,
-          namePath,
-          commentPath,
-        );
-        var acknowledgeNeeded = AcknowledgeAttribute.acknowledge(eventValues);
-        var priority = PriorityAttribute.priority(eventValues);
-        var ioAttributeVariablePaths = IoAttribute.findIoAttributeVariablePaths(
-          sysmacProject,
-          namePath,
-          eventValues,
-        );
-        var variablePathWithComponentCodes =
-            IoAttribute.findIoVariableNameWithComponentCodes(
-              ioAttributeVariablePaths,
-            );
-        var variableNameWithHardwareAddress =
-            IoAttribute.findIoVariableNameWithAddresses(
-              ioAttributeVariablePaths,
-            );
-        var componentCodes = findComponentCodes(
-          namePath,
-          eventValues,
-          //TODO change to ioVariables
-          [],
-        );
-        var messageParts = createMessageParts(eventValues);
-        var event = Event(
-          number: counter.next(),
-          namePath: namePath,
-          group: createGroupName(namePath),
-          ioVariableNamePaths: _uniqueNamePaths(
-            ioAttributeVariablePaths.values,
-          ).toSet().toList(),
-          componentCodes: componentCodes,
-          variableNameWithComponentCodes: variablePathWithComponentCodes,
-          variableNameWithHardwareAddress: variableNameWithHardwareAddress,
-          messageParts: messageParts,
-          priority: priority,
-          acknowledgeRequired: acknowledgeNeeded,
-        );
-        events.add(event);
-      }
-    } else {
-      var namePaths = createNamePaths(parentNamePath);
-      var commentPath = createCommentPath(parentCommentPath);
-      for (var namePath in namePaths) {
-        for (var child in children) {
-          /// recursive call
-          events.addAll(
-            child.createEvents(
-              sysmacProject,
-              additionalCommentAttributeMap,
-              counter,
-              parentNamePath: namePath,
-              parentCommentPath: commentPath,
-            ),
-          );
-        }
-      }
-    }
-    return events;
-  }
-
-  bool _isBoolOrArrayOfBool(BaseType baseType) =>
-      baseType is IecBool ||
+  var baseType = node.baseType;
+  return baseType is IecBool ||
       baseType is ArrayType && baseType.baseType is IecBool;
-
-  /// e.g. returns GizzardPump1 if namePath == EventGlobal.GizzardPump[1].MtrProt
-  String createGroupName(String namePath) {
-    // Remove leading 'EventGlobal.'
-    if (namePath.startsWith('EventGlobal.')) {
-      namePath = namePath.substring('EventGlobal.'.length);
-    }
-
-    // Remove everything after the first dot
-    int dotIndex = namePath.indexOf('.');
-    if (dotIndex != -1) {
-      namePath = namePath.substring(0, dotIndex);
-    }
-
-    // Remove '[' and ']' characters
-    namePath = namePath.replaceAll(RegExp(r'[\[\]]'), '');
-
-    return namePath;
-  }
-
-  /// normalizes the commentPath to a message.
-  List<String> createMessageParts(List eventValues) {
-    var rawMessage = eventValues
-        .where((v) => v is String || v is num)
-        .map((v) => v.toString())
-        .join();
-    return rawMessage
-        // remove all leading dashes
-        .replaceAll(RegExp(r'^(-\s*)+'), '')
-        // remove all trailing dashes
-        .replaceAll(RegExp(r'(-\s*)+$'), '')
-        // remove all spaces before or after dashes
-        .replaceAll(RegExp(r'(\s*-\s*)'), '-')
-        // remove all unneeded characters
-        .replaceAll(' : ', ':')
-        .replaceAll(' :', ':')
-        .replaceAll(': ', ':')
-        .replaceAll('  ', ' ')
-        .replaceAll('--', '-')
-        .replaceAll(', message instead of alarm event', '')
-        .trim()
-        .split('-');
-  }
-
-  List<ComponentCode> findComponentCodes(
-    String namePath,
-    List eventValues,
-    List<Variable> io,
-  ) {
-    var componentCodes = <ComponentCode>[];
-    for (var variable in io) {
-      componentCodes.addAll(componentCodeParser.allMatches(variable.comment));
-    }
-
-    componentCodes.addAll(eventValues.whereType<ComponentCode>());
-    var columnAttribute = ComponentCodeAddColumnsAttribute.valueOf(
-      namePath,
-      eventValues,
-    );
-    var lettersAttribute = ComponentCodeOverrideLettersAttribute.valueOf(
-      eventValues,
-    );
-    var pageAttribute = ComponentCodeAddPageAttribute.valueOf(eventValues);
-    var result = <ComponentCode>[];
-    for (var componentCode in componentCodes) {
-      if (columnAttribute != null) {
-        componentCode = columnAttribute.componentCode(componentCode, namePath);
-      }
-      if (lettersAttribute != null) {
-        componentCode = lettersAttribute.componentCode(componentCode);
-      }
-      if (pageAttribute != null) {
-        componentCode = pageAttribute.componentCode(componentCode);
-      }
-      result.add(componentCode);
-    }
-    return result;
-  }
-
-  /// override the letters of the component code based on the comment path.
-  /// TODO do this with a CommentAttribute e.g. [ccl=S] or [ccl=Q]
-  String getComponentCodeLetters(
-    String commentPath,
-    ComponentCode componentCode,
-  ) {
-    if (commentPath.endsWith('Switched off')) {
-      // Motor Switch
-      return 'S';
-    }
-    if (commentPath.endsWith('Motor protection') ||
-        commentPath.endsWith('VFD circuit breaker')) {
-      // Motor Switch
-      return 'Q';
-    }
-    return componentCode.letters;
-  }
-
-  String _uppercaseFirstLetter(String text) {
-    if (text.isEmpty) {
-      return text;
-    }
-    return text.substring(0, 1).toUpperCase() + text.substring(1);
-  }
-
-  List<CommentAttribute> defaultAttributes = [
-    PriorityAttribute(EventPriority.medium),
-    AcknowledgeAttribute(true),
-    ComponentCodeAddColumnsAttribute(1),
-  ];
-
-  List<dynamic> createEventValues(
-    Map<String, String> additionalCommentAttributeMap,
-    String namePath,
-    String commentPath,
-  ) {
-    var additionalAttributes = createAdditionalCommentAttributes(
-      this,
-      additionalCommentAttributeMap,
-    );
-    var result = commentPathParser.parse(additionalAttributes + commentPath);
-    var values = result is Failure ? [] : result.value;
-    var eventValues = replaceEventValues(namePath, values);
-    var unknownAttributes = eventValues.whereType<UnknownAttribute>();
-    if (unknownAttributes.isNotEmpty) {
-      logger.warning(
-        'Unknown attributes found in event "$namePath" with commentPath "$commentPath": $unknownAttributes',
-      );
-    }
-    return eventValues;
-  }
-
-  /// Replaces all [Replaceable] values in the parsedValues with their replacement value.
-  List replaceEventValues(String namePath, Iterable eventValues) {
-    var values = [];
-    for (var eventValue in eventValues) {
-      if (eventValue is Replaceable) {
-        var newValue = eventValue.replacementValue(namePath);
-        var newValues = newValue is Iterable ? newValue : [newValue];
-        values.addAll(replaceEventValues(namePath, newValues));
-      } else {
-        values.add(eventValue);
-      }
-    }
-    return values;
-  }
-
-  Iterable<String> _uniqueNamePaths(Iterable<NodePath> nodePaths) => nodePaths
-      .map((nodePath) => nodePath.map((node) => node.name).join('.'))
-      .toSet();
 }
+
+/// recursive function to find all [NodePathWithIndexes] within a node that represent an event
+NodePathsFinder<NodePathWithIndexes> eventPathFinder({
+  NodePathWithIndexes precedingPath = const NodePathWithIndexes.empty(),
+}) => (Node node) {
+  var eventsPaths = _createEventPaths(precedingPath, node);
+
+  if (isLeafNode(node)) {
+    if (isDataTypeRefWithBaseTypeBoolOrArrayOfBool(node)) {
+      return eventsPaths;
+    } else {
+      return [];
+    }
+  }
+
+  var eventPathsFromChildren = <NodePathWithIndexes>[];
+  for (var eventPath in eventsPaths) {
+    var finder = eventPathFinder(precedingPath: eventPath);
+    for (var child in node.children) {
+      var eventPathsFromChild = finder(child as Node);
+      if (eventPathsFromChild.isNotEmpty) {
+        eventPathsFromChildren.addAll(eventPathsFromChild);
+      }
+    }
+  }
+  return eventPathsFromChildren;
+};
+
+List<NodePathWithIndexes> _createEventPaths(
+  NodePathWithIndexes precedingPath,
+  Node<Node<dynamic>> node,
+) {
+  var indexValues = _createIndexValues(node);
+  if (indexValues.isEmpty) {
+    return [
+      NodePathWithIndexes(
+        [...precedingPath, node],
+        [...precedingPath.arrayIndexes, null],
+      ),
+    ];
+  } else {
+    return indexValues
+        .map(
+          (arrayIndexValue) => NodePathWithIndexes(
+            [...precedingPath, node],
+            [...precedingPath.arrayIndexes, arrayIndexValue],
+          ),
+        )
+        .toList();
+  }
+}
+
+List<String> _createIndexValues(Node<Node<dynamic>> node) {
+  if (node is! DataTypeMember) {
+    return [];
+  }
+  var baseType = node.baseType;
+  if (baseType is ArrayType) {
+    return baseType.arrayRanges.toStringList();
+  } else {
+    return [];
+  }
+}
+
+Event createEvent(
+  SysmacProject sysmacProject,
+  Counter counter,
+  NodePathWithIndexes eventPath,
+  Map<String, String> additionalCommentAttributeMap,
+) {
+  var namePathWithArrayIndexes = eventPath.toNamePathWithArrayIndexes().join(
+    '.',
+  );
+  var eventValues = createEventValues(additionalCommentAttributeMap, eventPath);
+  var acknowledgeNeeded = AcknowledgeAttribute.acknowledge(eventValues);
+  var priority = PriorityAttribute.priority(eventValues);
+  var ioAttributeVariablePaths = IoAttribute.findIoAttributeVariablePaths(
+    sysmacProject,
+    namePathWithArrayIndexes,
+    eventValues,
+  );
+  var variablePathWithComponentCodes =
+      IoAttribute.findIoVariableNameWithComponentCodes(
+        ioAttributeVariablePaths,
+      );
+  var variableNameWithHardwareAddress =
+      IoAttribute.findIoVariableNameWithAddresses(ioAttributeVariablePaths);
+
+  //TODO change to ioVariables
+  var componentCodes = findComponentCodes(
+    namePathWithArrayIndexes,
+    eventValues,
+    [],
+  );
+
+  var messageParts = createMessage(eventValues).split('-');
+  return Event(
+    number: counter.next(),
+    namePath: namePathWithArrayIndexes,
+    group: createGroupName(namePathWithArrayIndexes),
+    ioVariableNamePaths: _uniqueNamePaths(ioAttributeVariablePaths.values),
+    componentCodes: componentCodes,
+    variableNameWithComponentCodes: variablePathWithComponentCodes,
+    variableNameWithHardwareAddress: variableNameWithHardwareAddress,
+    messageParts: messageParts,
+    priority: priority,
+    acknowledgeRequired: acknowledgeNeeded,
+  );
+}
+
+List<dynamic> createEventValues(
+  Map<String, String> additionalCommentAttributeMap,
+  NodePathWithIndexes eventPath,
+) {
+  var additionalAttributes = findAdditionalCommentAttributes(
+    additionalCommentAttributeMap,
+    eventPath,
+  );
+  // skipping the namePath of the InterfaceGlobal variable
+  var namePath = eventPath.toNamePathWithArrayIndexes().skip(1).join('.');
+  // skipping the comment of the InterfaceGlobal variable
+  var commentPath = eventPath.toCommentPath().skip(1).join('-');
+  var result = commentPathParser.parse(additionalAttributes + commentPath);
+  var values = result is Failure ? [] : result.value;
+  var eventValues = replaceEventValues(namePath, values);
+  var unknownAttributes = eventValues.whereType<UnknownAttribute>();
+  if (unknownAttributes.isNotEmpty) {
+    logger.warning(
+      'Unknown attributes found in event "$namePath" with commentPath "$commentPath": $unknownAttributes',
+    );
+  }
+  return eventValues;
+}
+
+String findAdditionalCommentAttributes(
+  Map<String, String> commentAttributeMap,
+  NodePathWithIndexes eventPath,
+) {
+  var key = createDataTypePathWithoutIndexes(eventPath);
+  var attributes = commentAttributeMap[key] ?? '';
+  return attributes;
+}
+
+// returns null if there is none
+String? createDataTypePathWithoutIndexes(NodePath eventPath) {
+  if (eventPath.length <= 1) return null;
+  var parentIndex = eventPath.length - 2;
+  var parent = eventPath[parentIndex];
+  if (parent is! DataTypeMember) return null;
+  var baseType = parent.baseType;
+  if (baseType is ArrayType) {
+    baseType = baseType.baseType;
+  }
+  if (baseType is! DataTypeReference) return null;
+  var dataTypePath = baseType.dataTypePath;
+  return '${dataTypePath.toNamePath().join(r'\')}\\${eventPath.last.name}';
+}
+
+/// Replaces all [Replaceable] values in the parsedValues with their replacement value.
+List replaceEventValues(String namePath, Iterable eventValues) {
+  var values = [];
+  for (var eventValue in eventValues) {
+    if (eventValue is Replaceable) {
+      var newValue = eventValue.replacementValue(namePath);
+      var newValues = newValue is Iterable ? newValue : [newValue];
+      values.addAll(replaceEventValues(namePath, newValues));
+    } else {
+      values.add(eventValue);
+    }
+  }
+  return values;
+}
+
+List<ComponentCode> findComponentCodes(
+  String namePath,
+  List eventValues,
+  List<Variable> io,
+) {
+  var componentCodes = <ComponentCode>[];
+  for (var variable in io) {
+    componentCodes.addAll(componentCodeParser.allMatches(variable.comment));
+  }
+
+  componentCodes.addAll(eventValues.whereType<ComponentCode>());
+  var columnAttribute = ComponentCodeAddColumnsAttribute.valueOf(
+    namePath,
+    eventValues,
+  );
+  var lettersAttribute = ComponentCodeOverrideLettersAttribute.valueOf(
+    eventValues,
+  );
+  var pageAttribute = ComponentCodeAddPageAttribute.valueOf(eventValues);
+  var result = <ComponentCode>[];
+  for (var componentCode in componentCodes) {
+    if (columnAttribute != null) {
+      componentCode = columnAttribute.componentCode(componentCode, namePath);
+    }
+    if (lettersAttribute != null) {
+      componentCode = lettersAttribute.componentCode(componentCode);
+    }
+    if (pageAttribute != null) {
+      componentCode = pageAttribute.componentCode(componentCode);
+    }
+    result.add(componentCode);
+  }
+  return result;
+}
+
+/// normalizes the commentPath to a message.
+String createMessage(List eventValues) {
+  var rawMessage = eventValues
+      .where((v) => v is String || v is num)
+      .map((v) => v.toString())
+      .join();
+  return rawMessage
+      // remove all leading dashes
+      .replaceAll(RegExp(r'^(-\s*)+'), '')
+      // remove all trailing dashes
+      .replaceAll(RegExp(r'(-\s*)+$'), '')
+      // remove all spaces before or after dashes
+      .replaceAll(RegExp(r'(\s*-\s*)'), '-')
+      // remove all unneeded characters
+      .replaceAll(' : ', ':')
+      .replaceAll(' :', ':')
+      .replaceAll(': ', ':')
+      .replaceAll('  ', ' ')
+      .replaceAll('--', '-')
+      .replaceAll(', message instead of alarm event', '')
+      .trim();
+}
+
+/// e.g. returns GizzardPump1 if namePath == EventGlobal.GizzardPump[1].MtrProt
+String createGroupName(String namePath) {
+  // Remove leading 'EventGlobal.'
+  if (namePath.startsWith('EventGlobal.')) {
+    namePath = namePath.substring('EventGlobal.'.length);
+  }
+
+  // Remove everything after the first dot
+  int dotIndex = namePath.indexOf('.');
+  if (dotIndex != -1) {
+    namePath = namePath.substring(0, dotIndex);
+  }
+
+  // Remove '[' and ']' characters
+  namePath = namePath.replaceAll(RegExp(r'[\[\]]'), '');
+
+  return namePath;
+}
+
+Iterable<String> _uniqueNamePaths(Iterable<NodePath> nodePaths) => nodePaths
+    .map((nodePath) => nodePath.map((node) => node.name).join('.'))
+    .toSet();

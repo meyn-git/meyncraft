@@ -2,6 +2,7 @@ import 'dart:core';
 
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.infrastructure.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
@@ -33,6 +34,14 @@ List<Variable> createGlobalVariables(
         id,
       )[VariableGroup.global] ??
       [];
+
+  for (var globalVariable in globalVariables) {
+    _baseTypeFactory.resolveBaseTypeOwnersRecursively(
+      dataTypes,
+      globalVariable,
+    );
+  }
+
   return globalVariables;
 }
 
@@ -96,13 +105,13 @@ Variable createVariable(
   var hardwareAddress = attributes['AT'];
   var networkPublish = NetworkPublish.ofValue(attributes['NTP']);
   var typeExpression = attributes['D']!;
-  var baseType = _baseTypeFactory.tryToResolveDataTypeRefBaseType(
-    dataTypes: dataTypes,
-    name: name,
-    comment: comment,
-    typeExpression: typeExpression,
-  );
-
+  var baseType = _baseTypeFactory.createFromExpression(typeExpression);
+  if (baseType is BaseTypeOwner) {
+    _baseTypeFactory.resolveBaseTypeOwnersRecursively(
+      dataTypes,
+      (baseType as BaseTypeOwner),
+    );
+  }
   // var unknownAttributes = {...attributes};
   // unknownAttributes.remove('N');
   // unknownAttributes.remove('Com');

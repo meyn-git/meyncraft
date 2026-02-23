@@ -16,7 +16,7 @@ const String nameSpacePathSeparator = '\\';
 
 List<DataTypeBase> createDataTypes(SysmacProjectArchive sysmacProjectArchive) {
   var dataTypes = _createChildren(sysmacProjectArchive);
-  tryToResolveDataTypeRefBaseType(dataTypes);
+  tryToResolveDataTypeBaseTypes(dataTypes);
   return dataTypes;
 }
 
@@ -97,12 +97,14 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     dataTypes.addAll(
       dataTypeRootElement.childElements
           .where((element) => element.name.local == 'DataType')
-          .map((element) => _createDataType(element)),
+          .map((element) => _createDataType(element))
+          // remove nulls
+          .whereType<DataTypeBase>(),
     );
     return dataTypes;
   }
 
-  DataTypeBase _createDataType(XmlElement dataTypeElement) {
+  DataTypeBase? _createDataType(XmlElement dataTypeElement) {
     String baseTypeExpression = dataTypeElement.getAttribute(
       baseTypeAttribute,
     )!;
@@ -119,11 +121,7 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     logger.warning(
       'Unknown base type expression "$baseTypeExpression" for xml element: $dataTypeElement',
     );
-    return UnknownDataTypeBase(
-      name: dataTypeElement.getAttribute(nameAttribute)!,
-      comment: dataTypeElement.getAttribute(commentAttribute)!,
-      typeExpression: baseTypeExpression,
-    );
+    return null;
   }
 
   final _baseTypeFactory = BaseTypeFactory();
@@ -164,20 +162,15 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     return Structure(name: name, comment: comment, children: members);
   }
 
-  DataType _createDataTypeReference(XmlElement dataTypeElement) {
-    String name = dataTypeElement.getAttribute(nameAttribute)!;
-    String comment = dataTypeElement.getAttribute(commentAttribute)!;
-    String typeExpression = dataTypeElement.getAttribute(baseTypeAttribute)!;
-
-    /// We create an UnknownDataTypeBase as the base type,
-    /// which will be replaced with the correct BaseType later
-    /// when we have all the data types available
-    /// and can find the path to the base type
-    return UnknownDataTypeBase(
-      name: name,
-      comment: comment,
-      typeExpression: typeExpression,
-    );
+  DataTypeMember _createDataTypeReference(XmlElement dataTypeElement) {
+    var name = dataTypeElement.getAttribute(nameAttribute)!;
+    var comment = dataTypeElement.getAttribute(commentAttribute)!;
+    var typeExpression = dataTypeElement.getAttribute(baseTypeAttribute)!;
+    var baseType = _baseTypeFactory.createFromExpression(typeExpression);
+    // note that if the typeExpression is a reference to a dataType
+    // than baseType will be an UnknownBaseType which will be replaced
+    // with the correct BaseType later, see resolveDataTypeReferences(dataTypes)
+    return DataTypeMember(name: name, comment: comment, baseType: baseType);
   }
 
   DataType _createUnion(XmlElement dataTypeElement) {

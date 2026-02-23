@@ -61,80 +61,74 @@ class NameSpace extends DataTypeBase {
 /// A [DataType] is a custom data type that is made of [BaseType]s
 abstract interface class DataType extends DataTypeBase {}
 
-/// TODO We might need to generalize to a ReferenceType that can also reference to functions or functionBlocks
-/// Reference to either:
-/// * a [BasicType]
-/// * a [DataType] or one of its children
+/// A [DataTypeMember] is a child of a [Structure] or a child of a [Union]
 ///
-/// A [DataTypeReference] is often a child of a [Structure] or a child of a [Union]
-class DataTypeReference extends DataType {
+/// Its [baseType] is either an
+/// * a [BasicType]
+/// * a [DataTypeReference]
+class DataTypeMember extends DataType implements BaseTypeOwner {
   @override
   final String name;
 
   @override
   final String comment;
 
-  final BasicType? basicType;
+  @override
+  BaseType baseType;
 
-  /// Either:
-  /// * An empty NodePath when [basicType] is not null (e.g. a [ArrayType] or an [IecType])
-  /// * The path to the referenced [DataTypeBase] or one of its children
-  final NodePath dataTypePath;
-
-  late final BaseType baseType = _baseType();
-
-  BaseType _baseType() {
-    if (basicType != null) {
-      return basicType!;
+  @override
+  List<DataTypeBase> get children {
+    var leaf = baseTypeLeaf(baseType);
+    if (leaf is DataType) {
+      return leaf.children;
+    } else {
+      return [];
     }
-    if (dataTypePath.last is DataTypeReference) {
-      return (dataTypePath.last as DataTypeReference).baseType;
-    }
-    if (dataTypePath.last is BaseType) {
-      return dataTypePath.last as BaseType;
-    }
-    return UnknownBaseType(dataTypePath.toNamePath().join('.'));
   }
 
-  @override
-  late final List<DataTypeBase> children = (baseType is DataType)
-      ? (baseType as DataType).children
-      : <DataTypeBase>[];
-
-  DataTypeReference.forDataTypePath({
+  DataTypeMember({
     required this.name,
     required this.comment,
-    required this.dataTypePath,
-  }) : basicType = null;
-
-  DataTypeReference.forBasicType({
-    required this.name,
-    required this.comment,
-    required this.basicType,
-  }) : dataTypePath = const NodePath.empty();
-}
-
-class UnknownDataTypeBase extends DataType {
-  @override
-  final String name;
-
-  @override
-  final String comment;
-
-  @override
-  final List<DataTypeBase> children = const [];
-
-  final String typeExpression;
-
-  UnknownDataTypeBase({
-    required this.name,
-    required this.comment,
-    required this.typeExpression,
+    required this.baseType,
   });
-
-  @override
-  String toString() => 'UnknownDataTypeBase($typeExpression)';
 }
+
+/// Refers to a DataType or one of its children
+/// This BaseType is normally owned by a [Variable], [ArrayType] or [DataTypeMember]
+class DataTypeReference implements BaseType, BaseTypeOwner {
+  final NodePath dataTypePath;
+  @override
+  late BaseType baseType;
+
+  DataTypeReference({required this.dataTypePath}) {
+    if (dataTypePath.isEmpty) {
+      throw ArgumentError('DataTypeReference.dataTypePath may not be empty');
+    }
+    baseType = dataTypePath.last as BaseType;
+  }
+}
+
+// class UnknownDataTypeBase extends DataType {
+//   @override
+//   final String name;
+
+//   @override
+//   final String comment;
+
+//   @override
+//   final List<DataTypeBase> children = const [];
+
+//   final String typeExpression;
+
+//   UnknownDataTypeBase({
+//     required this.name,
+//     required this.comment,
+//     required this.typeExpression,
+//   });
+
+//   @override
+//   String toString() => 'UnknownDataTypeBase($typeExpression)';
+// }
 
 class Structure extends DataType {
   @override
@@ -144,7 +138,7 @@ class Structure extends DataType {
   final String comment;
 
   @override
-  final List<DataType> children;
+  final List<DataTypeMember> children;
 
   Structure({
     required this.name,
@@ -161,7 +155,7 @@ class Union extends DataType {
   final String comment;
 
   @override
-  final List<DataType> children;
+  final List<DataTypeMember> children;
 
   Union({required this.name, required this.comment, required this.children});
 }
@@ -183,14 +177,15 @@ class Enumeration extends DataType {
   });
 }
 
-class EnumerationMember extends DataType {
+class EnumerationMember extends DataType implements BaseTypeOwner {
   @override
   final String name;
 
   @override
   final String comment;
 
-  final BaseType baseType;
+  @override
+  BaseType baseType;
 
   final int index;
 

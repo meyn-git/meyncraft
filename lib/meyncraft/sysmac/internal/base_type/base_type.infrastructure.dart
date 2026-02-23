@@ -19,35 +19,34 @@ class BaseTypeFactory {
     return factory.create(typeExpression);
   }
 
-  BaseType tryToResolveDataTypeRefBaseType({
-    required List<DataTypeBase> dataTypes,
-    required String name,
-    required String comment,
-    required String typeExpression,
-  }) {
-    var baseType = createFromExpression(typeExpression);
-    if (baseType is BasicType) {
-      return DataTypeReference.forBasicType(
-        name: name,
-        comment: comment,
-        basicType: baseType,
+  /// References to DataTypes may not exist during the creation
+  /// of [DataType]'s or [Variable]s and are therefore created as [UnknownBaseType]
+  ///
+  /// This method will try and replaces baseTypes that
+  /// are an [UnknownBaseType] with a [DataTypeMember]
+  /// This is done recursively: a baseType may also contain a baseType that needs resolving
+  void resolveBaseTypeOwnersRecursively(
+    List<DataTypeBase> dataTypes,
+    BaseTypeOwner baseTypeOwner,
+  ) {
+    if (baseTypeOwner.baseType is UnknownBaseType) {
+      var typeExpression =
+          (baseTypeOwner.baseType as UnknownBaseType).typeExpression;
+      // try to find a path for the data type reference
+      var dataTypePath = dataTypes.findFirstNodePath(
+        namePathFinder(typeExpression.split(r'\'), caseSensitive: false),
       );
+      if (dataTypePath.isNotEmpty) {
+        // replace baseType with a DataTypeReference
+        var resolvedBaseType = DataTypeReference(dataTypePath: dataTypePath);
+        baseTypeOwner.baseType = resolvedBaseType;
+      }
     }
-    // try to find a path for the data type reference
-    var dataTypePath = dataTypes.findFirstNodePath(
-      namePathFinder(typeExpression.split(r'\'), caseSensitive: false),
-    );
-    if (dataTypePath.isNotEmpty) {
-      return DataTypeReference.forDataTypePath(
-        name: name,
-        comment: comment,
-        dataTypePath: dataTypePath,
-      );
-    } else {
-      return UnknownDataTypeBase(
-        name: name,
-        comment: comment,
-        typeExpression: typeExpression,
+    if (baseTypeOwner.baseType is BaseTypeOwner) {
+      // recursive call for nested BaseTypeOwner's
+      resolveBaseTypeOwnersRecursively(
+        dataTypes,
+        (baseTypeOwner.baseType as BaseTypeOwner),
       );
     }
   }
@@ -237,37 +236,106 @@ class ArrayFactory extends BaseTypeSubFactory {
   RegExp get regex => _regex;
 }
 
-/// Replaces all the [UnknownBaseType]s with [DataTypeReference]s
-/// when the path can be found
-void tryToResolveDataTypeRefBaseType(List<DataTypeBase> dataTypes) {
-  var dataTypesWithUnresolvedChildren = dataTypes.descendants.where(
-    (dataTypeBase) =>
-        dataTypeBase is DataType &&
-        dataTypeBase.children.any((child) => child is UnknownDataTypeBase),
-  );
-  for (var dataTypeWithUnresolvedChildren in dataTypesWithUnresolvedChildren) {
-    for (
-      var childIndex = 0;
-      childIndex < dataTypeWithUnresolvedChildren.children.length;
-      childIndex++
-    ) {
-      var child = dataTypeWithUnresolvedChildren.children[childIndex];
-      if (child is UnknownDataTypeBase) {
-        var possiblyResolvedDataTypeRef = _baseTypeFactory
-            .tryToResolveDataTypeRefBaseType(
-              dataTypes: dataTypes,
-              name: child.name,
-              comment: child.comment,
-              typeExpression: child.typeExpression,
-            );
-        if (possiblyResolvedDataTypeRef is DataTypeReference) {
-          // replace the UnknownDataTypeBase with the resolved DataTypeReference
-          dataTypeWithUnresolvedChildren.children[childIndex] =
-              possiblyResolvedDataTypeRef;
-        }
-      }
-    }
+// void tryToResolveDataTypeBaseTypesOfArrays(List<DataTypeBase> dataTypes) {
+// var dataTypeRefsOfArray = dataTypes.descendants.where(
+//   (dataTypeBase) =>
+//       dataTypeBase is DataTypeReference && dataTypeBase.baseType is ArrayType,
+// );
+// for (var dataTypeRefOfArray in dataTypeRefsOfArray) {
+//   var array = (dataTypeRefOfArray as DataTypeReference).baseType as ArrayType;
+//   var arrayBaseType = array.baseType;
+//   if (arrayBaseType is UnknownDataTypeBase) {
+//     var possibleResolvedType = _baseTypeFactory
+//         .tryToResolveDataTypeRefBaseType(
+//           dataTypes: dataTypes,
+//           name: arrayBaseType.name,
+//           comment: arrayBaseType.comment,
+//           typeExpression: arrayBaseType.typeExpression,
+//         );
+//     if (possibleResolvedType is DataTypeReference) {
+//       dataTypeRefOfArray.baseType = ArrayType(
+//         baseType: possibleResolvedType,
+//         arrayRanges: array.arrayRanges,
+//       );
+//     }
+//   }
+// }
+
+//   var allDescendents = [ ...dataTypes, ...dataTypes.descendants];
+//   AAARRRGGGHHH
+//   var dataTypesWithUnresolvedBaseTypes = allDescendents.where(
+//     (dataTypeBase) =>
+//         dataTypeBase is DataType &&
+//         dataTypeBase.children.any(childWithUnresolvedArrayBaseType),
+//   );
+//   for (var dataTypeWithUnresolvedBaseType in dataTypesWithUnresolvedBaseTypes) {
+//     for (
+//       var childIndex = 0;
+//       childIndex < dataTypeWithUnresolvedBaseType.children.length;
+//       childIndex++
+//     ) {
+//       var child = dataTypeWithUnresolvedBaseType.children[childIndex];
+//       if (childWithUnresolvedArrayBaseType(child)) {
+//         var unknownBaseType =
+//             ((child as DataTypeReference).baseType as ArrayType).baseType
+//                 as UnknownBaseType;
+//         var typeExpression = unknownBaseType.typeExpression;
+//         var dataTypePath = dataTypes.findFirstNodePath(
+//           namePathFinder(typeExpression.split(r'\'), caseSensitive: false),
+//         );
+//         if (dataTypePath.isNotEmpty && dataTypePath.last is DataTypeReference) {
+//           // replace the UnknownDataTypeBase with the resolved DataTypeReference
+//           dataTypeWithUnresolvedBaseType.children[childIndex] =
+//               dataTypePath.last as DataTypeReference;
+//         }
+//       }
+//     }
+//   }
+// }
+
+// /// Replaces all baseTypes that are an [UnknownBaseType] recursively
+// void tryToResolveDataTypeBaseTypes(List<DataTypeBase> dataTypes) {
+//   var dataTypesToResolve = dataTypes.descendants.where(
+//     (dataTypeBase) =>
+//         dataTypeBase is DataType &&
+//         dataTypeBase.children.any((child) => child is UnknownDataTypeBase),
+//   );
+//   for (var dataTypeWithUnresolvedChildren in dataTypesToResolve) {
+//     for (
+//       var childIndex = 0;
+//       childIndex < dataTypeWithUnresolvedChildren.children.length;
+//       childIndex++
+//     ) {
+//       var child = dataTypeWithUnresolvedChildren.children[childIndex];
+//       if (child is UnknownDataTypeBase) {
+//         var possiblyResolvedDataTypeRef = _baseTypeFactory
+//             .tryToResolveDataTypeRefBaseType(
+//               dataTypes: dataTypes,
+//               name: child.name,
+//               comment: child.comment,
+//               typeExpression: child.typeExpression,
+//             );
+//         if (possiblyResolvedDataTypeRef is DataTypeReference) {
+//           // replace the UnknownDataTypeBase with the resolved DataTypeReference
+//           dataTypeWithUnresolvedChildren.children[childIndex] =
+//               possiblyResolvedDataTypeRef;
+//         }
+//       }
+//     }
+//   }
+// }
+
+// final _baseTypeFactory = BaseTypeFactory();
+
+// bool childWithUnresolvedArrayBaseType(DataTypeBase child) =>
+//     child is DataTypeMember &&
+//     child.baseType is ArrayType &&
+//     (child.baseType as ArrayType).baseType is UnknownBaseType;
+
+void tryToResolveDataTypeBaseTypes(List<DataTypeBase> dataTypes) {
+  final baseTypeFactory = BaseTypeFactory();
+  var baseTypeOwners = dataTypes.descendants.whereType<BaseTypeOwner>();
+  for (var baseTypeOwner in baseTypeOwners) {
+    baseTypeFactory.resolveBaseTypeOwnersRecursively(dataTypes, baseTypeOwner);
   }
 }
-
-final _baseTypeFactory = BaseTypeFactory();

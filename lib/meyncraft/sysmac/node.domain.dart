@@ -59,7 +59,7 @@ class NodePath extends DelegatingList<Node> {
         : node.name,
   );
 
-  List<String> get commentPath => map((node) => node.comment).toList();
+  List<String> toCommentPath() => map((node) => node.comment).toList();
 
   @override
   String toString() => toNamePath().join('.');

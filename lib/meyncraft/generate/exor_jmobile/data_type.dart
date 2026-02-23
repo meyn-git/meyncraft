@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 
@@ -76,23 +77,13 @@ abstract class ExorDataType {
     ExorString(),
     ExorTime(),
     ExorDateTime(),
+    ExorEnum(),
   ];
 
-  static ExorDataType findCompatibleType(BaseType omronBaseType) {
-    return _allTypes.firstWhere(
-      (type) => type.comparableOmronTypes.contains(omronBaseType.runtimeType),
-      orElse: () => throw Exception(
-        'Omron data type: $omronBaseType could not be converted to a Exor data type',
-      ),
-    );
-  }
-
-  static ExorDataType findCompatibleTypeWithOneDimensionalArray(
-    BaseType baseType,
-  ) {
-    var compatibleType = findCompatibleType((baseType as ArrayType).baseType);
-    return ExorOneDimensionalArray(compatibleType, baseType.arrayRanges.first);
-  }
+  static ExorDataType? findCompatibleType(BaseType omronBaseType) =>
+      _allTypes.firstWhereOrNull(
+        (type) => type.comparableOmronTypes.contains(omronBaseType.runtimeType),
+      );
 }
 
 class ExorEnum extends ExorDataType {
@@ -100,13 +91,13 @@ class ExorEnum extends ExorDataType {
     : super(
         exorTypeName: 'int',
         iecTypeName: 'DINT',
-        comparableOmronTypes: [EnumerationMember],
+        comparableOmronTypes: [Enumeration],
         min: '-32768',
         max: '32767',
       );
 }
 
-/// Wraps a [ExorDataType] and overrides the arraySize  fields to make it a one dimensional array
+/// Wraps a [ExorDataType] and overrides the arraySize fields to make it a one dimensional array
 class ExorOneDimensionalArray extends ExorDataType {
   ExorOneDimensionalArray(ExorDataType compatibleType, ArrayRange arrayRange)
     : super(

@@ -3,13 +3,14 @@ import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.d
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
-class Variable extends Node<DataTypeBase> {
+class Variable extends Node<DataTypeBase> implements BaseTypeOwner {
   @override
   final String name;
   @override
   final String comment;
   final NetworkPublish networkPublish;
-  final BaseType baseType;
+  @override
+  BaseType baseType;
   final String? hardwareAddress;
   final VariableDirection? direction;
   final bool isRetained;
@@ -17,9 +18,14 @@ class Variable extends Node<DataTypeBase> {
   final String? initialValue;
 
   @override
-  late final List<DataTypeBase> children = baseType is DataTypeReference
-      ? (baseType as DataTypeReference).children
-      : [];
+  List<DataTypeBase> get children {
+    var leaf = baseTypeLeaf(baseType);
+    if (leaf is DataType) {
+      return leaf.children;
+    } else {
+      return [];
+    }
+  }
 
   Variable({
     required this.name,

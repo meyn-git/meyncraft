@@ -60,7 +60,7 @@ void main() {
         var dataTypePaths = sysmacProjectFile.dataTypes.findAllNodePaths(
           leafPathsFinder(),
         );
-        expect(dataTypePaths.length, 47888);
+        expect(dataTypePaths.length, 54609);
       });
     });
 
