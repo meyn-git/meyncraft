@@ -48,6 +48,7 @@ class ProjectIndexXml extends ArchiveXml {
 
   List<DataTypeArchiveXmlFile> dataTypeArchiveXmlFiles() {
     var plcDeviceEntities = _findPlcDeviceEntities();
+    //TODO to consider: also hmiDeviceEntities that use VbTypeFactories?
 
     List<XmlNode> dataTypeEntities = _findDataTypeEntities(plcDeviceEntities);
 
