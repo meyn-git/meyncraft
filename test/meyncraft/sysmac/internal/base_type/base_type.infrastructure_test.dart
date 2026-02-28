@@ -40,10 +40,7 @@ void main() {
             .beAssignableTo<IecType>();
         baseTypeFactory.createFromExpression('LINT').should.beOfType<IecLInt>();
 
-        baseTypeFactory
-            .createFromExpression('lint')
-            .should
-            .beOfType<IecLInt>();
+        baseTypeFactory.createFromExpression('lint').should.beOfType<IecLInt>();
       });
       test('UINT', () {
         baseTypeFactory
@@ -52,10 +49,7 @@ void main() {
             .beAssignableTo<IecType>();
         baseTypeFactory.createFromExpression('UINT').should.beOfType<IecUInt>();
 
-        baseTypeFactory
-            .createFromExpression('uint')
-            .should
-            .beOfType<IecUInt>();
+        baseTypeFactory.createFromExpression('uint').should.beOfType<IecUInt>();
       });
       test('WORD', () {
         baseTypeFactory
@@ -64,10 +58,7 @@ void main() {
             .beAssignableTo<IecType>();
         baseTypeFactory.createFromExpression('WORD').should.beOfType<IecWord>();
 
-        baseTypeFactory
-            .createFromExpression('word')
-            .should
-            .beOfType<IecWord>();
+        baseTypeFactory.createFromExpression('word').should.beOfType<IecWord>();
       });
       test('UDINT', () {
         baseTypeFactory
@@ -136,10 +127,7 @@ void main() {
             .beAssignableTo<IecType>();
         baseTypeFactory.createFromExpression('REAL').should.beOfType<IecReal>();
 
-        baseTypeFactory
-            .createFromExpression('real')
-            .should
-            .beOfType<IecReal>();
+        baseTypeFactory.createFromExpression('real').should.beOfType<IecReal>();
       });
       test('LREAL', () {
         baseTypeFactory
@@ -163,10 +151,7 @@ void main() {
             .beAssignableTo<IecType>();
         baseTypeFactory.createFromExpression('BOOL').should.beOfType<IecBool>();
 
-        baseTypeFactory
-            .createFromExpression('bool')
-            .should
-            .beOfType<IecBool>();
+        baseTypeFactory.createFromExpression('bool').should.beOfType<IecBool>();
       });
       test('STRING', () {
         baseTypeFactory
@@ -201,10 +186,7 @@ void main() {
             .beAssignableTo<IecType>();
         baseTypeFactory.createFromExpression('SINT').should.beOfType<IecSInt>();
 
-        baseTypeFactory
-            .createFromExpression('sint')
-            .should
-            .beOfType<IecSInt>();
+        baseTypeFactory.createFromExpression('sint').should.beOfType<IecSInt>();
       });
       test('USINT', () {
         baseTypeFactory
@@ -228,10 +210,7 @@ void main() {
             .beAssignableTo<IecType>();
         baseTypeFactory.createFromExpression('BYTE').should.beOfType<IecByte>();
 
-        baseTypeFactory
-            .createFromExpression('byte')
-            .should
-            .beOfType<IecByte>();
+        baseTypeFactory.createFromExpression('byte').should.beOfType<IecByte>();
       });
       test('TIME', () {
         baseTypeFactory
@@ -240,10 +219,7 @@ void main() {
             .beAssignableTo<IecType>();
         baseTypeFactory.createFromExpression('TIME').should.beOfType<IecTime>();
 
-        baseTypeFactory
-            .createFromExpression('time')
-            .should
-            .beOfType<IecTime>();
+        baseTypeFactory.createFromExpression('time').should.beOfType<IecTime>();
       });
       test('DATE', () {
         baseTypeFactory
@@ -252,10 +228,7 @@ void main() {
             .beAssignableTo<IecType>();
         baseTypeFactory.createFromExpression('DATE').should.beOfType<IecDate>();
 
-        baseTypeFactory
-            .createFromExpression('date')
-            .should
-            .beOfType<IecDate>();
+        baseTypeFactory.createFromExpression('date').should.beOfType<IecDate>();
       });
       test('DATE_AND_TIME', () {
         baseTypeFactory
@@ -323,13 +296,13 @@ void main() {
             .beOfType<VbInteger>();
       });
       test('Long', () {
-        baseTypeFactory.createFromExpression('Long').should.beAssignableTo<VbType>();
+        baseTypeFactory
+            .createFromExpression('Long')
+            .should
+            .beAssignableTo<VbType>();
         baseTypeFactory.createFromExpression('Long').should.beOfType<VbLong>();
 
-        baseTypeFactory
-            .createFromExpression('long')
-            .should
-            .beOfType<VbLong>();
+        baseTypeFactory.createFromExpression('long').should.beOfType<VbLong>();
       });
       test('UShort', () {
         baseTypeFactory
@@ -363,7 +336,10 @@ void main() {
             .beOfType<VbUInteger>();
       });
       test('ULong', () {
-        baseTypeFactory.createFromExpression('ULong').should.beAssignableTo<VbType>();
+        baseTypeFactory
+            .createFromExpression('ULong')
+            .should
+            .beAssignableTo<VbType>();
         baseTypeFactory
             .createFromExpression('ULong')
             .should
@@ -463,16 +439,19 @@ void main() {
       //       .beOfType<VbString>();
       // });
       test('Char', () {
-        baseTypeFactory.createFromExpression('Char').should.beAssignableTo<VbType>();
+        baseTypeFactory
+            .createFromExpression('Char')
+            .should
+            .beAssignableTo<VbType>();
         baseTypeFactory.createFromExpression('Char').should.beOfType<VbChar>();
 
-        baseTypeFactory
-            .createFromExpression('char')
-            .should
-            .beOfType<VbChar>();
+        baseTypeFactory.createFromExpression('char').should.beOfType<VbChar>();
       });
       test('SByte', () {
-        baseTypeFactory.createFromExpression('SByte').should.beAssignableTo<VbType>();
+        baseTypeFactory
+            .createFromExpression('SByte')
+            .should
+            .beAssignableTo<VbType>();
         baseTypeFactory
             .createFromExpression('SByte')
             .should
@@ -483,7 +462,7 @@ void main() {
             .should
             .beOfType<VbSByte>();
       });
-     // VbByte overlaps with IceByte
+      // VbByte overlaps with IceByte
       // test('Byte', () {
       //   baseTypeFactory.createFromExpression('Byte').should.beAssignableTo<VbType>();
       //   baseTypeFactory.createFromExpression('Byte').should.beOfType<VbByte>();

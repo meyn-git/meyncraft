@@ -51,7 +51,6 @@ extension VariableListExtension on List<Variable> {
     return const NodePath.empty();
   }
 
-
   List<T> findAllNodePaths<T extends NodePath>(NodePathsFinder<T> finder) {
     var nodePaths = <T>[];
     for (var child in this) {
