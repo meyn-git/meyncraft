@@ -7,13 +7,14 @@ import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.d
 import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
+import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:xml/xml.dart';
 
 /// creates an xml file with [ExorTag]s generated from a Sysmac project file
 /// to be imported by JMobile
 Future<void> writeJMobileTagsFile(MeynSysmacProject sysmacProject) async {
-  var variables = sysmacProject.globalVariables;
-  List<ExorTag> tags = createTags(variables);
+  var tags = createTags(sysmacProject);
   logger.info('Found ${tags.length} Exor-JMobile tags');
   String formattedXml = createFormattedTagsXml(tags);
   var outputFile = createOutputFile(sysmacProject, '-JMobileTags.xml');
@@ -46,7 +47,7 @@ File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   return outputFile;
 }
 
-String createFormattedTagsXml(List<ExorTag> tags) {
+String createFormattedTagsXml(Iterable<ExorTag> tags) {
   var document = XmlDocument([
     XmlComment('This code was generated with MeynCraft on ${DateTime.now()}.'),
     XmlComment(
@@ -58,19 +59,29 @@ String createFormattedTagsXml(List<ExorTag> tags) {
   return formattedXml;
 }
 
-List<ExorTag> createTags(List<Variable> variables) {
+Iterable<ExorTag> createTags(
+  SysmacProject sysmacProject, {
+  List<bool Function(String namePath)> skipRules = const [
+    skipMeynConnect,
+    skipVetInsp,
+  ],
+}) {
+  var variables = sysmacProject.globalVariables;
   var publicVariables = variables
       .where((v) => v.networkPublish == NetworkPublish.publicationOnly)
       .toList();
-  var tags = <ExorTag>[];
-  for (var variable in publicVariables) {
-    var tagNode = ExorTagNode.fromVariable(variable);
-    var createdTags = tagNode.createTags(
-      skipRules: [skipMeynConnect, skipVetInsp],
-    );
-    tags.addAll(createdTags);
-  }
-  return tags;
+
+  var tagPaths = publicVariables
+      .findAllNodePaths<NodePathWithIndexes>(tagPathFinder())
+      .where(
+        (tagPath) => !skipRules.any(
+          (skipRule) => skipRule(tagPath.toNamePath().join('.')),
+        ),
+      );
+  var exorTags = tagPaths
+      .map((tagPath) => _createExorTag(tagPath))
+      .whereType<ExorTag>();
+  return exorTags;
 }
 
 bool skipMeynConnect(String namePath) => namePath.startsWith(RegExp(r'L\d_'));
@@ -166,133 +177,146 @@ class ExorTag {
   ]);
 }
 
-///TODO investigate if we can use DataTypeBase.findPaths instead of using ExorTagNode.
-class ExorTagNode {
-  final String name;
-  final String comment;
-  final BaseType baseType;
-  final List<ExorTagNode> children;
+/// recursive function to find all [NodePathWithIndexes] within a node that represent an [ExorTag]
+NodePathsFinder<NodePathWithIndexes> tagPathFinder({
+  NodePathWithIndexes precedingPath = const NodePathWithIndexes.empty(),
+}) => (Node node) {
+  // if (precedingPath.join('/') == 'HmiGlobal/Common/Config/NewAlarmWarningOff' &&
+  // if (node.name == 'Unit') {
+  //   print('DEBUG');
+  // }
 
-  ExorTagNode.fromVariable(Variable variable)
-    : name = variable.name,
-      comment = variable.comment,
-      baseType = variable.baseType,
-      children = createChildren(variable.baseType);
+  var tagPaths = _createTagPaths(precedingPath, node);
 
-  ExorTagNode.fromDataTypeMember(DataTypeMember dataTypeMember)
-    : name = dataTypeMember.name,
-      comment = dataTypeMember.comment,
-      baseType = dataTypeMember.baseType,
-      children = createChildren(dataTypeMember.baseType);
-
-  static List<ExorTagNode> createChildren(BaseType baseType) {
-    var nestedBaseType = baseTypeLeaf(baseType);
-    if (nestedBaseType is DataType) {
-      return nestedBaseType.children
-          .whereType<DataTypeMember>()
-          .map(
-            (dataTypeMember) => ExorTagNode.fromDataTypeMember(dataTypeMember),
-          )
-          .toList();
-    }
-    // baseType has no children
-    return [];
-  }
-
-  static bool isNoTag(BaseType baseType) {
-    var nestedBaseType = baseTypeLeaf(baseType);
-    return nestedBaseType is EnumerationMember ||
-        nestedBaseType is UnknownBaseType ||
-        nestedBaseType is DataTypeMember;
-  }
-
-  List<ExorTag> createTags({
-    String parentNamePath = '',
-    List<bool Function(String namePath)> skipRules = const [],
-  }) {
-    String namePath = createNamePath(parentNamePath);
-    if (isLeafNode) {
-      if (isNoTag(baseType) || skipRules.any((rule) => rule(namePath))) {
-        return [];
-      }
-      // an exception on the rule to reduce the number of tags:
-      if (singleArrayRootNode(parentNamePath, baseType)) {
-        return _createExorTagForOneDimensionalArray(namePath);
-      }
-      return _createExorTags(parentNamePath, namePath);
+  if (_isLeafNode(node)) {
+    if (_isExorTag(node)) {
+      return tagPaths;
     } else {
-      var tags = <ExorTag>[];
-      var namePaths = createNamePaths(parentNamePath);
-      for (var namePath in namePaths) {
-        for (var child in children) {
-          tags.addAll(
-            child.createTags(parentNamePath: namePath, skipRules: skipRules),
-          );
-        }
+      return [];
+    }
+  }
+
+  var tagPathsFromChildren = <NodePathWithIndexes>[];
+  for (var eventPath in tagPaths) {
+    var finder = tagPathFinder(precedingPath: eventPath);
+    for (var child in node.children) {
+      var eventPathsFromChild = finder(child as Node);
+      if (eventPathsFromChild.isNotEmpty) {
+        tagPathsFromChildren.addAll(eventPathsFromChild);
       }
-      return tags;
     }
   }
+  return tagPathsFromChildren;
+};
 
-  List<ExorTag> _createExorTags(String parentNamePath, String namePath) {
-    var namePaths = createNamePaths(parentNamePath);
-    var nestedBaseType = baseTypeLeaf(baseType);
-    var exorDataType = ExorDataType.findCompatibleType(nestedBaseType);
-    if (exorDataType == null) {
-      logger.warning(
-        'No compatible Exor data type found for Omron base type: $namePath',
-      );
-      return [];
-    }
-    return namePaths
-        .map((namePath) => ExorTag(name: namePath, exorDataType: exorDataType))
-        .toList();
-  }
+bool _isExorTag(Node node) {
+  // if (node is! BaseTypeOwner) {
+  //   return false;
+  // }
+  // if (node.name == 'NO_UNIT') {
+  //   print('!!!');
+  // }
+  // var nestedBaseType = baseTypeLeaf((node as BaseTypeOwner).baseType);
+  // return nestedBaseType is! EnumerationMember &&
+  //     nestedBaseType is! UnknownBaseType;
+  return node is! EnumerationMember && node is! UnknownBaseType;
+}
 
-  List<ExorTag> _createExorTagForOneDimensionalArray(String namePath) {
-    var compatibleType = ExorDataType.findCompatibleType(
-      (baseType as ArrayType).baseType,
-    );
-    if (compatibleType == null) {
-      logger.warning(
-        'No compatible Exor data type found for Omron base type: $namePath',
-      );
-      return [];
-    }
+bool _isLeafNode(Node node) => node.children.isEmpty || _isEnumeration(node);
+
+bool _isEnumeration(Node node) =>
+    (node is DataTypeMember) && baseTypeLeaf(node.baseType) is Enumeration;
+
+List<NodePathWithIndexes> _createTagPaths(
+  NodePathWithIndexes precedingPath,
+  Node<Node<dynamic>> node,
+) {
+  var indexValues = _createIndexValues(node);
+  if (indexValues.isEmpty) {
     return [
-      ExorTag(
-        name: namePath,
-        exorDataType: ExorOneDimensionalArray(
-          compatibleType,
-          (baseType as ArrayType).arrayRanges.first,
-        ),
+      NodePathWithIndexes(
+        [...precedingPath, node],
+        [...precedingPath.arrayIndexes, null],
       ),
     ];
+  } else {
+    return indexValues
+        .map(
+          (arrayIndexValue) => NodePathWithIndexes(
+            [...precedingPath, node],
+            [...precedingPath.arrayIndexes, arrayIndexValue],
+          ),
+        )
+        .toList();
+  }
+}
+
+List<String> _createIndexValues(Node<Node<dynamic>> node) {
+  if (node is! DataTypeMember) {
+    return [];
+  }
+  var baseType = node.baseType;
+  if (baseType is ArrayType) {
+    return baseType.arrayRanges.toStringList();
+  } else {
+    return [];
+  }
+}
+
+bool _isSingleArrayRootNode(NodePathWithIndexes tagPath) {
+  if (tagPath.isEmpty || tagPath.length > 1) {
+    return false;
+  }
+  if (tagPath.first is! BaseTypeOwner) {
+    return false;
+  }
+  var baseType = (tagPath.first as BaseTypeOwner).baseType;
+  return baseType is ArrayType && baseType.arrayRanges.length == 1;
+}
+
+ExorTag? _createExorTag(NodePathWithIndexes tagPath) {
+  if (tagPath.last is! BaseTypeOwner) {
+    return null;
   }
 
-  /// creates a name path of this node.
-  /// returns a list with:
-  /// * one path if there is no array.
-  /// * or a path for each array value
-  List<String> createNamePaths(String preceedingPath) {
-    var path = createNamePath(preceedingPath);
-    if (baseType is ArrayType) {
-      var arrayIndexes = (baseType as ArrayType).arrayRanges.toStringList();
-      return arrayIndexes.map((arrayValue) => path + arrayValue).toList();
-    } else {
-      return [path];
-    }
+  String namePath = tagPath.toNamePathWithArrayIndexes().join('/');
+  var baseType = (tagPath.last as BaseTypeOwner).baseType;
+
+  if (_isSingleArrayRootNode(tagPath)) {
+    // an exception on the rule to reduce the number of tags:
+    return _createExorTagForOneDimensionalArray(
+      namePath,
+      baseType as ArrayType,
+    );
   }
 
-  /// creates a name path for this node without array values
-  String createNamePath(String preceedingPath) =>
-      preceedingPath.isEmpty ? name : [preceedingPath, name].join('/');
+  var nestedBaseType = baseTypeLeaf(baseType);
+  var exorDataType = ExorDataType.findCompatibleType(nestedBaseType);
+  if (exorDataType == null) {
+    logger.warning(
+      'No compatible Exor data type found for Omron base type: $namePath',
+    );
+    return null;
+  }
+  return ExorTag(name: namePath, exorDataType: exorDataType);
+}
 
-  /// an exception on the rule: to reduce the number of tags
-  bool singleArrayRootNode(String preceedingPath, BaseType baseType) =>
-      preceedingPath.isEmpty &&
-      baseType is ArrayType &&
-      baseType.arrayRanges.length == 1;
-
-  bool get isLeafNode => children.isEmpty;
+ExorTag? _createExorTagForOneDimensionalArray(
+  String namePath,
+  ArrayType arrayType,
+) {
+  var compatibleType = ExorDataType.findCompatibleType(baseTypeLeaf(arrayType));
+  if (compatibleType == null) {
+    logger.warning(
+      'No compatible Exor data type found for Omron base type: $namePath',
+    );
+    return null;
+  }
+  return ExorTag(
+    name: namePath,
+    exorDataType: ExorOneDimensionalArray(
+      compatibleType,
+      arrayType.arrayRanges.first,
+    ),
+  );
 }

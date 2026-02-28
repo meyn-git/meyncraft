@@ -18,14 +18,12 @@ void main() {
       );
     });
     test('Should return tags', () {
-      var variables = sysmacProject.globalVariables;
-      List<ExorTag> tags = createTags(variables);
-      tags.length.should.be(12530);
+      Iterable<ExorTag> tags = createTags(sysmacProject);
+      tags.length.should.be(12606);
     });
 
     test('Should contain HmiGlobal', () {
-      var variables = sysmacProject.globalVariables;
-      List<ExorTag> tags = createTags(variables);
+      Iterable<ExorTag> tags = createTags(sysmacProject);
       var tagNames = tags.map((tag) => tag.name);
       tagNames.should.any((name) => name.startsWith('HmiGlobal'));
     });

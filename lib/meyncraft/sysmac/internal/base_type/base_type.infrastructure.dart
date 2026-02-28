@@ -7,7 +7,7 @@ import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 class BaseTypeFactory {
   final List<BaseTypeSubFactory> baseTypeSubFactories = [
     ArrayFactory(),
-    ...NxTypeFactories(),
+    ...IecTypeFactories(),
     ...VbTypeFactories(),
     UnknownBaseTypeFactory(),
   ];
@@ -66,18 +66,23 @@ class UnknownBaseTypeFactory extends BaseTypeSubFactory {
   BaseType create(String expression) => UnknownBaseType(expression);
 }
 
-class NxTypeFactory extends BaseTypeSubFactory {
+class IecTypeFactory extends BaseTypeSubFactory {
   final IecType _nxType;
   final RegExp _regex;
 
-  NxTypeFactory(this._nxType)
-    : _regex = FluentRegex().startOfLine().literal(_nxType.name).endOfLine();
-
-  /// e.g. STRING[123]
-  NxTypeFactory.withOptionalLength(this._nxType)
+  IecTypeFactory(this._nxType)
     : _regex = FluentRegex()
           .startOfLine()
           .literal(_nxType.name)
+          .ignoreCase()
+          .endOfLine();
+
+  /// e.g. STRING[123]
+  IecTypeFactory.withOptionalLength(this._nxType)
+    : _regex = FluentRegex()
+          .startOfLine()
+          .literal(_nxType.name)
+          .ignoreCase()
           .group(
             FluentRegex()
                 .literal('[')
@@ -94,29 +99,29 @@ class NxTypeFactory extends BaseTypeSubFactory {
   RegExp get regex => _regex;
 }
 
-class NxTypeFactories extends DelegatingList<NxTypeFactory> {
-  NxTypeFactories()
+class IecTypeFactories extends DelegatingList<IecTypeFactory> {
+  IecTypeFactories()
     : super([
-        NxTypeFactory(IecInt()),
-        NxTypeFactory(IecDInt()),
-        NxTypeFactory(IecLInt()),
-        NxTypeFactory(IecUInt()),
-        NxTypeFactory(IecWord()),
-        NxTypeFactory(IecUDInt()),
-        NxTypeFactory(IecDWord()),
-        NxTypeFactory(IecULInt()),
-        NxTypeFactory(IecLWord()),
-        NxTypeFactory(IecReal()),
-        NxTypeFactory(IecLReal()),
-        NxTypeFactory(IecBool()),
-        NxTypeFactory.withOptionalLength(IecString()),
-        NxTypeFactory(IecSInt()),
-        NxTypeFactory(IecUSInt()),
-        NxTypeFactory(IecByte()),
-        NxTypeFactory(IecTime()),
-        NxTypeFactory(IecDate()),
-        NxTypeFactory(IecDateAndTime()),
-        NxTypeFactory(IecTimeOfDay()),
+        IecTypeFactory(IecInt()),
+        IecTypeFactory(IecDInt()),
+        IecTypeFactory(IecLInt()),
+        IecTypeFactory(IecUInt()),
+        IecTypeFactory(IecWord()),
+        IecTypeFactory(IecUDInt()),
+        IecTypeFactory(IecDWord()),
+        IecTypeFactory(IecULInt()),
+        IecTypeFactory(IecLWord()),
+        IecTypeFactory(IecReal()),
+        IecTypeFactory(IecLReal()),
+        IecTypeFactory(IecBool()),
+        IecTypeFactory.withOptionalLength(IecString()),
+        IecTypeFactory(IecSInt()),
+        IecTypeFactory(IecUSInt()),
+        IecTypeFactory(IecByte()),
+        IecTypeFactory(IecTime()),
+        IecTypeFactory(IecDate()),
+        IecTypeFactory(IecDateAndTime()),
+        IecTypeFactory(IecTimeOfDay()),
       ]);
 }
 
@@ -125,12 +130,17 @@ class VbTypeFactory extends BaseTypeSubFactory {
   final RegExp _regex;
 
   VbTypeFactory(this._vbType)
-    : _regex = FluentRegex().startOfLine().literal(_vbType.name).endOfLine();
+    : _regex = FluentRegex()
+          .startOfLine()
+          .literal(_vbType.name)
+          .ignoreCase()
+          .endOfLine();
 
   VbTypeFactory.withOptionalLength(this._vbType)
     : _regex = FluentRegex()
           .startOfLine()
           .literal(_vbType.name)
+          .ignoreCase()
           .group(
             FluentRegex()
                 .literal('[')

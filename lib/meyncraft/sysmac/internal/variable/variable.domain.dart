@@ -41,7 +41,7 @@ class Variable extends Node<DataTypeBase> implements BaseTypeOwner {
 }
 
 extension VariableListExtension on List<Variable> {
-  NodePath findFirstNodePath(NodePathFinder finder) {
+  NodePath findFirstNodePath<T extends NodePath>(NodePathFinder<T> finder) {
     for (var child in this) {
       var result = finder(child);
       if (result.isNotEmpty) {
@@ -51,8 +51,9 @@ extension VariableListExtension on List<Variable> {
     return const NodePath.empty();
   }
 
-  List<NodePath> findAllNodePaths(NodePathsFinder finder) {
-    var nodePaths = <NodePath>[];
+
+  List<T> findAllNodePaths<T extends NodePath>(NodePathsFinder<T> finder) {
+    var nodePaths = <T>[];
     for (var child in this) {
       var foundNodePaths = finder(child);
       if (foundNodePaths.isNotEmpty) {

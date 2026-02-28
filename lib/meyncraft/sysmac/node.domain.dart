@@ -161,7 +161,11 @@ NodePathFinder<NodePath> namePathFinder(
   if (namePath.length == 1) {
     return currentPath;
   }
-  var finder = namePathFinder(namePath.skip(1), precedingPath: currentPath);
+  var finder = namePathFinder(
+    namePath.skip(1),
+    precedingPath: currentPath,
+    caseSensitive: caseSensitive,
+  );
   for (var child in node.children) {
     var found = finder(child as Node);
     if (found.isNotEmpty) {
