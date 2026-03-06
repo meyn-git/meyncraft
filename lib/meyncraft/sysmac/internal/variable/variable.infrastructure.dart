@@ -90,7 +90,7 @@ List<Variable> toVariables(Group group, List<DataTypeBase> dataTypes) => group
     .map((attributes) => createVariable(attributes, dataTypes))
     .toList();
 
-final _baseTypeFactory = BaseTypeFactory();
+final _baseTypeFactory = BaseTypeFactory.forIecTypes();
 
 Variable createVariable(
   Map<String, String> attributes,

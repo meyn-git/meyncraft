@@ -245,14 +245,16 @@ class ExorDouble extends ExorDataType {
 }
 
 class ExorString extends ExorDataType {
-  ExorString()
+  ExorString() : this.withSize(255);
+
+  ExorString.withSize(int nrOfChars)
     : super(
         exorTypeName: 'string',
         iecTypeName: 'STRING',
         comparableOmronTypes: [IecString, VbString],
         min: '',
         max: '',
-        arraySize: '255',
+        arraySize: nrOfChars.toString(),
       );
 }
 

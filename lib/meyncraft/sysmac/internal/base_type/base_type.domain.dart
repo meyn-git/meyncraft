@@ -224,7 +224,11 @@ class IecLWord extends IecType {}
 class IecLReal extends IecType {}
 
 /// 8 bits per character
-class IecString extends IecType {}
+class IecString extends IecType {
+  final int? size;
+
+  IecString({this.size});
+}
 
 /// 64 bit
 class IecTime extends IecType {}
@@ -284,7 +288,11 @@ class VbDouble extends VbType {}
 
 class VbDecimal extends VbType {}
 
-class VbString extends VbType {}
+class VbString extends VbType {
+  final int? size;
+
+  VbString({this.size});
+}
 
 class VbChar extends VbType {}
 

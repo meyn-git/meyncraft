@@ -301,6 +301,17 @@ ExorTag? _createExorTag(NodePathWithIndexes tagPath) {
   return ExorTag(name: namePath, exorDataType: exorDataType);
 }
 
+//FIX ME!!!!
+// ExorDataType? findCompatibleTypeBugFix(BaseType nestedBaseType) {
+// return (nestedBaseType.toString() ==
+//         'UnknownBaseType(ARRAY[1..5] OF STRING[256])')
+//     ? ExorOneDimensionalArray(
+//         ExorString.withSize(256),
+//         ArrayRange.minMax(1, 5),
+//       )
+//     : ExorDataType.findCompatibleType(nestedBaseType);
+// }
+
 ExorTag? _createExorTagForOneDimensionalArray(
   String namePath,
   ArrayType arrayType,

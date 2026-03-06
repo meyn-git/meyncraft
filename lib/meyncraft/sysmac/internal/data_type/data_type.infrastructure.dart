@@ -16,7 +16,7 @@ const String nameSpacePathSeparator = '\\';
 
 List<DataTypeBase> createDataTypes(SysmacProjectArchive sysmacProjectArchive) {
   var dataTypes = _createChildren(sysmacProjectArchive);
-  tryToResolveDataTypeBaseTypes(dataTypes);
+  BaseTypeFactory.forIecTypes().tryToResolveDataTypeBaseTypes(dataTypes);
   return dataTypes;
 }
 
@@ -124,7 +124,7 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     return null;
   }
 
-  final _baseTypeFactory = BaseTypeFactory();
+  final _baseTypeFactory = BaseTypeFactory.forIecTypes();
 
   Enumeration _createEnum(XmlElement dataTypeElement) {
     String name = dataTypeElement.getAttribute(nameAttribute)!;

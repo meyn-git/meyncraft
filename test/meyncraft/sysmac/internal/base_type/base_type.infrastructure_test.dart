@@ -15,9 +15,8 @@ import '../../../../test_resource.dart';
 
 void main() {
   group('class: $BaseTypeFactory', () {
-    var baseTypeFactory = BaseTypeFactory();
-
     group('${IecType}s', () {
+      var baseTypeFactory = BaseTypeFactory.forIecTypes();
       test('INT', () {
         var createFromExpression = baseTypeFactory.createFromExpression('INT');
         createFromExpression.should.beAssignableTo<IecType>();
@@ -167,12 +166,18 @@ void main() {
         baseTypeFactory
             .createFromExpression('STRING[123]')
             .should
-            .beAssignableTo<IecString>();
+            .beOfType<IecString>()!
+            .size
+            .should
+            .be(123);
 
         baseTypeFactory
-            .createFromExpression('STRING[123]')
+            .createFromExpression('string[5]')
             .should
-            .beOfType<IecString>();
+            .beOfType<IecString>()!
+            .size
+            .should
+            .be(5);
 
         baseTypeFactory
             .createFromExpression('string')
@@ -262,9 +267,174 @@ void main() {
             .should
             .beOfType<IecTimeOfDay>();
       });
+      group('Arrays', () {
+        test('INT', () {
+          baseTypeFactory.createFromExpression('INT').should.beOfType<IecInt>();
+        });
+        test('invalid arrays', () {
+          baseTypeFactory
+              .createFromExpression('array[1A..2] OF INT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('array[1..2b] OF INT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..] OF INT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..] OF INT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[..2] OF INT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[..2] OF INT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[2] OF INT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[2] OF INT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..2]OF INT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..2] OFINT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..2] OFINT')
+              .should
+              .beOfType<UnknownBaseType>();
+
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..2] OF')
+              .should
+              .beOfType<UnknownBaseType>();
+        });
+
+        test('ARRAY[1..2] OF INT', () {
+          var baseType = baseTypeFactory.createFromExpression(
+            'ARRAY[1..2] OF INT',
+          );
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<IecInt>();
+          arrayType.arrayRanges.length.should.be(1);
+          arrayType.arrayRanges[0].min.should.be(1);
+          arrayType.arrayRanges[0].max.should.be(2);
+        });
+
+        test('ARRAY[2..3,4..5] OF BOOL', () {
+          var baseType = baseTypeFactory.createFromExpression(
+            'ARRAY[2..3,4..5] OF BOOL',
+          );
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<IecBool>();
+          arrayType.arrayRanges.length.should.be(2);
+          arrayType.arrayRanges[0].min.should.be(2);
+          arrayType.arrayRanges[0].max.should.be(3);
+          arrayType.arrayRanges[1].min.should.be(4);
+          arrayType.arrayRanges[1].max.should.be(5);
+        });
+
+        test('ARRAY[2..3,4..5,7..10] OF BOOL', () {
+          var baseType = baseTypeFactory.createFromExpression(
+            'ARRAY[2..3,4..5,7..10] OF BOOL',
+          );
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<IecBool>();
+          arrayType.arrayRanges.length.should.be(3);
+          arrayType.arrayRanges[0].min.should.be(2);
+          arrayType.arrayRanges[0].max.should.be(3);
+          arrayType.arrayRanges[1].min.should.be(4);
+          arrayType.arrayRanges[1].max.should.be(5);
+          arrayType.arrayRanges[2].min.should.be(7);
+          arrayType.arrayRanges[2].max.should.be(10);
+        });
+
+        test('ARRAY[1..2]', () {
+          var baseType = baseTypeFactory.createFromExpression('ARRAY[1..2]');
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<IecBool>();
+          arrayType.arrayRanges.length.should.be(1);
+          arrayType.arrayRanges[0].min.should.be(1);
+          arrayType.arrayRanges[0].max.should.be(2);
+        });
+
+        test('ARRAY[1..5] OF STRING[256]', () {
+          var baseType = baseTypeFactory.createFromExpression(
+            'ARRAY[1..5] OF STRING[256]',
+          );
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<IecString>()!.size.should.be(256);
+          arrayType.arrayRanges.length.should.be(1);
+          arrayType.arrayRanges[0].min.should.be(1);
+          arrayType.arrayRanges[0].max.should.be(5);
+        });
+
+        test('ARRAY[1..6] OF Equipment\\LineModuleWash_v11\\sInterface', () {
+          var baseType = baseTypeFactory.createFromExpression(
+            'ARRAY[1..6] OF Equipment\\LineModuleWash_v11\\sInterface',
+          );
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<UnknownBaseType>();
+          baseType.arrayRanges.length.should.be(1);
+          baseType.arrayRanges[0].min.should.be(1);
+          baseType.arrayRanges[0].max.should.be(6);
+        });
+      });
+      group('Custom types', () {
+        test(
+          'createDataTypes should have a single "sEvent.Common" dataType path',
+          () async {
+            var sysmacProjectArchive = await SysmacProjectArchive.create(
+              SysmacProjectTestResource().file,
+            );
+            var dataTypes = createDataTypes(sysmacProjectArchive);
+            var found = <String>[];
+            for (var dataType in dataTypes) {
+              var paths = dataType.findAllNodePaths(leafPathsFinder());
+              for (var path in paths) {
+                var pathString = path.map((n) => n.name).join('.');
+                if (pathString.contains('sEvent.Common')) {
+                  found.add(pathString);
+                }
+              }
+            }
+            found.length.should.be(1);
+          },
+        );
+      });
     });
 
     group('${VbType}s', () {
+      var baseTypeFactory = BaseTypeFactory.forVbTypes();
       test('Short', () {
         var createFromExpression = baseTypeFactory.createFromExpression(
           'Short',
@@ -412,32 +582,34 @@ void main() {
             .should
             .beOfType<VbBoolean>();
       });
-      // VbString has overlap with IecString
-      // test('String', () {
-      //   baseTypeFactory
-      //       .createFromExpression('String')
-      //       .should
-      //       .beAssignableTo<VbType>();
-      //   baseTypeFactory
-      //       .createFromExpression('String')
-      //       .should
-      //       .beOfType<VbString>();
+      test('String', () {
+        baseTypeFactory
+            .createFromExpression('String')
+            .should
+            .beAssignableTo<VbType>();
+        baseTypeFactory
+            .createFromExpression('String')
+            .should
+            .beOfType<VbString>();
 
-      //   baseTypeFactory
-      //       .createFromExpression('String[123]')
-      //       .should
-      //       .beAssignableTo<VbType>();
+        baseTypeFactory
+            .createFromExpression('String[123]')
+            .should
+            .beAssignableTo<VbType>();
 
-      //   baseTypeFactory
-      //       .createFromExpression('String[123]')
-      //       .should
-      //       .beOfType<VbString>();
+        baseTypeFactory
+            .createFromExpression('String[123]')
+            .should
+            .beOfType<VbString>()!
+            .size
+            .should
+            .be(123);
 
-      //   baseTypeFactory
-      //       .createFromExpression('string')
-      //       .should
-      //       .beOfType<VbString>();
-      // });
+        baseTypeFactory
+            .createFromExpression('string')
+            .should
+            .beOfType<VbString>();
+      });
       test('Char', () {
         baseTypeFactory
             .createFromExpression('Char')
@@ -462,15 +634,14 @@ void main() {
             .should
             .beOfType<VbSByte>();
       });
-      // VbByte overlaps with IceByte
-      // test('Byte', () {
-      //   baseTypeFactory.createFromExpression('Byte').should.beAssignableTo<VbType>();
-      //   baseTypeFactory.createFromExpression('Byte').should.beOfType<VbByte>();
-      //   baseTypeFactory
-      //       .createFromExpression('byte')
-      //       .should
-      //       .beOfType<VbByte>();
-      // });
+      test('Byte', () {
+        baseTypeFactory
+            .createFromExpression('Byte')
+            .should
+            .beAssignableTo<VbType>();
+        baseTypeFactory.createFromExpression('Byte').should.beOfType<VbByte>();
+        baseTypeFactory.createFromExpression('byte').should.beOfType<VbByte>();
+      });
       test('DateTime', () {
         baseTypeFactory
             .createFromExpression('DateTime')
@@ -503,162 +674,156 @@ void main() {
             .should
             .beOfType<VbTimeSpan>();
       });
-    });
+      group('Arrays', () {
+        test('Integer', () {
+          baseTypeFactory
+              .createFromExpression('Integer')
+              .should
+              .beOfType<VbInteger>();
+        });
+        test('invalid arrays', () {
+          baseTypeFactory
+              .createFromExpression('array[1A..2] OF Integer')
+              .should
+              .beOfType<UnknownBaseType>();
 
-    group('Arrays', () {
-      test('INT', () {
-        baseTypeFactory.createFromExpression('INT').should.beOfType<IecInt>();
-      });
-      test('invalid arrays', () {
-        baseTypeFactory
-            .createFromExpression('array[1A..2] OF INT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('array[1..2b] OF Integer')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('array[1..2b] OF INT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..] OF Integer')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[1..] OF INT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..] OF Integer')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[1..] OF INT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[..2] OF Integer')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[..2] OF INT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[..2] OF Integer')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[..2] OF INT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[2] OF Integer')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[2] OF INT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[2] OF Integer')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[2] OF INT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..2]OF Integer')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[1..2]OF INT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..2] OFINT')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[1..2] OFINT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..2] OFInteger')
+              .should
+              .beOfType<UnknownBaseType>();
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[1..2] OFINT')
-            .should
-            .beOfType<UnknownBaseType>();
+          baseTypeFactory
+              .createFromExpression('ARRAY[1..2] OF')
+              .should
+              .beOfType<UnknownBaseType>();
+        });
 
-        baseTypeFactory
-            .createFromExpression('ARRAY[1..2] OF')
-            .should
-            .beOfType<UnknownBaseType>();
-      });
-
-      test('ARRAY[1..2] OF INT', () {
-        var baseType = baseTypeFactory.createFromExpression(
-          'ARRAY[1..2] OF INT',
-        );
-        baseType.should.beOfType<ArrayType>();
-        var arrayType = baseType as ArrayType;
-        arrayType.baseType.should.beOfType<IecInt>();
-        arrayType.arrayRanges.length.should.be(1);
-        arrayType.arrayRanges[0].min.should.be(1);
-        arrayType.arrayRanges[0].max.should.be(2);
-      });
-
-      test('ARRAY[2..3,4..5] OF BOOL', () {
-        var baseType = baseTypeFactory.createFromExpression(
-          'ARRAY[2..3,4..5] OF BOOL',
-        );
-        baseType.should.beOfType<ArrayType>();
-        var arrayType = baseType as ArrayType;
-        arrayType.baseType.should.beOfType<IecBool>();
-        arrayType.arrayRanges.length.should.be(2);
-        arrayType.arrayRanges[0].min.should.be(2);
-        arrayType.arrayRanges[0].max.should.be(3);
-        arrayType.arrayRanges[1].min.should.be(4);
-        arrayType.arrayRanges[1].max.should.be(5);
-      });
-
-      test('ARRAY[2..3,4..5,7..10] OF BOOL', () {
-        var baseType = baseTypeFactory.createFromExpression(
-          'ARRAY[2..3,4..5,7..10] OF BOOL',
-        );
-        baseType.should.beOfType<ArrayType>();
-        var arrayType = baseType as ArrayType;
-        arrayType.baseType.should.beOfType<IecBool>();
-        arrayType.arrayRanges.length.should.be(3);
-        arrayType.arrayRanges[0].min.should.be(2);
-        arrayType.arrayRanges[0].max.should.be(3);
-        arrayType.arrayRanges[1].min.should.be(4);
-        arrayType.arrayRanges[1].max.should.be(5);
-        arrayType.arrayRanges[2].min.should.be(7);
-        arrayType.arrayRanges[2].max.should.be(10);
-      });
-      test('ARRAY[1..2]', () {
-        var baseType = baseTypeFactory.createFromExpression('ARRAY[1..2]');
-        baseType.should.beOfType<ArrayType>();
-        var arrayType = baseType as ArrayType;
-        arrayType.baseType.should.beOfType<IecBool>();
-        arrayType.arrayRanges.length.should.be(1);
-        arrayType.arrayRanges[0].min.should.be(1);
-        arrayType.arrayRanges[0].max.should.be(2);
-      });
-      test('ARRAY[1..6] OF Equipment\\LineModuleWash_v11\\sInterface', () {
-        var baseType = baseTypeFactory.createFromExpression(
-          'ARRAY[1..6] OF Equipment\\LineModuleWash_v11\\sInterface',
-        );
-        baseType.should.beOfType<ArrayType>();
-        var arrayType = baseType as ArrayType;
-        arrayType.baseType.should.beOfType<UnknownBaseType>();
-        baseType.arrayRanges.length.should.be(1);
-        baseType.arrayRanges[0].min.should.be(1);
-        baseType.arrayRanges[0].max.should.be(6);
-      });
-    });
-    group('Custom types', () {
-      test(
-        'createDataTypes should have a single "sEvent.Common" dataType path',
-        () async {
-          var sysmacProjectArchive = await SysmacProjectArchive.create(
-            SysmacProjectTestResource().file,
+        test('ARRAY[1..2] OF Integer', () {
+          var baseType = baseTypeFactory.createFromExpression(
+            'ARRAY[1..2] OF Integer',
           );
-          var dataTypes = createDataTypes(sysmacProjectArchive);
-          var found = <String>[];
-          for (var dataType in dataTypes) {
-            var paths = dataType.findAllNodePaths(leafPathsFinder());
-            for (var path in paths) {
-              var pathString = path.map((n) => n.name).join('.');
-              if (pathString.contains('sEvent.Common')) {
-                found.add(pathString);
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<VbInteger>();
+          arrayType.arrayRanges.length.should.be(1);
+          arrayType.arrayRanges[0].min.should.be(1);
+          arrayType.arrayRanges[0].max.should.be(2);
+        });
+
+        test('ARRAY[2..3,4..5] OF Boolean', () {
+          var baseType = baseTypeFactory.createFromExpression(
+            'ARRAY[2..3,4..5] OF Boolean',
+          );
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<VbBoolean>();
+          arrayType.arrayRanges.length.should.be(2);
+          arrayType.arrayRanges[0].min.should.be(2);
+          arrayType.arrayRanges[0].max.should.be(3);
+          arrayType.arrayRanges[1].min.should.be(4);
+          arrayType.arrayRanges[1].max.should.be(5);
+        });
+
+        test('ARRAY[2..3,4..5,7..10] OF Boolean', () {
+          var baseType = baseTypeFactory.createFromExpression(
+            'ARRAY[2..3,4..5,7..10] OF Boolean',
+          );
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<VbBoolean>();
+          arrayType.arrayRanges.length.should.be(3);
+          arrayType.arrayRanges[0].min.should.be(2);
+          arrayType.arrayRanges[0].max.should.be(3);
+          arrayType.arrayRanges[1].min.should.be(4);
+          arrayType.arrayRanges[1].max.should.be(5);
+          arrayType.arrayRanges[2].min.should.be(7);
+          arrayType.arrayRanges[2].max.should.be(10);
+        });
+
+        test('ARRAY[1..6] OF Equipment\\LineModuleWash_v11\\sInterface', () {
+          var baseType = baseTypeFactory.createFromExpression(
+            'ARRAY[1..6] OF Equipment\\LineModuleWash_v11\\sInterface',
+          );
+          baseType.should.beOfType<ArrayType>();
+          var arrayType = baseType as ArrayType;
+          arrayType.baseType.should.beOfType<UnknownBaseType>();
+          baseType.arrayRanges.length.should.be(1);
+          baseType.arrayRanges[0].min.should.be(1);
+          baseType.arrayRanges[0].max.should.be(6);
+        });
+      });
+      group('Custom types', () {
+        test(
+          'createDataTypes should have a single "sEvent.Common" dataType path',
+          () async {
+            var sysmacProjectArchive = await SysmacProjectArchive.create(
+              SysmacProjectTestResource().file,
+            );
+            var dataTypes = createDataTypes(sysmacProjectArchive);
+            var found = <String>[];
+            for (var dataType in dataTypes) {
+              var paths = dataType.findAllNodePaths(leafPathsFinder());
+              for (var path in paths) {
+                var pathString = path.map((n) => n.name).join('.');
+                if (pathString.contains('sEvent.Common')) {
+                  found.add(pathString);
+                }
               }
             }
-          }
-          found.length.should.be(1);
-        },
-      );
+            found.length.should.be(1);
+          },
+        );
+      });
     });
   });
   group('ArrayFactory class', () {
     test('ArrayFactory class', () {
-      var factory = ArrayFactory();
+      var factory = ArrayFactory(BaseTypeFactory.forIecTypes());
       factory.regex
           .hasMatch('ARRAY[1..6] OF EquipmentLineModuleWashv11sInterface')
           .should

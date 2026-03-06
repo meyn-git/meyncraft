@@ -5,18 +5,36 @@ import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.d
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 
 class BaseTypeFactory {
-  final List<BaseTypeSubFactory> baseTypeSubFactories = [
-    ArrayFactory(),
-    ...IecTypeFactories(),
-    ...VbTypeFactories(),
-    UnknownBaseTypeFactory(),
-  ];
+  late final List<BaseTypeSubFactory> baseTypeSubFactories;
+
+  BaseTypeFactory.forIecTypes() {
+    baseTypeSubFactories = [
+      ArrayFactory(this),
+      ...IecTypeFactories(),
+      UnknownBaseTypeFactory(),
+    ];
+  }
+
+  BaseTypeFactory.forVbTypes() {
+    baseTypeSubFactories = [
+      ArrayFactory(this),
+      ...VbTypeFactories(),
+      UnknownBaseTypeFactory(),
+    ];
+  }
 
   BaseType createFromExpression(String typeExpression) {
     var factory = baseTypeSubFactories.firstWhere(
       (factory) => factory.regex.hasMatch(typeExpression),
     );
     return factory.create(typeExpression);
+  }
+
+  void tryToResolveDataTypeBaseTypes(List<DataTypeBase> dataTypes) {
+    var baseTypeOwners = dataTypes.descendants.whereType<BaseTypeOwner>();
+    for (var baseTypeOwner in baseTypeOwners) {
+      resolveBaseTypeOwnersRecursively(dataTypes, baseTypeOwner);
+    }
   }
 
   /// References to DataTypes may not exist during the creation
@@ -66,40 +84,64 @@ class UnknownBaseTypeFactory extends BaseTypeSubFactory {
   BaseType create(String expression) => UnknownBaseType(expression);
 }
 
-class IecTypeFactory extends BaseTypeSubFactory {
-  final IecType _nxType;
+abstract interface class IecTypeFactoryBase implements BaseTypeSubFactory {}
+
+class IecTypeFactory extends IecTypeFactoryBase {
+  final IecType _iecType;
   final RegExp _regex;
 
-  IecTypeFactory(this._nxType)
+  IecTypeFactory(this._iecType)
     : _regex = FluentRegex()
           .startOfLine()
-          .literal(_nxType.name)
+          .literal(_iecType.name)
           .ignoreCase()
           .endOfLine();
 
-  /// e.g. STRING[123]
-  IecTypeFactory.withOptionalLength(this._nxType)
+  @override
+  IecType create(String expression) => _iecType;
+
+  @override
+  RegExp get regex => _regex;
+}
+
+/// Creates a [IecString]
+/// e.g. string, String[12] or STRING[123]
+class IecStringFactory extends IecTypeFactoryBase {
+  final RegExp _regex;
+  static const String sizeGroupName = 'size';
+
+  IecStringFactory()
     : _regex = FluentRegex()
           .startOfLine()
-          .literal(_nxType.name)
+          .literal('STRING')
+          .ignoreCase()
           .ignoreCase()
           .group(
             FluentRegex()
                 .literal('[')
-                .digit(Quantity.oneOrMoreTimes())
+                .group(
+                  FluentRegex().digit(Quantity.oneOrMoreTimes()),
+                  type: GroupType.captureNamed(sizeGroupName),
+                )
                 .literal(']'),
             quantity: Quantity.zeroOrOneTime(),
           )
           .endOfLine();
 
   @override
-  IecType create(String expression) => _nxType;
+  IecString create(String expression) {
+    var result = _regex.firstMatch(expression);
+    if (result == null) return IecString();
+    var size = result.namedGroup(sizeGroupName);
+    if (size == null) return IecString();
+    return IecString(size: int.tryParse(size));
+  }
 
   @override
   RegExp get regex => _regex;
 }
 
-class IecTypeFactories extends DelegatingList<IecTypeFactory> {
+class IecTypeFactories extends DelegatingList<IecTypeFactoryBase> {
   IecTypeFactories()
     : super([
         IecTypeFactory(IecInt()),
@@ -114,7 +156,7 @@ class IecTypeFactories extends DelegatingList<IecTypeFactory> {
         IecTypeFactory(IecReal()),
         IecTypeFactory(IecLReal()),
         IecTypeFactory(IecBool()),
-        IecTypeFactory.withOptionalLength(IecString()),
+        IecStringFactory(),
         IecTypeFactory(IecSInt()),
         IecTypeFactory(IecUSInt()),
         IecTypeFactory(IecByte()),
@@ -125,7 +167,9 @@ class IecTypeFactories extends DelegatingList<IecTypeFactory> {
       ]);
 }
 
-class VbTypeFactory extends BaseTypeSubFactory {
+abstract interface class VbTypeFactoryBase implements BaseTypeSubFactory {}
+
+class VbTypeFactory implements VbTypeFactoryBase {
   final VbType _vbType;
   final RegExp _regex;
 
@@ -136,20 +180,6 @@ class VbTypeFactory extends BaseTypeSubFactory {
           .ignoreCase()
           .endOfLine();
 
-  VbTypeFactory.withOptionalLength(this._vbType)
-    : _regex = FluentRegex()
-          .startOfLine()
-          .literal(_vbType.name)
-          .ignoreCase()
-          .group(
-            FluentRegex()
-                .literal('[')
-                .digit(Quantity.oneOrMoreTimes())
-                .literal(']'),
-            quantity: Quantity.zeroOrOneTime(),
-          )
-          .endOfLine();
-
   @override
   VbType create(String expression) => _vbType;
 
@@ -157,7 +187,44 @@ class VbTypeFactory extends BaseTypeSubFactory {
   RegExp get regex => _regex;
 }
 
-class VbTypeFactories extends DelegatingList<VbTypeFactory> {
+/// Creates a [VbString]
+/// e.g. string, String[12] or STRING[123]
+class VbStringFactory implements VbTypeFactoryBase {
+  final RegExp _regex;
+  static const String sizeGroupName = 'size';
+
+  VbStringFactory()
+    : _regex = FluentRegex()
+          .startOfLine()
+          .literal('STRING')
+          .ignoreCase()
+          .ignoreCase()
+          .group(
+            FluentRegex()
+                .literal('[')
+                .group(
+                  FluentRegex().digit(Quantity.oneOrMoreTimes()),
+                  type: GroupType.captureNamed(sizeGroupName),
+                )
+                .literal(']'),
+            quantity: Quantity.zeroOrOneTime(),
+          )
+          .endOfLine();
+
+  @override
+  VbString create(String expression) {
+    var result = _regex.firstMatch(expression);
+    if (result == null) return VbString();
+    var size = result.namedGroup(sizeGroupName);
+    if (size == null) return VbString();
+    return VbString(size: int.tryParse(size));
+  }
+
+  @override
+  RegExp get regex => _regex;
+}
+
+class VbTypeFactories extends DelegatingList<VbTypeFactoryBase> {
   VbTypeFactories()
     : super([
         VbTypeFactory(VbShort()),
@@ -170,7 +237,7 @@ class VbTypeFactories extends DelegatingList<VbTypeFactory> {
         VbTypeFactory(VbDouble()),
         VbTypeFactory(VbDecimal()),
         VbTypeFactory(VbBoolean()),
-        VbTypeFactory.withOptionalLength(VbString()),
+        VbStringFactory(),
         VbTypeFactory(VbChar()),
         VbTypeFactory(VbSByte()),
         VbTypeFactory(VbByte()),
@@ -180,6 +247,9 @@ class VbTypeFactories extends DelegatingList<VbTypeFactory> {
 }
 
 class ArrayFactory extends BaseTypeSubFactory {
+  ArrayFactory(this.baseTypeFactory);
+
+  final BaseTypeFactory baseTypeFactory;
   static final rangeName = 'range';
   static final typeName = 'type';
   static final RegExp _regex = FluentRegex()
@@ -201,7 +271,9 @@ class ArrayFactory extends BaseTypeSubFactory {
               FluentRegex()
                   .letter(quantity: Quantity.oneTime())
                   .characterSet(
-                    CharacterSet().addLetters().addDigits().addLiterals(r'\_'),
+                    CharacterSet().addLetters().addDigits().addLiterals(
+                      r'\.,_[]',
+                    ),
                     Quantity.oneOrMoreTimes(),
                   ),
               type: GroupType.captureNamed(typeName),
@@ -228,8 +300,6 @@ class ArrayFactory extends BaseTypeSubFactory {
     return baseTypeFactory.createFromExpression(typeExpression);
   }
 
-  late final baseTypeFactory = BaseTypeFactory();
-
   ArrayRanges _createArrayRanges(String expression) {
     var rangeExpressions = ArrayRange.regex.allMatches(expression);
 
@@ -244,12 +314,4 @@ class ArrayFactory extends BaseTypeSubFactory {
 
   @override
   RegExp get regex => _regex;
-}
-
-void tryToResolveDataTypeBaseTypes(List<DataTypeBase> dataTypes) {
-  final baseTypeFactory = BaseTypeFactory();
-  var baseTypeOwners = dataTypes.descendants.whereType<BaseTypeOwner>();
-  for (var baseTypeOwner in baseTypeOwners) {
-    baseTypeFactory.resolveBaseTypeOwnersRecursively(dataTypes, baseTypeOwner);
-  }
 }
