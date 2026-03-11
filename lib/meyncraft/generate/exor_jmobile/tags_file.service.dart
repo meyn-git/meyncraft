@@ -181,7 +181,6 @@ class ExorTag {
 NodePathsFinder<NodePathWithIndexes> tagPathFinder({
   NodePathWithIndexes precedingPath = const NodePathWithIndexes.empty(),
 }) => (Node node) {
-
   var tagPaths = _createTagPaths(precedingPath, node);
 
   if (_isLeafNode(node)) {
@@ -205,7 +204,8 @@ NodePathsFinder<NodePathWithIndexes> tagPathFinder({
   return tagPathsFromChildren;
 };
 
-bool _isExorTag(Node node) => node is! EnumerationMember && node is! UnknownBaseType;
+bool _isExorTag(Node node) =>
+    node is! EnumerationMember && node is! UnknownBaseType;
 
 bool _isLeafNode(Node node) => node.children.isEmpty || _isEnumeration(node);
 

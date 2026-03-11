@@ -131,11 +131,7 @@ Variable createVariable(
     isConstant: isConstant,
     initialValue: initialValue,
   );
-    _baseTypeFactory.resolveBaseTypeOwnersRecursively(
-      dataTypes,
-      variable,
-    );
-  
+  _baseTypeFactory.resolveBaseTypeOwnersRecursively(dataTypes, variable);
 
   return variable;
 }
