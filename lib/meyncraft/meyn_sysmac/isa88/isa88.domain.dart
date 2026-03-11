@@ -127,5 +127,5 @@ class CallPath {
       '${codeOwner.name}.'
       '${program.name}.'
       '${ladderSection.name}.'
-      '${call is FunctionBlockCall ? "${(call as FunctionBlockCall).variable} of ${call.name}" : call.name}';
+      '${call is FunctionBlockCall ? "${(call as FunctionBlockCall).variable} (${call.name})" : call.name}';
 }

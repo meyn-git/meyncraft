@@ -32,10 +32,17 @@ void write(
   String? parameter,
   required Isa88Node node,
 }) {
+  var nodeTitle =
+      '${parameter == null ? '' : '$parameter= '}${node.name} (${node.runtimeType})';
+  var nodeParameters = _createNodeParameters(node);
   report.writeln(
     [
-      for (int i = 0; i < level; i++) wrapCommas(''),
-      wrapCommas('${parameter == null ? '' : '$parameter: '}$node'),
+      for (int i = 0; i < level; i++) wrapWithDoubleQuotes(''),
+      wrapWithDoubleQuotes(nodeTitle),
+      for (int i = level; i < 10; i++) wrapWithDoubleQuotes(''),
+      for (var nodeParameter in nodeParameters.entries)
+        '${wrapWithDoubleQuotes(nodeParameter.key)}= '
+        '${wrapWithDoubleQuotes(nodeParameter.value)}',
     ].join(','),
   );
 
@@ -57,6 +64,35 @@ void write(
       );
     }
   }
+}
+
+Map<String, String> _createNodeParameters(Isa88Node node) {
+  if (node is Unit) {
+    return {
+      'variableToEquipment': node.variableToEquipment
+          .toNamePathWithArrayIndexes()
+          .join('.'),
+      'function(block)': node.callPath.toString(),
+    };
+  }
+  if (node is EquipmentModule) {
+    return {
+      'variableFromParent': node.variableFromParent
+          .toNamePathWithArrayIndexes()
+          .join('.'),
+      'function(block)': node.callPath.toString(),
+    };
+  }
+  if (node is ControlModule) {
+    return {
+      'variableFromParent': node.variableFromParent
+          .toNamePathWithArrayIndexes()
+          .join('.'),
+      'function(block)': node.callPath.toString(),
+    };
+  }
+
+  return {};
 }
 
 File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {

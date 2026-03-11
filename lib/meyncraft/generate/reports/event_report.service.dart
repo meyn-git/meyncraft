@@ -21,12 +21,12 @@ Future<void> writeEventReportFile(MeynSysmacProject sysmacProject) async {
         event.number,
         event.namePath,
         event.group,
-        wrapCommas(componentCodesNewStyle),
-        wrapCommas(componentCodesOldStyle),
-        wrapCommas(event.messageParts.join('-')),
+        wrapWithDoubleQuotes(componentCodesNewStyle),
+        wrapWithDoubleQuotes(componentCodesOldStyle),
+        wrapWithDoubleQuotes(event.messageParts.join('-')),
         event.priority.name,
         event.acknowledgeRequired,
-        wrapCommas(variableNameWithAddresses),
+        wrapWithDoubleQuotes(variableNameWithAddresses),
       ].join(','),
     );
   }
@@ -41,7 +41,7 @@ Future<void> writeEventReportFile(MeynSysmacProject sysmacProject) async {
   );
 }
 
-String wrapCommas(String contentWithCommas) => '"$contentWithCommas"';
+String wrapWithDoubleQuotes(String text) => '"$text"';
 
 File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
   var sysmacFile = sysmacProject.identity.projectFile;
