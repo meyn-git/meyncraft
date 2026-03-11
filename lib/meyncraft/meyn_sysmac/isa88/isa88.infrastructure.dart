@@ -297,19 +297,17 @@ bool isControlModuleVariable(NodePath variablePath) {
   BaseType baseType;
   if (variablePath.last is Variable) {
     baseType = (variablePath.last as Variable).baseType;
-  } else if (variablePath.last is! DataTypeMember) {
+  } else if (variablePath.last is DataTypeMember) {
     baseType = (variablePath.last as DataTypeMember).baseType;
   } else {
     return false;
   }
-  if (baseType is! DataTypeMember) return false;
+  if (baseType is! DataTypeReference) return false;
   return _startsWithControlModuleNameSpace(baseType);
 }
 
-bool _startsWithControlModuleNameSpace(DataTypeMember dataTypeMember) {
-  if (dataTypeMember.baseType is! DataTypeReference) return false;
-  var dataTypeRef = dataTypeMember.baseType as DataTypeReference;
-  if (dataTypeRef.dataTypePath.isEmpty) return false;
-  var dataTypePath = dataTypeRef.dataTypePath;
+bool _startsWithControlModuleNameSpace(DataTypeReference dataTypeReference) {
+  if (dataTypeReference.dataTypePath.isEmpty) return false;
+  var dataTypePath = dataTypeReference.dataTypePath;
   return dataTypePath.first.name.toLowerCase() == 'cm';
 }

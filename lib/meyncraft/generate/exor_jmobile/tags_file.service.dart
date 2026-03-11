@@ -181,10 +181,6 @@ class ExorTag {
 NodePathsFinder<NodePathWithIndexes> tagPathFinder({
   NodePathWithIndexes precedingPath = const NodePathWithIndexes.empty(),
 }) => (Node node) {
-  // if (precedingPath.join('/') == 'HmiGlobal/Common/Config/NewAlarmWarningOff' &&
-  // if (node.name == 'Unit') {
-  //   print('DEBUG');
-  // }
 
   var tagPaths = _createTagPaths(precedingPath, node);
 
@@ -209,18 +205,7 @@ NodePathsFinder<NodePathWithIndexes> tagPathFinder({
   return tagPathsFromChildren;
 };
 
-bool _isExorTag(Node node) {
-  // if (node is! BaseTypeOwner) {
-  //   return false;
-  // }
-  // if (node.name == 'NO_UNIT') {
-  //   print('!!!');
-  // }
-  // var nestedBaseType = baseTypeLeaf((node as BaseTypeOwner).baseType);
-  // return nestedBaseType is! EnumerationMember &&
-  //     nestedBaseType is! UnknownBaseType;
-  return node is! EnumerationMember && node is! UnknownBaseType;
-}
+bool _isExorTag(Node node) => node is! EnumerationMember && node is! UnknownBaseType;
 
 bool _isLeafNode(Node node) => node.children.isEmpty || _isEnumeration(node);
 
