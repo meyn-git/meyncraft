@@ -41,8 +41,10 @@ void write(
       wrapWithDoubleQuotes(nodeTitle),
       for (int i = level; i < 10; i++) wrapWithDoubleQuotes(''),
       for (var nodeParameter in nodeParameters.entries)
-        '${wrapWithDoubleQuotes(nodeParameter.key)}= '
-        '${wrapWithDoubleQuotes(nodeParameter.value)}',
+        wrapWithDoubleQuotes(
+          '${nodeParameter.key}= '
+          '${nodeParameter.value}',
+        ),
     ].join(','),
   );
 

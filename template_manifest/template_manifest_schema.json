@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/web-service-template.schema.json",
+  "type": "object",
+  "required": ["name", "description", "repository", "parameters", "templates"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the template"
+    },
+    "repository": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional URL of a git repository where the template is stored"
+    },
+    "documentation": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional URL to documentation for the template, e.g. a README file in the repository"
+    },
+    "parameters": {
+      "type": "array",
+      "description": "Input parameters",
+      "items": {
+        "$ref": "#/$defs/parameter"
+      }
+    },
+    "templates": {
+      "type": "array",
+      "description": "Template source-to-target mappings",
+      "items": {
+        "$ref": "#/$defs/templateMapping"
+      }
+    }
+  },
+  "$defs": {
+    "parameter": {
+      "type": "object",
+      "required": ["name", "type", "description"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "enum", "boolean","number", "relativePath", "uri"]
+        },
+        "description": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "default": {},
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "enum" } }
+          },
+          "then": {
+            "required": ["values"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "templateMapping": {
+      "type": "object",
+      "required": ["source", "target"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Glob pattern for template source files"
+        },
+        "target": {
+          "type": "string",
+          "description": "Output location, supports templating"
+        }
+      },
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path of the generated output file"
+        },
+        "when": {
+          "type": "string",
+          "description": "Conditional expression controlling generation"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

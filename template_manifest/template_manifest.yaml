@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=./template_manifest_schema.json
+name: SysmacEventGlobalArray
+description: "Creates an xml file to be imported by Omron Sysmac containing structured text code that copies the EventGlobal variable to a EventGlobalArray variable for efficient event communication with HMIs and MeynConnect."
+repository: https://github.com/meyn-git/meyncraft_SysmacEventGlobalArray
+documentation: https://github.com/meyn-git/meyncraft_SysmacEventGlobalArray/README.md
+parameters:
+  - name: sysmacProjectPath
+    type: string
+    description: "Sysmac project file path"
+templates:
+  - source: "SysmacEventGlobalArray.xml"
+    target: "{{removeFileExtension(sysmacProjectPath)+'-SysmacEventGlobalArray.xml'}}"

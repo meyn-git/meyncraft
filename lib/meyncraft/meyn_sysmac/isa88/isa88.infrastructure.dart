@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fluent_regex/fluent_regex.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
@@ -109,19 +110,21 @@ List<EquipmentModule> _createEquipmentModules(
 Map<String, ControlModule> createArgumentsAndControlModules(
   List<Variable> globalVariables,
   List<CallPath> allCallPaths,
-  CallPath equipmentCallPath,
+
+  /// parent [CallPath] being a [EquipmentModule] or [ControlModule]
+  CallPath parentCallPath,
 ) {
   var argumentsAndVariableExpressions = <String, String>{
-    for (var parameterIn in equipmentCallPath.call.parametersIn)
+    for (var parameterIn in parentCallPath.call.parametersIn)
       parameterIn.argument: parameterIn.variable ?? '',
-    for (var parameterOut in equipmentCallPath.call.parametersOut)
+    for (var parameterOut in parentCallPath.call.parametersOut)
       parameterOut.argument: parameterOut.variable ?? '',
   };
 
   /// TODO: we need a relation with the scope of callPaths
   var variables = [
     // callPath = allCallPaths where((callPath) => callPath.program==equipmentCallPath.program)
-    ...equipmentCallPath.program.internalVariables,
+    ...parentCallPath.program.internalVariables,
     // callPath = allCallPaths
     ...globalVariables,
   ];
@@ -145,7 +148,8 @@ Map<String, ControlModule> createArgumentsAndControlModules(
 
   var argumentsAndControlVariables = Map.fromEntries(
     argumentsAndVariables.entries.where(
-      (entry) => isControlModuleVariable(entry.value),
+      //FIXME we need to find a way to prevent round trips using entry.Value (Variable)
+      (entry) => false || isControlModuleVariable(entry.value),
     ),
   );
 
@@ -154,7 +158,12 @@ Map<String, ControlModule> createArgumentsAndControlModules(
         .map(
           (argument, controlVariable) => MapEntry(
             argument,
-            createControlModule(allCallPaths, controlVariable),
+            createControlModule(
+              globalVariables,
+              allCallPaths,
+              parentCallPath,
+              controlVariable,
+            ),
           ),
         )
         .entries
@@ -166,21 +175,56 @@ Map<String, ControlModule> createArgumentsAndControlModules(
 }
 
 ControlModule? createControlModule(
+  List<Variable> globalVariables,
   List<CallPath> allCallPaths,
+
+  /// parent [CallPath] being a [EquipmentModule] or [ControlModule]
+  CallPath parentCallPath,
+
+  /// variable that connects the [EquipmentModule] or [ControlModule] with the [ControlModule]
   NodePathWithIndexes controlVariable,
 ) {
   var variableExpression = controlVariable.toNamePathWithArrayIndexes().join(
     '.',
   );
+  var regExp = FluentRegex()
+      .literal(variableExpression, Quantity.oneTime())
+      .group(
+        FluentRegex()
+            .literal('.')
+            .characterSet(
+              CharacterSet().addLetters().addDigits(),
+              Quantity.oneOrMoreTimes(),
+            ),
+        quantity: Quantity.zeroOrOneTime(),
+      );
+
+  // We want the child not the parent
+  var parentCallPathString = parentCallPath.toString();
 
   /// TODO: limit the callPaths to a specific program if variableExpression is a internal variable
   var callPath = allCallPaths.firstWhereOrNull(
     (callPath) => callPath.call.parametersIn.any(
-      (parameter) => parameter.variable == variableExpression,
+      (parameter) =>
+          callPath.toString() != parentCallPathString &&
+          regExp.hasMatch(parameter.variable ?? ''),
     ),
   );
 
   if (callPath == null) return null;
+
+  if (callPath.toString().endsWith('fMtrArrayCmd')) {
+    print('!!!');
+  }
+
+  var argumentsAndControlModules = <String, ControlModule>{};
+  // TODO fMtrArrayCmd has children linked to ioMtr parameter
+  //FIXME endless roundtrips
+  // var argumentsAndControlModules = createArgumentsAndControlModules(
+  //   globalVariables,
+  //   allCallPaths,
+  //   callPath,
+  // );
 
   var name =
       '${controlVariable.last.name}'
@@ -190,7 +234,7 @@ ControlModule? createControlModule(
     name: name,
     variableFromParent: controlVariable,
     callPath: callPath,
-    argumentsAndControlModules: {},
+    argumentsAndControlModules: argumentsAndControlModules,
   );
 }
 
