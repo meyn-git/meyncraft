@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/web-service-template.schema.json",
   "type": "object",
-  "required": ["name", "description", "repository", "parameters", "templates"],
+  "required": ["name", "description", "parameters", "templates"],
   "properties": {
     "name": {
       "type": "string",

@@ -210,8 +210,9 @@ class IoAttribute implements CommentAttribute {
     nameValueConverter,
   );
 
-  static bool experimental =
-      kDebugMode; // TODO remove field after experimenting
+  static bool experimental = false; // kDebugMode;
+  // TODO remove false after demo
+  // TODO remove field after experimenting
 
   static IoAttribute nameValueConverter({
     required String name,
