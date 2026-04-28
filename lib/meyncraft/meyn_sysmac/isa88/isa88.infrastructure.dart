@@ -321,7 +321,8 @@ List<CallPath> findAllCallPaths(SysmacProject sysmacProject) {
 
 /// returns true when it is a [FunctionBlockCall] of type fbUnitControl
 bool isFbUnitControl(CallPath callPath) =>
-    callPath.call is FunctionBlockCall && callPath.call.name == 'fbUnitControl';
+    callPath.call is FunctionBlockCall &&
+    callPath.call.name.startsWith('fbUnitControl');
 
 /// returns true when it is a [FunctionBlockCall] of type fbUnitInterface
 bool isFbUnitInterface(CallPath callPath) =>

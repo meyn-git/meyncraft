@@ -6,7 +6,7 @@ class TemplateManifest {
   final String description;
 
   /// Optional URL of a git repository where the template is stored
-  final String? repository;
+  final String? gitRepository;
 
   /// Optional URL to documentation for the template, e.g. a README file in the repository
   final String? documentation;
@@ -17,13 +17,16 @@ class TemplateManifest {
   /// Template source-to-target mappings
   final List<TemplateMapping> templates;
 
+  final List<String> tags;
+
   TemplateManifest({
     required this.name,
     required this.description,
-    required this.repository,
-    required this.documentation,
-    required this.parameters,
-    required this.templates,
+    this.gitRepository,
+    this.documentation,
+    this.parameters = const [],
+    this.templates = const [],
+    this.tags = const [],
   });
 }
 
@@ -37,11 +40,7 @@ class TemplateMapping {
   /// Optional condition that must be met for this mapping to be applied, e.g. "{{includeTests == true}}"
   final String? when;
 
-  TemplateMapping({
-    required this.source,
-    required this.target,
-    required this.when,
-  });
+  TemplateMapping({required this.source, required this.target, this.when});
 }
 
 class Parameter {

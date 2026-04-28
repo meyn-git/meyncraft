@@ -14,9 +14,13 @@ dependencies:
   fluent_regex: ^1.0.3
   flutter:
     sdk: flutter
+  flutter_markdown: ^0.7.7+1
+  flutter_markdown_plus: ^1.0.7
   get_it: ^8.3.0
+  package_info_plus: ^9.0.1
   petitparser: ^7.0.1
   recase: ^4.1.0
+  url_launcher: ^6.3.2
   window_manager: ^0.5.1
   xml: ^6.5.0
 

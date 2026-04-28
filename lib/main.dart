@@ -2,7 +2,10 @@ import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/meyncraft.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/all_templates.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/meyncraft.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/meyncraft_info.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main(List<String> args) async {
@@ -24,6 +27,10 @@ void main(List<String> args) async {
     /// Maximize the window on start see: https://stackoverflow.com/questions/66149486/set-desktop-flutter-to-run-in-maximized-size-at-startup (replace SW_SHOWNORMAL with SW_SHOWMAXIMIZED) in win32_window.cpp
   });
 
-  GetIt.I.registerSingleton<Logger>(Logger());
+  final getIt = GetIt.instance;
+  getIt.registerSingleton<Logger>(Logger());
+  getIt.registerSingleton<TabService>(TabService());
+  getIt.get<TabService>().addTab(AllTemplatesTab());
+  getIt.get<TabService>().addTab(MeynCraftInfoTab());
   runApp(MeynCraft(args));
 }

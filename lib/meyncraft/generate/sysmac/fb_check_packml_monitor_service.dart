@@ -19,6 +19,13 @@ Future<void> createPackMlMonitorFile(
 ) async {
   var structuredText = StringBuffer();
 
+  var unitInterfaceExpression = unit.callPath.call.parametersIn
+      .firstWhere((parameter) => parameter.argument == 'ioUnitPackML')
+      .variable!;
+  structuredText.writeln(
+    "dummy:=$unitInterfaceExpression.StateTransSum.Cmd_Abort;",
+  );
+
   for (var equipment in unit.equipmentModules) {
     var call = equipment.fbUnitInterfaceCallPath?.call;
     if (call == null) continue;

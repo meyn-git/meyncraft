@@ -20,6 +20,7 @@ const Color meynAccent = Color(0xFFFF00BF);
 
 ThemeData meynTheme(Brightness brightness) =>
     ThemeData.from(
+      useMaterial3: true,
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: meynPrimary,
         accentColor: meynAccent,
