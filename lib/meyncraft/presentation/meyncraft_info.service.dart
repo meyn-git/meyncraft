@@ -15,6 +15,21 @@ String meynCraftInfoMarkdown({String? version}) {
     markDown.writeln();
   }
   markDown.writeln(
+    meynCraftCurrentDescription,
+    //TODO use meynCraftFutureDescription when it is implemented as a template engine,
+  );
+  markDown.writeln();
+  markDown.writeln(
+    'For more information, visit: https://github.com/meyn-git/meyncraft',
+  );
+  markDown.writeln();
+  return markDown.toString();
+}
+
+String get meynCraftCurrentDescription =>
+    'MeynCraft is a file generator, that generates files based on a Sysmac project file.';
+
+String get meynCraftFutureDescription =>
     'MeynCraft is a '
     '[template engine](https://en.wikipedia.org/wiki/Template_processor) '
     'that combines template files with input data to generate output files.\n'
@@ -31,12 +46,4 @@ String meynCraftInfoMarkdown({String? version}) {
     '* Configuration files\n'
     '* Documentation\n'
     '\n'
-    'You are free to create (and share)your own templates and use MeynCraft to generate any kind of files you need. ',
-  );
-  markDown.writeln();
-  markDown.writeln(
-    'For more information, visit: https://github.com/meyn-git/meyncraft',
-  );
-  markDown.writeln();
-  return markDown.toString();
-}
+    'You are free to create (and share)your own templates and use MeynCraft to generate any kind of files you need. ';
