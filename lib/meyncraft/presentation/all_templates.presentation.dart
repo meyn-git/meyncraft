@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/presentation/all_templates.service.dart';
+import 'package:meyncraft/meyncraft/presentation/selected_templates.service.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
 import 'package:meyncraft/meyncraft/presentation/template_manifest_tab.presentation.dart';
@@ -9,52 +10,71 @@ import 'package:meyncraft/meyncraft/template_manifest/template_manifest.domain.d
 class AllTemplatesTab extends ClosableTab {
   AllTemplatesTab() : super(tabName: 'All Templates', closable: false);
 
+  final selectedTemplateService = GetIt.I<SelectedTemplateService>();
+
   @override
-  Widget buildContent(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-      child: ListView(
-        children: getAllTemplateManifests()
-            .map((manifest) => TemplateManifestTile(manifest))
-            .toList(),
-      ),
-    );
-  }
+  Widget buildContent(BuildContext context) => ListenableBuilder(
+    listenable: selectedTemplateService,
+    builder: (context, _) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+        child: ListView(
+          children: getAllTemplateManifests()
+              .map((manifest) => TemplateManifestTile(manifest))
+              .toList(),
+        ),
+      );
+    },
+  );
 }
 
 class TemplateManifestTile extends StatefulWidget {
-  const TemplateManifestTile(this.manifest, {super.key});
+  const TemplateManifestTile(this.templateManifest, {super.key});
 
-  final TemplateManifest manifest;
+  final TemplateManifest templateManifest;
 
   @override
   State<TemplateManifestTile> createState() => _TemplateManifestTileState();
 }
 
 class _TemplateManifestTileState extends State<TemplateManifestTile> {
-  Offset? _tapPosition;
-
   final _tabService = GetIt.I.get<TabService>();
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (details) {
-        _tapPosition = details.globalPosition;
-      },
-      child: ListTile(
-        leading: const Icon(Icons.check_box),
-        title: Text(widget.manifest.name),
-        subtitle: Text(widget.manifest.description),
+  List<TemplateManifest> get selectedTemplates =>
+      GetIt.I<SelectedTemplateService>().selectedTemplates;
 
-        onTap: () {
-          if (_tapPosition != null) {
-            _showContextMenu(context, widget.manifest, _tapPosition!);
-          }
+  TemplateManifest get templateManifest => widget.templateManifest;
+
+  bool get isSelected => selectedTemplates.contains(templateManifest);
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      IconButton(
+        onPressed: () {
+          setState(() {
+            if (isSelected) {
+              GetIt.I<SelectedTemplateService>().remove(templateManifest);
+            } else {
+              GetIt.I<SelectedTemplateService>().add(templateManifest);
+            }
+          });
         },
+        icon: isSelected
+            ? const Icon(Icons.check_box)
+            : const Icon(Icons.check_box_outline_blank),
       ),
-    );
-  }
+      Expanded(
+        child: ListTile(
+          title: Text(templateManifest.name),
+          subtitle: Text(templateManifest.description),
+          onTap: () {
+            _tabService.addTab(TemplateManifestTab(templateManifest));
+          },
+        ),
+      ),
+    ],
+  );
 
   void _showContextMenu(
     BuildContext context,

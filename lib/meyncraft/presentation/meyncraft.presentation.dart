@@ -38,7 +38,7 @@ class _MeynCraftState extends State<MeynCraft> {
       darkTheme: meynTheme(Brightness.dark),
       //home: LogView(),
       home: DraggableSplitView(
-        left: const SelectedTemplatesPanel(),
+        left: SelectedTemplatesPanel(),
         right: ClosableTabsView(),
       ),
     );

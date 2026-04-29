@@ -32,6 +32,16 @@ class TemplateManifest {
     this.templates = const [],
     this.tags = const [],
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TemplateManifest &&
+          runtimeType == other.runtimeType &&
+          name == other.name;
+
+  @override
+  int get hashCode => name.hashCode;
 }
 
 class TemplateMapping {

@@ -9,6 +9,7 @@ class SelectedTemplateService extends ChangeNotifier {
       List.unmodifiable(_selectedTemplates);
 
   void add(TemplateManifest templateManifest) {
+    if (_selectedTemplates.contains(templateManifest)) return;
     _selectedTemplates.add(templateManifest);
     _selectedTemplates.sort((a, b) => a.name.compareTo(b.name));
     notifyListeners();
