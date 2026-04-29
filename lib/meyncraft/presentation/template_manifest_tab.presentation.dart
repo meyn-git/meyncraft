@@ -11,7 +11,10 @@ class TemplateManifestTab extends ClosableTab {
 
   @override
   Widget buildContent(BuildContext context) => Markdown(
-    styleSheet: MarkdownStyleSheet(h2Padding: EdgeInsets.fromLTRB(0, 10, 0, 0)),
+    styleSheet: MarkdownStyleSheet(
+      h2Padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+      a: TextStyle(color: Theme.of(context).colorScheme.primary),
+    ),
     data: createMarkdown(),
     onTapLink: (text, href, title) {
       if (href != null) {
