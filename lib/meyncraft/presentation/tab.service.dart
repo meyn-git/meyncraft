@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
 
 class TabService extends ChangeNotifier {
-
-  final List<ClosableTab> _tabs =[];
+  final List<ClosableTab> _tabs = [];
   int _selectedIndex = 0;
 
   List<ClosableTab> get tabs => List.unmodifiable(_tabs);

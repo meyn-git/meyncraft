@@ -11,6 +11,8 @@ Future<void> writeSysmacPackMlMonitorFile(
   for (var unit in units) {
     await createPackMlMonitorFile(sysmacProject, unit);
   }
+  //TODO create an XML import file instead of a text file that needs to be copied pasted.
+  //TODO also include state complete commands see scPackMlStates
 }
 
 Future<void> createPackMlMonitorFile(

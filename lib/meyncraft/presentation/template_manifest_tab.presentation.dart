@@ -25,10 +25,18 @@ class TemplateManifestTab extends ClosableTab {
 
     buffer.writeln('# ${templateManifest.name} Manifest');
     buffer.writeln();
+
     buffer.writeln('## Description');
     buffer.writeln();
     buffer.writeln(templateManifest.description);
     buffer.writeln();
+
+    if (templateManifest.generatedFileInstructions != null) {
+      buffer.writeln('## Generated File Instructions');
+      buffer.writeln();
+      buffer.writeln(templateManifest.generatedFileInstructions!);
+      buffer.writeln();
+    }
 
     if (templateManifest.gitRepository != null) {
       buffer.writeln('## Git Repository');
@@ -73,11 +81,12 @@ class TemplateManifestTab extends ClosableTab {
       buffer.writeln('## Templates');
       buffer.writeln();
       for (final template in templateManifest.templates) {
-        buffer.writeln('* source: ${template.source}\\');
-        buffer.writeln('  target: ${template.target}\\');
-        if (template.when != null) {
-          buffer.writeln('  when: ${template.when}');
-        }
+        var texts = [
+          ' source: ${template.source}',
+          ' target: ${template.target}',
+          if (template.when != null) ' when: ${template.when}',
+        ];
+        buffer.writeln("* ${texts.join('\\\n  ')}");
       }
     }
 

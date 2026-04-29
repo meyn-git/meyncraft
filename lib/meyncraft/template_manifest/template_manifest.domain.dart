@@ -5,6 +5,9 @@ class TemplateManifest {
   /// Human-readable description of what the template does
   final String description;
 
+  /// Optional instructions (optionally in markdown format) on how to use the generated file
+  final String? generatedFileInstructions;
+
   /// Optional URL of a git repository where the template is stored
   final String? gitRepository;
 
@@ -22,6 +25,7 @@ class TemplateManifest {
   TemplateManifest({
     required this.name,
     required this.description,
+    this.generatedFileInstructions,
     this.gitRepository,
     this.documentation,
     this.parameters = const [],

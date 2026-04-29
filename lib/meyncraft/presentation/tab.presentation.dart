@@ -13,7 +13,6 @@ abstract class ClosableTab {
 }
 
 class ClosableTabsView extends StatefulWidget {
-  
   const ClosableTabsView({super.key});
 
   @override

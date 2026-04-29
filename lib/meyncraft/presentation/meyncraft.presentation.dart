@@ -36,12 +36,11 @@ class _MeynCraftState extends State<MeynCraft> {
       themeMode: ThemeMode.system,
       theme: meynTheme(Brightness.light),
       darkTheme: meynTheme(Brightness.dark),
-      home: LogView(),
-      // home: DraggableSplitView(
-      //   left: const SelectedTemplatesPanel(),
-      //   right: ClosableTabsView(),
-      // ),
-      
+      //home: LogView(),
+      home: DraggableSplitView(
+        left: const SelectedTemplatesPanel(),
+        right: ClosableTabsView(),
+      ),
     );
   }
 }
