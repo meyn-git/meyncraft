@@ -14,12 +14,18 @@ List<TemplateManifest> getAllTemplateManifests() {
       generatedFileInstructions:
           'You can import the generated tag file in JMobile:\n'
           '* Open an existing JMobile project\n'
-          '* Open the tags window from the left menu Configuration \\ Tags\n'
+          '* In the "Project view" double click on Configuration \\ Tags\n'
           '* Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list\n'
           '* Click on the "import dictionary button" in the toolbar\n'
           '* Select the "Tag editor exported xml" row from the import dialog and click ok\n'
-          '* Select the generated file\n'
-          '* Remove old dictionaries (but not dictionaries that contain internal tags)\n',
+          '* Select the generated file as the "watched dictionary file"\n'
+          '* Click on "Ok"\n'
+          '* In the "Project view" remove old dictionaries (but not dictionaries that contain internal tags)\n'
+          '* Note that new tags in dictionaries will need to by added to the tags by finding them in the "Tags" view'
+          ', selecting them and "Adding to tags" with a right click\n'
+          '* Note that pages that use tags that no longer exist need to be fixed. '
+          'These can be found with the project validator: Menu \\ Run \\ Run Project Validator. '
+          'When these tags are no longer used you can remove them from the tags.\n',
       parameters: [sysmacProjectFileParameter],
       templates: [
         TemplateMapping(
