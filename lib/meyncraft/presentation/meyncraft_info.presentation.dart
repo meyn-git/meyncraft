@@ -13,15 +13,18 @@ class MeynCraftInfoTab extends ClosableTab {
     builder: (context, AsyncSnapshot<String> snapshot) {
       if (snapshot.hasData) {
         final version = snapshot.data!;
-        return createInfo(version);
+        return createInfo(context, version);
       } else {
-        return createInfo();
+        return createInfo(context);
       }
     },
   );
 
-  Widget createInfo([String? version]) => Markdown(
-    styleSheet: MarkdownStyleSheet(pPadding: EdgeInsets.symmetric(vertical: 6)),
+  Widget createInfo(BuildContext context, [String? version]) => Markdown(
+    styleSheet: MarkdownStyleSheet(
+      pPadding: EdgeInsets.symmetric(vertical: 6),
+      a: TextStyle(color: Theme.of(context).colorScheme.primary),
+    ),
     data: meynCraftInfoMarkdown(version: version),
     onTapLink: (text, href, title) {
       if (href != null) {
