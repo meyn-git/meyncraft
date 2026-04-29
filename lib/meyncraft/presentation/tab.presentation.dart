@@ -48,8 +48,7 @@ class _ClosableTabsViewState extends State<ClosableTabsView> {
           // Tabs header
           Container(
             height: 40,
-            color:
-                Colors.black, // Theme.of(context).colorScheme.primaryContainer,
+            color: Theme.of(context).colorScheme.surfaceDim,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: _tabService.tabs.length,

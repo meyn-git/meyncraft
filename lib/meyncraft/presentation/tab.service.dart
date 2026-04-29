@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
 
+/// Service to manage the state of open tabs in the application.
 class TabService extends ChangeNotifier {
   final List<ClosableTab> _tabs = [];
   int _selectedIndex = 0;

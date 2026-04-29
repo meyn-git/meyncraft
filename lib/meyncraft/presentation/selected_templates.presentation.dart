@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:meyncraft/meyncraft/presentation/all_templates.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/selected_templates.service.dart';
 
 class SelectedTemplatesPanel extends StatelessWidget {
   const SelectedTemplatesPanel({super.key});
 
+  SelectedTemplateService get selectedTemplateService =>
+      GetIt.I<SelectedTemplateService>();
+
   @override
   Widget build(BuildContext context) {
+    var selectedTemplates = selectedTemplateService.selectedTemplates;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -12,50 +19,30 @@ class SelectedTemplatesPanel extends StatelessWidget {
           height: 40,
           width: double.infinity,
           alignment: Alignment.centerLeft,
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.surfaceDim,
           padding: const EdgeInsets.only(left: 8),
-          child: const Text(
+          child: Text(
             'Selected templates',
-            style: TextStyle(color: Colors.white),
+            //style: TextStyle(color: Theme.of(context).colorScheme.b),
           ),
         ),
 
-        /// ✅ ListView now has bounded height
         Expanded(
-          child: ListView(
-            children: const [
-              ListTile(
-                title: Text('JMobileTags'),
-                subtitle: Text(
-                  'Creates JMobile tags from a Sysmac project file.',
+          child: selectedTemplates.isEmpty
+              ? Center(
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    'Select templates to generate\nfrom "All Templates"',
+                    // style: TextStyle(
+                    //   color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    // ),
+                  ),
+                )
+              : ListView(
+                  children: selectedTemplates
+                      .map((t) => TemplateManifestTile(t))
+                      .toList(),
                 ),
-              ),
-              ListTile(
-                title: Text('JMobileEvents'),
-                subtitle: Text(
-                  'Creates JMobile events from a Sysmac project file.',
-                ),
-              ),
-              ListTile(
-                title: Text('SysmacEventGlobalArray'),
-                subtitle: Text(
-                  'Creates EventGlobalArray mapping code from a Sysmac project file.',
-                ),
-              ),
-              ListTile(
-                title: Text('EventReport'),
-                subtitle: Text(
-                  'Generates a report of events from a Sysmac project.',
-                ),
-              ),
-              ListTile(
-                title: Text('Isa88Report'),
-                subtitle: Text(
-                  'Generates an ISA 88 report from a Sysmac project.',
-                ),
-              ),
-            ],
-          ),
         ),
       ],
     );

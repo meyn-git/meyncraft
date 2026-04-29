@@ -18,17 +18,21 @@ const MaterialColor meynPrimary = MaterialColor(
 
 const Color meynAccent = Color(0xFFFF00BF);
 
-ThemeData meynTheme(Brightness brightness) =>
-    ThemeData.from(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSwatch(
+ThemeData meynTheme(Brightness brightness) => ThemeData.from(
+  useMaterial3: true,
+  colorScheme:
+      ColorScheme.fromSwatch(
         primarySwatch: meynPrimary,
         accentColor: meynAccent,
         brightness: brightness,
+      ).copyWith(
+        surface: brightness == Brightness.light ? Colors.white : Colors.black,
       ),
-    ).copyWith(
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.black, // Use your primary color here
-        foregroundColor: Colors.white, // Optional: sets text/icon color
-      ),
-    );
+)
+// .copyWith(
+//   appBarTheme: AppBarTheme(
+//     backgroundColor: Colors.black, // Use your primary color here
+//     foregroundColor: Colors.white, // Optional: sets text/icon color
+//   ),
+// );
+;

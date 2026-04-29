@@ -5,6 +5,7 @@ import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/presentation/all_templates.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/meyncraft.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/meyncraft_info.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/selected_templates.service.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -29,8 +30,10 @@ void main(List<String> args) async {
 
   final getIt = GetIt.instance;
   getIt.registerSingleton<Logger>(Logger());
+  getIt.registerSingleton<SelectedTemplateService>(SelectedTemplateService());
   getIt.registerSingleton<TabService>(TabService());
   getIt.get<TabService>().addTab(AllTemplatesTab());
   getIt.get<TabService>().addTab(MeynCraftInfoTab());
+  getIt.get<TabService>().selectTab(0);
   runApp(MeynCraft(args));
 }

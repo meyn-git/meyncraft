@@ -123,12 +123,12 @@ class _DraggableSplitViewState extends State<DraggableSplitView> {
                   },
                   child: Container(
                     width: 6,
-                    color: Colors.black,
-                    child: const Center(
+                    color: Theme.of(context).colorScheme.surfaceDim,
+                    child: Center(
                       child: VerticalDivider(
                         width: 1,
                         thickness: 1,
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.surfaceDim,
                       ),
                     ),
                   ),
