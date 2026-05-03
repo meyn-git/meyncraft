@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:meyncraft/meyncraft/template_manifest/template_manifest.domain.dart';
+import 'package:meyncraft/meyncraft/template/template.domain.dart';
 
 /// Service to manage the state of selected templates in the application.
 class SelectedTemplateService extends ChangeNotifier {
-  final List<TemplateManifest> _selectedTemplates = [];
+  final List<Template> _selectedTemplates = [];
 
   List<TemplateManifest> get selectedTemplates =>
       List.unmodifiable(_selectedTemplates);
 
-  void add(TemplateManifest templateManifest) {
-    if (_selectedTemplates.contains(templateManifest)) return;
-    _selectedTemplates.add(templateManifest);
+  void add(Template template) {
+    if (_selectedTemplates.contains(template)) return;
+    _selectedTemplates.add(template);
     _selectedTemplates.sort((a, b) => a.name.compareTo(b.name));
     notifyListeners();
   }
 
-  void remove(TemplateManifest templateManifest) {
-    _selectedTemplates.remove(templateManifest);
+  void remove(Template template) {
+    _selectedTemplates.remove(template);
     notifyListeners();
   }
 
-  bool contains(TemplateManifest templateManifest) =>
-      _selectedTemplates.contains(templateManifest);
+  bool contains(Template template) => _selectedTemplates.contains(template);
 }

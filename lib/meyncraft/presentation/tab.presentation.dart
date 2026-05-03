@@ -23,19 +23,6 @@ class _ClosableTabsViewState extends State<ClosableTabsView> {
   final TabService _tabService = GetIt.I.get<TabService>();
 
   @override
-  // void initState() {
-  //   super.initState();
-  //   _tabs = List.from(widget.tabs);
-  // }
-  // void _closeTab(int index) {
-  //   setState(() {
-  //     _tabs.removeAt(index);
-  //     if (_selectedIndex >= _tabs.length) {
-  //       _selectedIndex = _tabs.length - 1;
-  //     }
-  //   });
-  // }
-  @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: _tabService,
     builder: (context, _) {
@@ -76,7 +63,7 @@ class _ClosableTabsViewState extends State<ClosableTabsView> {
                         if (tab.closable) ...[
                           const SizedBox(width: 6),
                           GestureDetector(
-                            onTap: () => _tabService.closeTab(index),
+                            onTap: () => _tabService.closeTabIndex(index),
                             child: const Icon(Icons.close, size: 16),
                           ),
                         ],
@@ -101,65 +88,4 @@ class _ClosableTabsViewState extends State<ClosableTabsView> {
       );
     },
   );
-  // {
-  //   if (_tabs.isEmpty) {
-  //     return const Center(child: Text('No tabs open'));
-  //   }
-
-  //   return Column(
-  //     children: [
-  //       // Tabs header
-  //       Container(
-  //         height: 40,
-  //         color:
-  //             Colors.black, // Theme.of(context).colorScheme.primaryContainer,
-  //         child: ListView.builder(
-  //           scrollDirection: Axis.horizontal,
-  //           itemCount: _tabs.length,
-  //           itemBuilder: (context, index) {
-  //             final tab = _tabs[index];
-  //             final selected = index == _selectedIndex;
-
-  //             return InkWell(
-  //               onTap: () => setState(() => _selectedIndex = index),
-  //               child: Container(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 12),
-  //                 decoration: BoxDecoration(
-  //                   border: Border(
-  //                     bottom: BorderSide(
-  //                       width: 2,
-  //                       color: selected
-  //                           ? Theme.of(context).colorScheme.primary
-  //                           : Colors.transparent,
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 child: Row(
-  //                   children: [
-  //                     Text(tab.tabName),
-  //                     if (tab.closable) ...[
-  //                       const SizedBox(width: 6),
-  //                       GestureDetector(
-  //                         onTap: () => _closeTab(index),
-  //                         child: const Icon(Icons.close, size: 16),
-  //                       ),
-  //                     ],
-  //                   ],
-  //                 ),
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       ),
-
-  //       // Active tab content
-  //       Expanded(
-  //         child: Align(
-  //           alignment: Alignment.topLeft,
-  //           child: _tabs[_selectedIndex].buildContent(context),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
 }

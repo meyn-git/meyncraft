@@ -1,0 +1,52 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:get_it/get_it.dart';
+import 'package:meyncraft/meyncraft/generate/generate_result.domain.dart';
+import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
+import 'package:meyncraft/meyncraft/style/markdown_style_sheet.presentation.dart';
+import 'package:meyncraft/meyncraft/template/template.service.dart';
+import 'package:meyncraft/meyncraft/template/template_detail_tab.presentation.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+class GeneratorResultTab extends ClosableTab {
+  final StreamController<GeneratorResult> results;
+
+  GeneratorResultTab(this.results) : super(tabName: 'Generator Results');
+
+  var markdown = StringBuffer();
+
+  @override
+  Widget buildContent(BuildContext context) => StreamBuilder<GeneratorResult>(
+    stream: results.stream,
+    builder: (context, snapshot) {
+      if (snapshot.hasData) {
+        var result = snapshot.data!;
+        markdown.writeln(result.toMarkdown());
+      }
+      return Markdown(
+        styleSheet: MeynMarkdownStyleSheet(context),
+        data: markdown.toString(),
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            var uri = Uri.parse(href);
+            if (uri.scheme == 'detail') {
+              var templateName = uri.path;
+              var template = allTemplates().firstWhere(
+                (t) => t.name == templateName,
+                orElse: () =>
+                    throw Exception('Template not found: $templateName'),
+              );
+              var tabService = GetIt.I.get<TabService>();
+              tabService.addOrSelectTab(TemplateDetailTab(template));
+            } else {
+              launchUrl(uri);
+            }
+          }
+        },
+      );
+    },
+  );
+}

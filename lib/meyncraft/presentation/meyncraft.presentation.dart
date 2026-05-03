@@ -1,7 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/generate/generate.service.dart';
+import 'package:meyncraft/meyncraft/generate/generator.service.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/logger/logger.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/all_templates.presentation.dart';
@@ -9,7 +9,7 @@ import 'package:meyncraft/meyncraft/presentation/meyncraft_info.presentation.dar
 import 'package:meyncraft/meyncraft/presentation/selected_templates.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
-import 'package:meyncraft/meyncraft/theme.presentation.dart';
+import 'package:meyncraft/meyncraft/style/theme.presentation.dart';
 
 class MeynCraft extends StatefulWidget {
   final List<String> args;
@@ -52,7 +52,7 @@ Future<void> selectSysmacFileAndGenerate() async {
     logger.completed = true;
     return;
   }
-  await generate(sysmacProjectFilePath);
+  await generateOld(sysmacProjectFilePath);
 }
 
 Future<String?> _openFilePicker() async {

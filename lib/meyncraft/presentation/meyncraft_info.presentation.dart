@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meyncraft/meyncraft/presentation/meyncraft_info.service.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
+import 'package:meyncraft/meyncraft/style/markdown_style_sheet.presentation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
@@ -21,10 +22,7 @@ class MeynCraftInfoTab extends ClosableTab {
   );
 
   Widget createInfo(BuildContext context, [String? version]) => Markdown(
-    styleSheet: MarkdownStyleSheet(
-      pPadding: EdgeInsets.symmetric(vertical: 6),
-      a: TextStyle(color: Theme.of(context).colorScheme.primary),
-    ),
+    styleSheet: MeynMarkdownStyleSheet(context),
     data: meynCraftInfoMarkdown(version: version),
     onTapLink: (text, href, title) {
       if (href != null) {

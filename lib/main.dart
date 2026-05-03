@@ -2,6 +2,7 @@ import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
 import 'package:meyncraft/meyncraft/presentation/all_templates.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/meyncraft.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/meyncraft_info.presentation.dart';
@@ -31,6 +32,7 @@ void main(List<String> args) async {
   final getIt = GetIt.instance;
   getIt.registerSingleton<Logger>(Logger());
   getIt.registerSingleton<SelectedTemplateService>(SelectedTemplateService());
+  getIt.registerSingleton<MeynSysmacProjectService>(MeynSysmacProjectService());
   getIt.registerSingleton<TabService>(TabService());
   getIt.get<TabService>().addTab(AllTemplatesTab());
   getIt.get<TabService>().addTab(MeynCraftInfoTab());

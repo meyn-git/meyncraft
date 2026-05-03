@@ -1,25 +1,61 @@
-class TemplateManifest {
+import 'package:meyncraft/meyncraft/generate/generator.domain.dart';
+
+abstract class Template {
   /// Template name
+  String get name;
+
+  /// Human-readable description of what the template does
+  String get description;
+
+  /// Optional instructions (optionally in markdown format) on how to use the generated file
+  String? get generatedFileInstructions;
+
+  /// Optional URL of a git repository where the template is stored
+  String? get gitRepository;
+
+  /// Optional URL to documentation for the template, e.g. a README file in the repository
+  String? get documentation;
+
+  /// Input parameters
+  List<Parameter> get parameters;
+
+  /// Template source-to-target mappings
+  List<Generator> get generators;
+
+  List<String> get tags;
+}
+
+/// A template from a template manifest file
+class TemplateManifest implements Template {
+  /// Template name
+  @override
   final String name;
 
   /// Human-readable description of what the template does
+  @override
   final String description;
 
   /// Optional instructions (optionally in markdown format) on how to use the generated file
+  @override
   final String? generatedFileInstructions;
 
   /// Optional URL of a git repository where the template is stored
+  @override
   final String? gitRepository;
 
   /// Optional URL to documentation for the template, e.g. a README file in the repository
+  @override
   final String? documentation;
 
   /// Input parameters
+  @override
   final List<Parameter> parameters;
 
   /// Template source-to-target mappings
-  final List<TemplateMapping> templates;
+  @override
+  final List<Generator> generators;
 
+  @override
   final List<String> tags;
 
   TemplateManifest({
@@ -29,7 +65,7 @@ class TemplateManifest {
     this.gitRepository,
     this.documentation,
     this.parameters = const [],
-    this.templates = const [],
+    this.generators = const [],
     this.tags = const [],
   });
 
@@ -42,19 +78,6 @@ class TemplateManifest {
 
   @override
   int get hashCode => name.hashCode;
-}
-
-class TemplateMapping {
-  /// Relative path to the template file
-  final String source;
-
-  /// Path where the generated file should be placed. Can include placeholders for parameters, e.g. "src/{{name}}.dart"
-  final String target;
-
-  /// Optional condition that must be met for this mapping to be applied, e.g. "{{includeTests == true}}"
-  final String? when;
-
-  TemplateMapping({required this.source, required this.target, this.when});
 }
 
 class Parameter {

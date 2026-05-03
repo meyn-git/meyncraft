@@ -1,12 +1,7 @@
-import 'package:meyncraft/meyncraft/template_manifest/template_manifest.domain.dart';
+import 'package:meyncraft/meyncraft/generate/generator.domain.dart';
+import 'package:meyncraft/meyncraft/template/template.domain.dart';
 
-List<TemplateManifest> getAllTemplateManifests() {
-  var sysmacProjectFileParameter = Parameter(
-    name: 'sysmacProjectFilePath',
-    description: 'Path to the Sysmac project file to generate from',
-    type: ParameterType.relativePath,
-    required: true,
-  );
+List<TemplateManifest> allTemplates() {
   return [
     TemplateManifest(
       name: 'JMobileTags',
@@ -27,9 +22,8 @@ List<TemplateManifest> getAllTemplateManifests() {
           'These can be found with the project validator: Menu \\ Run \\ Run Project Validator. '
           'When these tags are no longer used you can remove them from the tags.\n',
       parameters: [sysmacProjectFileParameter],
-      templates: [
-        TemplateMapping(
-          source: 'jmobile_tags.dart',
+      generators: [
+        CodeTemplateGenerator(
           target: '{{sysmacProjectFilePath}}-JMobile-Tags.xml',
         ),
       ],
@@ -50,33 +44,12 @@ List<TemplateManifest> getAllTemplateManifests() {
           '  * Check "Delete runtime dynamic files"\n'
           '  * Check "Alarms"\n',
       parameters: [sysmacProjectFileParameter],
-      templates: [
-        TemplateMapping(
-          source: 'jmobile_events.dart',
+      generators: [
+        CodeTemplateGenerator(
           target: '{{sysmacProjectFilePath}}-JMobile-Events.xml',
         ),
       ],
       tags: ['jmobile', 'exor', 'sysmac', 'events'],
-    ),
-
-    TemplateManifest(
-      name: 'SysmacPackMlMonitor',
-      description:
-          'Creates Sysmac monitor code to debug PackMLfrom a Sysmac project file.',
-      generatedFileInstructions:
-          'You can import the generated file in Sysmac:\n'
-          '* In the Sysmac Menu select tools \\ Tools \\ IEC 61131-10 XML \\ Import\n'
-          '* Select the generated file\n'
-          '* Then move the sections in the last programs to the begin of the"UnitControl" section of the corresponding unit',
-      parameters: [sysmacProjectFileParameter],
-      templates: [
-        TemplateMapping(
-          source: 'sysmac_packml_monitor.dart',
-          target:
-              '{{sysmacProjectFilePath}}-Sysmac-{{unit.name}}-PackMlMonitor.xml',
-        ),
-      ],
-      tags: ['sysmac', 'packml', 'code'],
     ),
 
     TemplateManifest(
@@ -85,18 +58,43 @@ List<TemplateManifest> getAllTemplateManifests() {
           'Creates EventGlobalArray mapping code from a Sysmac project file.',
       generatedFileInstructions:
           'You can import the generated file in Sysmac:\n'
-          '* In the Sysmac Menu select tools \\ Tools \\ IEC 61131-10 XML \\ Import\n'
-          '* Select the generated file\n'
-          '* Then move the sections in the last program "GeneratedByMeynCraft" to the end of section "Global\\EventHandling"',
+          '* In the Sysmac Menu select: Tools \\ IEC 61131-10 XML \\ Import\n'
+          '* Select the generated file by clicking the folder button\n'
+          '* Click on the "Execute" button\n'
+          '* Merge changes if prompted\n'
+          '* Then move the sections in the last program "GeneratedByMeynCraft" '
+          'to the end of section "Global\\EventHandling"',
       parameters: [sysmacProjectFileParameter],
-      templates: [
-        TemplateMapping(
-          source: 'sysmac_event_global_array.dart',
+      generators: [
+        CodeTemplateGenerator(
           target: '{{sysmacProjectFilePath}}-Sysmac-EventGlobalArray.txt',
         ),
       ],
       tags: ['sysmac', 'events', 'code', 'EventGlobalArray'],
     ),
+
+    TemplateManifest(
+      name: 'SysmacPackMlMonitor',
+      description:
+          'Creates Sysmac monitor code to debug PackMLfrom a Sysmac project file.',
+      generatedFileInstructions:
+          'You can import the generated file in Sysmac:\n'
+          '* In the Sysmac Menu select: Tools \\ IEC 61131-10 XML \\ Import\n'
+          '* Select the generated file by clicking the folder button\n'
+          '* Click on the "Execute" button\n'
+          '* Merge changes if prompted\n'
+          '* Then move the sections in the last programs to the begin of the '
+          '"UnitControl" section of the corresponding unit',
+      parameters: [sysmacProjectFileParameter],
+      generators: [
+        CodeTemplateGenerator(
+          target:
+              '{{sysmacProjectFilePath}}-Sysmac-{{unit.name}}-PackMlMonitor.xml',
+        ),
+      ],
+      tags: ['sysmac', 'packml', 'code'],
+    ),
+
     TemplateManifest(
       name: 'EventReport',
       description: 'Generates a report of events from a Sysmac project.',
@@ -104,9 +102,8 @@ List<TemplateManifest> getAllTemplateManifests() {
           'You can open the generated file e.g. for quick reference '
           'using Excel or any other spreadsheet software.',
       parameters: [sysmacProjectFileParameter],
-      templates: [
-        TemplateMapping(
-          source: 'event_report.dart',
+      generators: [
+        CodeTemplateGenerator(
           target: '{{sysmacProjectFilePath}}-EventReport.csv',
         ),
       ],
@@ -119,9 +116,8 @@ List<TemplateManifest> getAllTemplateManifests() {
           'You can open the generated file e.g. for quick reference '
           'using Excel or any other spreadsheet software.',
       parameters: [sysmacProjectFileParameter],
-      templates: [
-        TemplateMapping(
-          source: 'isa88_report.dart',
+      generators: [
+        CodeTemplateGenerator(
           target: '{{sysmacProjectFilePath}}-Isa88Report.csv',
         ),
       ],
@@ -129,3 +125,10 @@ List<TemplateManifest> getAllTemplateManifests() {
     ),
   ];
 }
+
+final sysmacProjectFileParameter = Parameter(
+  name: 'sysmacProjectFilePath',
+  description: 'Path to the Sysmac project file to generate from',
+  type: ParameterType.relativePath,
+  required: true,
+);
