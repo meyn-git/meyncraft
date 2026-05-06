@@ -6,10 +6,20 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class MeynCraftInfoTab extends ClosableTab {
-  MeynCraftInfoTab() : super(tabName: 'MeynCraft Info', closable: true);
+  const MeynCraftInfoTab()
+    : super(
+        tabName: 'MeynCraft Info',
+        closable: true,
+        tabKey: const ValueKey('MeynCraftInfoTab'),
+      );
 
   @override
-  Widget buildContent(BuildContext context) => FutureBuilder(
+  State<StatefulWidget> createState() => _MeynCraftInfoTabState();
+}
+
+class _MeynCraftInfoTabState extends State<MeynCraftInfoTab> {
+  @override
+  Widget build(BuildContext context) => FutureBuilder(
     future: applicationVersion(),
     builder: (context, AsyncSnapshot<String> snapshot) {
       if (snapshot.hasData) {

@@ -15,10 +15,9 @@ List<Device> createDevices(SysmacProject sysmacProject) => sysmacProject
           e.name.local == entity && e.getAttribute(typeAttribute) == 'Device',
     )
     .map((e) => _createDevice(sysmacProject, e))
-    .whereType<Device>() // remove nulls
     .toList();
 
-Device? _createDevice(SysmacProject sysmacProject, XmlElement deviceElement) {
+Device _createDevice(SysmacProject sysmacProject, XmlElement deviceElement) {
   var type = deviceElement.getAttribute(subTypeAttribute)!;
   if (type.startsWith('NJ')) {
     return createNjPlc(sysmacProject, deviceElement);
@@ -29,8 +28,7 @@ Device? _createDevice(SysmacProject sysmacProject, XmlElement deviceElement) {
   if (type == "NA") {
     return createNaHmi(deviceElement);
   }
-  logger.warning('Unknown device type: $type');
-  return null;
+  return createUnknownDevice(deviceElement);
 }
 
 NesSafetyPlc createNesSafetyPlc(XmlElement deviceElement) {
@@ -43,4 +41,20 @@ NaHmi createNaHmi(XmlElement deviceElement) {
   var name = deviceElement.getAttribute(nameAttribute)!;
   var type = deviceElement.getAttribute(subTypeAttribute)!;
   return NaHmi(name: name, type: type);
+}
+
+UnknownDevice createUnknownDevice(XmlElement deviceElement) {
+  var name = deviceElement.getAttribute(nameAttribute) ?? 'Unknown';
+  var type = deviceElement.getAttribute(subTypeAttribute) ?? 'Unknown';
+  return UnknownDevice(name: name, type: type);
+}
+
+class UnknownDevice implements Device {
+  @override
+  final String name;
+
+  @override
+  final String type;
+
+  UnknownDevice({required this.name, required this.type});
 }

@@ -1,34 +1,10 @@
+import 'package:meyncraft/meyncraft/generate/exor_jmobile/jmobile_tags_tempate.domain.dart';
 import 'package:meyncraft/meyncraft/generate/generator.domain.dart';
 import 'package:meyncraft/meyncraft/template/template.domain.dart';
 
-List<TemplateManifest> allTemplates() {
+List<Template> allTemplates() {
   return [
-    TemplateManifest(
-      name: 'JMobileTags',
-      description: 'Creates JMobile tags from a Sysmac project file.',
-      generatedFileInstructions:
-          'You can import the generated tag file in JMobile:\n'
-          '* Open an existing JMobile project\n'
-          '* In the "Project view" double click on Configuration \\ Tags\n'
-          '* Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list\n'
-          '* Click on the "import dictionary button" in the toolbar\n'
-          '* Select the "Tag editor exported xml" row from the import dialog and click ok\n'
-          '* Select the generated file as the "watched dictionary file"\n'
-          '* Click on "Ok"\n'
-          '* In the "Project view" remove old dictionaries (but not dictionaries that contain internal tags)\n'
-          '* Note that new tags in dictionaries will need to by added to the tags by finding them in the "Tags" view'
-          ', selecting them and "Adding to tags" with a right click\n'
-          '* Note that pages that use tags that no longer exist need to be fixed. '
-          'These can be found with the project validator: Menu \\ Run \\ Run Project Validator. '
-          'When these tags are no longer used you can remove them from the tags.\n',
-      parameters: [sysmacProjectFileParameter],
-      generators: [
-        CodeTemplateGenerator(
-          target: '{{sysmacProjectFilePath}}-JMobile-Tags.xml',
-        ),
-      ],
-      tags: ['jmobile', 'exor', 'sysmac', 'tags'],
-    ),
+    JMobileTagsTemplate(),
 
     TemplateManifest(
       name: 'JMobileEvents',

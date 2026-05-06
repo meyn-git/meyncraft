@@ -20,8 +20,8 @@ class MeynSysmacProject extends SysmacProject {
 
   late final List<Isa88Node> isa88Nodes = createMeynIsa88Nodes(this);
 
-  static Future<MeynSysmacProject> create(File file) async {
-    var sysmacProjectArchive = await SysmacProjectArchive.create(file);
+  static Future<MeynSysmacProject> loadFromFile(File file) async {
+    var sysmacProjectArchive = await SysmacProjectArchive.loadFromFile(file);
     return MeynSysmacProject(sysmacProjectArchive);
   }
 }

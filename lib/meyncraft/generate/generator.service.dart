@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/generate/exor_jmobile/events_file.service.dart';
-import 'package:meyncraft/meyncraft/generate/exor_jmobile/tags_file.service.dart';
-import 'package:meyncraft/meyncraft/generate/generate_result.domain.dart';
+import 'package:meyncraft/meyncraft/generate/exor_jmobile/jmobile_tags_tempate.domain.dart';
 import 'package:meyncraft/meyncraft/generate/generator_parameter_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/generate/generator_result_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/generate/reports/isa88_report_service.dart';
@@ -20,7 +20,7 @@ Future<void> generateOld(String sysmacProjectFilePath) async {
   try {
     logger.info('Reading: $sysmacProjectFilePath');
     var file = File(sysmacProjectFilePath);
-    var sysmacProject = await MeynSysmacProject.create(file);
+    var sysmacProject = await MeynSysmacProject.loadFromFile(file);
 
     await writeJMobileTagsFile(sysmacProject);
     await writeJMobileEventsFile(sysmacProject);
@@ -38,34 +38,53 @@ Future<void> generateOld(String sysmacProjectFilePath) async {
   logger.completed = true;
 }
 
-Future<void> generateNew(
+Future<MarkdownReport> generate(
   List<Template> selectedTemplates,
   Map<String, dynamic> parameterValues,
-  StreamController<GeneratorResult> results,
+  MarkdownReport outputReport,
 ) async {
-  var tabService = GetIt.I.get<TabService>();
-  tabService.addTab(GeneratorResultTab(results));
-
   for (var template in selectedTemplates) {
-    var templateResult = TemplateGenerationResult(template, results);
-    results.add(templateResult);
+    //var templateResult = TemplateGenerationResult(template, results);
+    outputReport.append('# [${template.name}](detail:${template.name})\n');
     for (var generator in template.generators) {
       try {
-        await generator.generate(
-          //sysmacProject,
+        outputReport = await generator.generate(
+          template,
           parameterValues,
-          templateResult.childResults,
+          outputReport,
         );
-      } on Exception catch (e) {
-        templateResult.childResults.add(
-          Error(
-            'Error generating ${generator.source.runtimeType}: ${e.toString()}',
-          ),
+      } on Exception catch (e, stackTrace) {
+        var errorLink = GenerationErrorLink(
+          template: template,
+          generator: generator,
+          message: 'Error generating ${generator.source}',
+          stackTrace: stackTrace,
         );
+        outputReport.append('* ${errorLink.toMarkdown()}');
       }
     }
   }
 
-  results.add(Info('Generation completed.'));
-  results.close();
+  outputReport.append('# Generation completed.');
+  outputReport.append(
+    '[Click here to run again with the same parameters](meyncraft://regenerate)',
+  );
+  return outputReport;
+}
+
+class MarkdownReport extends ChangeNotifier {
+  final StringBuffer _markdownBuffer = StringBuffer();
+
+  void append(String markdown) {
+    _markdownBuffer.writeln(markdown);
+    notifyListeners();
+  }
+
+  void set(String markdown) {
+    _markdownBuffer.clear();
+    _markdownBuffer.writeln(markdown);
+    notifyListeners();
+  }
+
+  String get markdown => _markdownBuffer.toString();
 }

@@ -6,12 +6,22 @@ import 'package:meyncraft/meyncraft/template/template.service.dart';
 import 'package:meyncraft/meyncraft/template/template_tile.presentation.dart';
 
 class AllTemplatesTab extends ClosableTab {
-  AllTemplatesTab() : super(tabName: 'All Templates', closable: false);
+  const AllTemplatesTab()
+    : super(
+        tabName: 'All Templates',
+        closable: false,
+        tabKey: const ValueKey('AllTemplatesTab'),
+      );
 
+  @override
+  State<StatefulWidget> createState() => _AllTemplatesTabState();
+}
+
+class _AllTemplatesTabState extends State<AllTemplatesTab> {
   final selectedTemplateService = GetIt.I<SelectedTemplateService>();
 
   @override
-  Widget buildContent(BuildContext context) => ListenableBuilder(
+  Widget build(BuildContext context) => ListenableBuilder(
     listenable: selectedTemplateService,
     builder: (context, _) {
       return Padding(

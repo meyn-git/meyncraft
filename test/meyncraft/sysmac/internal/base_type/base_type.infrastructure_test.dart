@@ -413,7 +413,7 @@ void main() {
         test(
           'createDataTypes should have a single "sEvent.Common" dataType path',
           () async {
-            var sysmacProjectArchive = await SysmacProjectArchive.create(
+            var sysmacProjectArchive = await SysmacProjectArchive.loadFromFile(
               SysmacProjectTestResource().file,
             );
             var dataTypes = createDataTypes(sysmacProjectArchive);
@@ -801,7 +801,7 @@ void main() {
         test(
           'createDataTypes should have a single "sEvent.Common" dataType path',
           () async {
-            var sysmacProjectArchive = await SysmacProjectArchive.create(
+            var sysmacProjectArchive = await SysmacProjectArchive.loadFromFile(
               SysmacProjectTestResource().file,
             );
             var dataTypes = createDataTypes(sysmacProjectArchive);
@@ -836,7 +836,7 @@ void main() {
     File file = SysmacProjectTestResource().file;
     late SysmacProjectArchive sysmacProjectArchive;
     setUpAll(() async {
-      sysmacProjectArchive = await SysmacProjectArchive.create(file);
+      sysmacProjectArchive = await SysmacProjectArchive.loadFromFile(file);
     });
 
     test('DataType "Common.sEvent.Alarm0" should exist and be correct', () {

@@ -5,8 +5,7 @@ import 'package:meyncraft/meyncraft/template/template.domain.dart';
 class SelectedTemplateService extends ChangeNotifier {
   final List<Template> _selectedTemplates = [];
 
-  List<TemplateManifest> get selectedTemplates =>
-      List.unmodifiable(_selectedTemplates);
+  List<Template> get selectedTemplates => List.unmodifiable(_selectedTemplates);
 
   void add(Template template) {
     if (_selectedTemplates.contains(template)) return;

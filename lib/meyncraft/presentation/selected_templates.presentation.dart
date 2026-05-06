@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/generate/generator.service.dart';
 import 'package:meyncraft/meyncraft/generate/generator_parameter_tab.presentation.dart';
-import 'package:meyncraft/meyncraft/generate/generate_result.domain.dart';
 import 'package:meyncraft/meyncraft/generate/generator_result_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/selected_templates.service.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
@@ -90,7 +89,12 @@ class SelectedTemplatesPanel extends StatelessWidget {
         parameters.first.name == sysmacProjectFileParameter.name) {
       await selectSysmacFileAndGenerate(selectedTemplates);
     } else {
-      _tabService.addTab(GeneratorParametersTab(selectedTemplates));
+      _tabService.addTab(
+        GeneratorParametersTab(
+          templatesToGenerate: selectedTemplates,
+          tabKey: UniqueKey(),
+        ),
+      );
     }
   }
 }
@@ -103,10 +107,10 @@ Future<void> selectSysmacFileAndGenerate(
     return;
   }
   var parameters = {sysmacProjectFileParameter.name: sysmacProjectFilePath};
-  var results = StreamController<GeneratorResult>();
+  var outputReport = MarkdownReport();
   var tabService = GetIt.I.get<TabService>();
-  tabService.addTab(GeneratorResultTab(results));
-  await generateNew(selectedTemplates, parameters, results);
+  tabService.addTab(GeneratorResultTab(outputReport, tabKey: UniqueKey()));
+  await generate(selectedTemplates, parameters, outputReport);
 }
 
 Future<String?> _openFilePicker() async {

@@ -17,7 +17,7 @@ class MeynSysmacProjectService {
     if (_cache.containsKey(fileKey)) {
       return _cache[fileKey]!;
     } else {
-      var projectFuture = await MeynSysmacProject.create(file);
+      var projectFuture = await MeynSysmacProject.loadFromFile(file);
       _cache[fileKey] = projectFuture;
       return projectFuture;
     }

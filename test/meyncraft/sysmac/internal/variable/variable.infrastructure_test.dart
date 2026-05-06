@@ -18,7 +18,7 @@ void main() {
     late SysmacProjectArchive sysmacProjectArchive;
     late List<DataTypeBase> dataTypes;
     setUp(() async {
-      sysmacProjectArchive = await SysmacProjectArchive.create(
+      sysmacProjectArchive = await SysmacProjectArchive.loadFromFile(
         SysmacProjectTestResource().file,
       );
       dataTypes = createDataTypes(sysmacProjectArchive);

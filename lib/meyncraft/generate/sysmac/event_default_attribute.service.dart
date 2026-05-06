@@ -17,7 +17,7 @@ import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dar
 /// FIXME remove this when no longer needed
 Future<void> main(List<String> args) async {
   var file = File(r'test\9062DE02-Evisceration-021-002.smc2');
-  var project = await MeynSysmacProject.create(file);
+  var project = await MeynSysmacProject.loadFromFile(file);
   await writeSysmacEventArrayXmlImportFile(project);
   exit(0);
 }

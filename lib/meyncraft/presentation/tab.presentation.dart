@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
 
-abstract class ClosableTab {
+abstract class ClosableTab extends StatefulWidget {
   final String tabName;
   final bool closable;
 
-  const ClosableTab({required this.tabName, this.closable = true});
-
-  /// Content displayed when the tab is active
-  Widget buildContent(BuildContext context);
+  const ClosableTab({
+    required Key tabKey,
+    required this.tabName,
+    this.closable = true,
+  }) : super(key: tabKey);
 }
 
 class ClosableTabsView extends StatefulWidget {
@@ -77,11 +78,10 @@ class _ClosableTabsViewState extends State<ClosableTabsView> {
 
           // Active tab content
           Expanded(
-            child: Align(
+            child: IndexedStack(
               alignment: Alignment.topLeft,
-              child: _tabService.tabs[_tabService.selectedIndex].buildContent(
-                context,
-              ),
+              index: _tabService.selectedIndex,
+              children: _tabService.tabs,
             ),
           ),
         ],

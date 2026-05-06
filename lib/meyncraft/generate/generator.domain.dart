@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/generate/generate_result.domain.dart';
+import 'package:meyncraft/meyncraft/generate/generator.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
+import 'package:meyncraft/meyncraft/template/template.domain.dart';
 import 'package:meyncraft/meyncraft/template/template.service.dart';
 
 abstract class Generator {
@@ -18,9 +19,10 @@ abstract class Generator {
   /// Optional condition that must be met for this mapping to be applied, e.g. "{{includeTests == true}}"
   // TODO String? get when;
 
-  Future<void> generate(
+  Future<MarkdownReport> generate(
+    Template template,
     Map<String, dynamic> parameterValues,
-    StreamController<GeneratorResult> results,
+    MarkdownReport outputReport,
   );
 }
 
@@ -35,37 +37,40 @@ class CodeTemplateGenerator implements Generator {
   CodeTemplateGenerator({required this.target});
 
   @override
-  Future<void> generate(
+  Future<MarkdownReport> generate(
+    Template template,
     Map<String, dynamic> parameterValues,
-    StreamController<GeneratorResult> results,
+    MarkdownReport outputReport,
   ) async {
-    String? sysmacProjectFilePath =
-        parameterValues[sysmacProjectFileParameter.name];
-    if (sysmacProjectFilePath == null) {
-      results.add(
-        Failure(
-          'Missing required parameter: ${sysmacProjectFileParameter.name}',
-        ),
-      );
-      results.close();
-      return;
-    }
+    // String? sysmacProjectFilePath =
+    //     parameterValues[sysmacProjectFileParameter.name];
+    // if (sysmacProjectFilePath == null) {
+    //   results.add(
+    //     Failure(
+    //       'Missing required parameter: ${sysmacProjectFileParameter.name}',
+    //     ),
+    //   );
+    //   // results.close();
+    //   return;
+    // }
 
-    try {
-      var meynSysmacProjectService = GetIt.I.get<MeynSysmacProjectService>();
-      var meynSysmacProject = await meynSysmacProjectService.getProject(
-        sysmacProjectFilePath,
-      );
-    } on Exception catch (e) {
-      results.add(
-        Failure('Error reading Sysmac project file: ${e.toString()}'),
-      );
-      results.close();
-      return;
-    }
+    // try {
+    //   var meynSysmacProjectService = GetIt.I.get<MeynSysmacProjectService>();
+    //   var meynSysmacProject = await meynSysmacProjectService.getProject(
+    //     sysmacProjectFilePath,
+    //   );
+    // } on Exception catch (e) {
+    //   results.add(
+    //     Failure('Error reading Sysmac project file: ${e.toString()}'),
+    //   );
+    //   // results.close();
+    //   return;
+    // }
 
-    return Future.value(
-      Error('CodeTemplateGenerator is deprecated and should not be used'),
-    );
+    // return Future.value(
+    //   Error('CodeTemplateGenerator is deprecated and should not be used'),
+    // );
+    return MarkdownReport()
+      ..append('CodeTemplateGenerator is deprecated and should not be used\n');
   }
 }

@@ -10,11 +10,16 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class TemplateDetailTab extends ClosableTab {
   final Template template;
-  TemplateDetailTab(this.template)
+  TemplateDetailTab({required this.template, required super.tabKey})
     : super(tabName: template.name, closable: true);
 
   @override
-  Widget buildContent(BuildContext context) => Markdown(
+  State<StatefulWidget> createState() => _TemplateDetailTabState();
+}
+
+class _TemplateDetailTabState extends State<TemplateDetailTab> {
+  @override
+  Widget build(BuildContext context) => Markdown(
     styleSheet: MeynMarkdownStyleSheet(context),
     data: createMarkdown(),
     onTapLink: (text, href, title) {
@@ -27,7 +32,9 @@ class TemplateDetailTab extends ClosableTab {
           orElse: () => throw Exception('Template not found: $templateName'),
         );
         var tabService = GetIt.I.get<TabService>();
-        tabService.addOrSelectTab(TemplateDetailTab(template));
+        tabService.addOrSelectTab(
+          TemplateDetailTab(template: template, tabKey: UniqueKey()),
+        );
       } else {
         launchUrl(uri);
       }
@@ -35,6 +42,7 @@ class TemplateDetailTab extends ClosableTab {
   );
 
   String createMarkdown() {
+    var template = widget.template;
     final buffer = StringBuffer();
 
     buffer.writeln('# ${template.name} Manifest');

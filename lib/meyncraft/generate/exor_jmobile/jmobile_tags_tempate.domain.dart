@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:meyncraft/meyncraft/generate/exor_jmobile/data_type.dart';
+import 'package:meyncraft/meyncraft/generate/generator.domain.dart';
+import 'package:meyncraft/meyncraft/generate/generator.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
@@ -9,10 +12,159 @@ import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart'
 import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/template/template.domain.dart';
+import 'package:meyncraft/meyncraft/template/template.service.dart';
 import 'package:xml/xml.dart';
+
+class JMobileTagsTemplate implements Template {
+  @override
+  final String name = 'JMobileTags';
+  @override
+  final String description = 'Creates JMobile tags from a Sysmac project file.';
+
+  @override
+  final String? gitRepository = null;
+
+  @override
+  final String? documentation = null;
+
+  @override
+  final String? generatedFileInstructions =
+      'You can import the generated tag file in JMobile:\n'
+      '* Open an existing JMobile project\n'
+      '* In the "Project view" double click on Configuration \\ Tags\n'
+      '* Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list\n'
+      '* Click on the "import dictionary button" in the toolbar\n'
+      '* Select the "Tag editor exported xml" row from the import dialog and click ok\n'
+      '* Select the generated file as the "watched dictionary file"\n'
+      '* Click on "Ok"\n'
+      '* In the "Project view" remove old dictionaries (but not dictionaries that contain internal tags)\n'
+      '* Note that new tags in dictionaries will need to by added to the tags by finding them in the "Tags" view'
+      ', selecting them and "Adding to tags" with a right click\n'
+      '* Note that pages that use tags that no longer exist need to be fixed. '
+      'These can be found with the project validator: Menu \\ Run \\ Run Project Validator. '
+      'When these tags are no longer used you can remove them from the tags.\n';
+
+  @override
+  final List<Parameter> parameters = [sysmacProjectFileParameter];
+
+  @override
+  final List<Generator> generators = [JMobileTagsGenerator()];
+
+  @override
+  List<String> tags = ['jmobile', 'exor', 'sysmac', 'tags'];
+}
+
+class JMobileTagsGenerator implements Generator {
+  @override
+  String get source => 'Dart code: $runtimeType';
+
+  @override
+  final String target =
+      '{{removeFileExtension(sysmacProjectFilePath)}}-JMobile-Tags.xml';
+
+  JMobileTagsGenerator();
+
+  @override
+  Future<MarkdownReport> generate(
+    Template template,
+    Map<String, dynamic> parameterValues,
+    MarkdownReport outputReport,
+  ) async {
+    var sysmacProjectFilePath =
+        parameterValues[sysmacProjectFileParameter.name];
+    if (sysmacProjectFilePath == null) {
+      throw Exception('Missing parameter: ${sysmacProjectFileParameter.name}');
+    }
+    var sysmacProject = await MeynSysmacProject.loadFromFile(
+      File(sysmacProjectFilePath),
+    );
+    int generatedFiles = 0;
+    try {
+      outputReport = await writeJMobileTagsFile(sysmacProject, outputReport);
+      generatedFiles++;
+    } on Exception catch (e, stackTrace) {
+      var errorLink = GenerationErrorLink(
+        template: template,
+        generator: this,
+        message: 'Error generating JMobile tags file',
+        stackTrace: stackTrace,
+      );
+      outputReport.append('* ${errorLink.toMarkdown()}');
+    }
+    if (generatedFiles == 0) {
+      outputReport.append('* No files generated');
+    }
+    outputReport.append(
+      '* Generated $generatedFiles files. [Click here for more information](meyncraft://test)',
+    );
+    return outputReport;
+  }
+
+  /// creates an xml file with [ExorTag]s generated from a Sysmac project file
+  /// to be imported by JMobile
+  Future<MarkdownReport> writeJMobileTagsFile(
+    MeynSysmacProject sysmacProject,
+    MarkdownReport outputReport,
+  ) async {
+    var tags = createTags(sysmacProject);
+    outputReport.append('* Found ${tags.length} Exor-JMobile tags\n');
+    String formattedXml = createFormattedTagsXml(tags);
+    var outputFile = createOutputFile(
+      sysmacProject,
+      '-JMobileTags.xml',
+    ); //TODO use target
+    await outputFile.create();
+    await outputFile.writeAsString(formattedXml);
+    outputReport.append(
+      '* Created file: [${outputFile.path}](${outputFile.uri})\n',
+    );
+    // results.close();
+    //TODO how to add instructions what to do with the generated file
+    // logger.info('     You can import the tags in JMobile:');
+    // logger.info('     * Open an existing JMobile project');
+    // logger.info(
+    //   '     * Open the tags window from the left menu Configuration \\ Tags',
+    // );
+    // logger.info(
+    //   '     * Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list',
+    // );
+    // logger.info('     * Click on the "import dictionary button" in the toolbar');
+    // logger.info(
+    //   '     * Select the "Tag editor exported xml" row from the import dialog and click ok',
+    // );
+    // logger.info('     * Select the generated ${outputFile.path} file');
+    return outputReport;
+  }
+}
+
+class GenerationErrorLink {
+  final Template template;
+  final Generator generator;
+  final String message;
+  final StackTrace stackTrace;
+
+  GenerationErrorLink({
+    required this.template,
+    required this.generator,
+    required this.message,
+    required this.stackTrace,
+  });
+
+  String toMarkdown() =>
+      '[❌ **FAILED**: $message](meyncraft://generationerror?$parameters)';
+
+  String get parameters => [
+    'template=${Uri.encodeComponent(template.name)}',
+    'source=${Uri.encodeComponent(generator.source)}',
+    'message=${Uri.encodeComponent(message)})'
+        'stackTrace=${Uri.encodeComponent(stackTrace.toString())}',
+  ].join('&');
+}
 
 /// creates an xml file with [ExorTag]s generated from a Sysmac project file
 /// to be imported by JMobile
+@Deprecated('Use the JMobileTagsGenerator instead')
 Future<void> writeJMobileTagsFile(MeynSysmacProject sysmacProject) async {
   var tags = createTags(sysmacProject);
   logger.info('Found ${tags.length} Exor-JMobile tags');

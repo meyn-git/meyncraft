@@ -30,7 +30,7 @@ class SysmacProject {
   SysmacProject(this.archive);
 
   static Future<SysmacProject> create(File file) async {
-    var sysmacProjectArchive = await SysmacProjectArchive.create(file);
+    var sysmacProjectArchive = await SysmacProjectArchive.loadFromFile(file);
     return SysmacProject(sysmacProjectArchive);
   }
 }

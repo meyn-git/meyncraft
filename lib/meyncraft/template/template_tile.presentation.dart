@@ -6,9 +6,9 @@ import 'package:meyncraft/meyncraft/template/template.domain.dart';
 import 'package:meyncraft/meyncraft/template/template_detail_tab.presentation.dart';
 
 class TemplateTile extends StatefulWidget {
-  const TemplateTile(this.templateManifest, {super.key});
+  const TemplateTile(this.template, {super.key});
 
-  final TemplateManifest templateManifest;
+  final Template template;
 
   @override
   State<TemplateTile> createState() => _TemplateTileState();
@@ -17,12 +17,12 @@ class TemplateTile extends StatefulWidget {
 class _TemplateTileState extends State<TemplateTile> {
   final _tabService = GetIt.I.get<TabService>();
 
-  List<TemplateManifest> get selectedTemplates =>
+  List<Template> get selectedTemplates =>
       GetIt.I<SelectedTemplateService>().selectedTemplates;
 
-  TemplateManifest get templateManifest => widget.templateManifest;
+  Template get template => widget.template;
 
-  bool get isSelected => selectedTemplates.contains(templateManifest);
+  bool get isSelected => selectedTemplates.contains(template);
 
   @override
   Widget build(BuildContext context) => Row(
@@ -35,8 +35,8 @@ class _TemplateTileState extends State<TemplateTile> {
       ),
       Expanded(
         child: ListTile(
-          title: Text(templateManifest.name),
-          subtitle: Text(templateManifest.description),
+          title: Text(template.name),
+          subtitle: Text(template.description),
           onTap: addOrSelectInfoTab,
         ),
       ),
@@ -45,13 +45,15 @@ class _TemplateTileState extends State<TemplateTile> {
 
   void toggleTemplateSelection() {
     if (isSelected) {
-      GetIt.I<SelectedTemplateService>().remove(templateManifest);
+      GetIt.I<SelectedTemplateService>().remove(template);
     } else {
-      GetIt.I<SelectedTemplateService>().add(templateManifest);
+      GetIt.I<SelectedTemplateService>().add(template);
     }
   }
 
   void addOrSelectInfoTab() {
-    _tabService.addOrSelectTab(TemplateDetailTab(templateManifest));
+    _tabService.addOrSelectTab(
+      TemplateDetailTab(template: template, tabKey: UniqueKey()),
+    );
   }
 }

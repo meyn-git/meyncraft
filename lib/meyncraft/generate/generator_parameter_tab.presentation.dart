@@ -12,14 +12,21 @@ import 'package:meyncraft/meyncraft/template/template_detail_tab.presentation.da
 import 'package:url_launcher/url_launcher.dart';
 
 class GeneratorParametersTab extends ClosableTab {
-  final List<TemplateManifest> templatesToGenerate;
+  final List<Template> templatesToGenerate;
 
-  GeneratorParametersTab(this.templatesToGenerate)
-    : super(tabName: 'Generator Parameters');
+  const GeneratorParametersTab({
+    required this.templatesToGenerate,
+    required super.tabKey,
+  }) : super(tabName: 'Generator Parameters');
 
   @override
-  Widget buildContent(BuildContext context) =>
-      ParameterForm(templatesToGenerate, this);
+  State<StatefulWidget> createState() => _GeneratorParametersTabState();
+}
+
+class _GeneratorParametersTabState extends State<GeneratorParametersTab> {
+  @override
+  Widget build(BuildContext context) =>
+      ParameterForm(widget.templatesToGenerate, widget);
 }
 
 class ParameterForm extends StatefulWidget {
@@ -145,7 +152,12 @@ class _ParameterFormState extends State<ParameterForm> {
           orElse: () => throw Exception('Template not found: $templateName'),
         );
         var tabService = GetIt.I.get<TabService>();
-        tabService.addOrSelectTab(TemplateDetailTab(template));
+        tabService.addOrSelectTab(
+          TemplateDetailTab(
+            template: template,
+            tabKey: const ValueKey('TemplateDetailTab'),
+          ),
+        );
       } else {
         launchUrl(uri);
       }

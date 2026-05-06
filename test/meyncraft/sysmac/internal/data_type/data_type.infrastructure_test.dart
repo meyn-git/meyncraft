@@ -99,7 +99,7 @@ Future<void> main() async {
   group('function: createDataTypes', () {
     test('created dataType leaf paths should be correct', () async {
       File file = SysmacProjectTestResource().file;
-      var sysmacProjectArchive = await SysmacProjectArchive.create(file);
+      var sysmacProjectArchive = await SysmacProjectArchive.loadFromFile(file);
       var dataTypes = createDataTypes(sysmacProjectArchive);
       var dataTypeLeafPaths = dataTypes.findAllNodePaths(leafPathsFinder());
       dataTypeLeafPaths.length.should.be(56728);
@@ -107,7 +107,7 @@ Future<void> main() async {
 
     test('should not contain HMI dataTypes', () async {
       File file = SysmacProjectTestResource().file;
-      var sysmacProjectArchive = await SysmacProjectArchive.create(file);
+      var sysmacProjectArchive = await SysmacProjectArchive.loadFromFile(file);
       var dataTypes = createDataTypes(sysmacProjectArchive);
       var dataTypePath = dataTypes.findFirstNodePath(
         namePathFinder(['Safety', 'sEvent', 'iCircleanEstpCord']),

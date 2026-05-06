@@ -20,7 +20,7 @@ Future<void> main() async {
 
     setUp(() async {
       await getIt.reset();
-      sysmacProject = await MeynSysmacProject.create(
+      sysmacProject = await MeynSysmacProject.loadFromFile(
         SysmacProjectTestResource().file,
       );
       if (!getIt.isRegistered<Logger>()) {

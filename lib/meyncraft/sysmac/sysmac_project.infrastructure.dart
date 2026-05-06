@@ -17,7 +17,7 @@ class SysmacProjectArchive {
   SysmacProjectArchive._(this.file, this.archive)
     : projectIndexXml = ProjectIndexXml(file, archive);
 
-  static Future<SysmacProjectArchive> create(File file) async {
+  static Future<SysmacProjectArchive> loadFromFile(File file) async {
     _validateExtension(file);
     _validateExists(file);
     var archive = await readArchive(file);

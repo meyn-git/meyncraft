@@ -395,7 +395,7 @@ void main() {
 
     test("IoAttribute.findCall should return a correct value", () async {
       var sysmacProjectFile = SysmacProjectTestResource();
-      var sysmacProject = await MeynSysmacProject.create(
+      var sysmacProject = await MeynSysmacProject.loadFromFile(
         sysmacProjectFile.file,
       );
 
@@ -411,7 +411,7 @@ void main() {
       "IoAttribute.findCallParameter should return a correct value",
       () async {
         var sysmacProjectFile = SysmacProjectTestResource();
-        var sysmacProject = await MeynSysmacProject.create(
+        var sysmacProject = await MeynSysmacProject.loadFromFile(
           sysmacProjectFile.file,
         );
 
@@ -439,7 +439,7 @@ void main() {
       "IoAttribute.findIoVariables(EventGlobal.CropperBrushMtr.MtrProt) should return a correct value",
       () async {
         var sysmacProjectFile = SysmacProjectTestResource();
-        var sysmacProject = await MeynSysmacProject.create(
+        var sysmacProject = await MeynSysmacProject.loadFromFile(
           sysmacProjectFile.file,
         );
 
@@ -475,7 +475,7 @@ void main() {
       "IoAttribute.findIoVariables(EventGlobal.CropperBrushMtr.MtrProt) should return a correct value",
       () async {
         var sysmacProjectFile = SysmacProjectTestResource();
-        var sysmacProject = await MeynSysmacProject.create(
+        var sysmacProject = await MeynSysmacProject.loadFromFile(
           sysmacProjectFile.file,
         );
 
