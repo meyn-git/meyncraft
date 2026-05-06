@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:meyncraft/meyncraft/generate/exor_jmobile/events_file.service.dart';
+import 'package:meyncraft/meyncraft/generate/exor_jmobile/jmobile_events_tempate.domain.dart';
 import 'package:meyncraft/meyncraft/generate/exor_jmobile/jmobile_tags_tempate.domain.dart';
 import 'package:meyncraft/meyncraft/generate/reports/isa88_report_service.dart';
 import 'package:meyncraft/meyncraft/generate/sysmac/event_array_code_file.service.dart';

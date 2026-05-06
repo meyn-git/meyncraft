@@ -79,10 +79,9 @@ class JMobileTagsGenerator implements Generator {
     var sysmacProject = await MeynSysmacProject.loadFromFile(
       File(sysmacProjectFilePath),
     );
-    int generatedFiles = 0;
+    var generatedFiles = <File>[];
     try {
-      outputReport = await writeJMobileTagsFile(sysmacProject, outputReport);
-      generatedFiles++;
+      generatedFiles = await writeJMobileTagsFile(sysmacProject, outputReport);
     } on Exception catch (e, stackTrace) {
       var errorLink = GenerationErrorLink(
         template: template,
@@ -92,18 +91,18 @@ class JMobileTagsGenerator implements Generator {
       );
       outputReport.append('* ${errorLink.toMarkdown()}');
     }
-    if (generatedFiles == 0) {
+    if (generatedFiles.isEmpty) {
       outputReport.append('* No files generated');
     }
     outputReport.append(
-      '* Generated $generatedFiles files. [Click here for instructions on how to use the generated files.](meyncraft://test)',
+      '* Generated ${generatedFiles.length} files. [Click here for instructions on how to use the generated files.](meyncraft://test)',
     );
     return outputReport;
   }
 
   /// creates an xml file with [ExorTag]s generated from a Sysmac project file
   /// to be imported by JMobile
-  Future<MarkdownReport> writeJMobileTagsFile(
+  Future<List<File>> writeJMobileTagsFile(
     MeynSysmacProject sysmacProject,
     MarkdownReport outputReport,
   ) async {
@@ -119,22 +118,7 @@ class JMobileTagsGenerator implements Generator {
     outputReport.append(
       '* Created file: [${outputFile.path}](${outputFile.uri})\n',
     );
-    // results.close();
-    //TODO how to add instructions what to do with the generated file
-    // logger.info('     You can import the tags in JMobile:');
-    // logger.info('     * Open an existing JMobile project');
-    // logger.info(
-    //   '     * Open the tags window from the left menu Configuration \\ Tags',
-    // );
-    // logger.info(
-    //   '     * Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list',
-    // );
-    // logger.info('     * Click on the "import dictionary button" in the toolbar');
-    // logger.info(
-    //   '     * Select the "Tag editor exported xml" row from the import dialog and click ok',
-    // );
-    // logger.info('     * Select the generated ${outputFile.path} file');
-    return outputReport;
+    return [outputFile];
   }
 }
 
@@ -164,7 +148,7 @@ class GenerationErrorLink {
 
 /// creates an xml file with [ExorTag]s generated from a Sysmac project file
 /// to be imported by JMobile
-@Deprecated('Use the JMobileTagsGenerator instead')
+@Deprecated('Use the JMobileTagsTemplate instead')
 Future<void> writeJMobileTagsFile(MeynSysmacProject sysmacProject) async {
   var tags = createTags(sysmacProject);
   logger.info('Found ${tags.length} Exor-JMobile tags');

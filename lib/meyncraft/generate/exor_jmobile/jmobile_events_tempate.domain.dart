@@ -2,11 +2,119 @@
 
 import 'dart:io';
 
+import 'package:meyncraft/meyncraft/generate/exor_jmobile/jmobile_tags_tempate.domain.dart';
+import 'package:meyncraft/meyncraft/generate/generator.domain.dart';
+import 'package:meyncraft/meyncraft/generate/generator.service.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/template/template.domain.dart';
+import 'package:meyncraft/meyncraft/template/template.service.dart';
 import 'package:xml/xml.dart';
 
+class JMobileEventsTemplate implements Template {
+  @override
+  final String name = 'JMobileEvents';
+
+  @override
+  final String description =
+      'Creates JMobile events from a Sysmac project file.';
+
+  @override
+  final String? documentation = null;
+
+  @override
+  final String? gitRepository = null;
+
+  @override
+  final String? generatedFileInstructions =
+      'You can import the generated event file in J-Mobile:\n'
+      '* Open an existing JMobile project\n'
+      '* Open the events window from the left menu Configuration \\ Alarms\n'
+      '* Click on the "import alarms button" in the toolbar\n'
+      '* Select the generated file\n'
+      '* Note that you must clear the existing runtime dynamic alarm files during downloading:\n'
+      '  * In download dialog, click on "Advanced"\n'
+      '  * Check "Delete runtime dynamic files"\n'
+      '  * Check "Alarms"\n';
+
+  @override
+  final List<Parameter> parameters = [sysmacProjectFileParameter];
+
+  @override
+  final List<Generator> generators = [JMobileEventsGenerator()];
+
+  @override
+  final List<String> tags = ['jmobile', 'exor', 'sysmac', 'events'];
+}
+
+class JMobileEventsGenerator implements Generator {
+  @override
+  String get source => 'Dart code: $runtimeType';
+
+  @override
+  final String target =
+      '{{removeFileExtension(sysmacProjectFilePath)}}-JMobile-Events.xml';
+
+  JMobileEventsGenerator();
+
+  @override
+  Future<MarkdownReport> generate(
+    Template template,
+    Map<String, dynamic> parameterValues,
+    MarkdownReport outputReport,
+  ) async {
+    var sysmacProjectFilePath =
+        parameterValues[sysmacProjectFileParameter.name];
+    if (sysmacProjectFilePath == null) {
+      throw Exception('Missing parameter: ${sysmacProjectFileParameter.name}');
+    }
+    var sysmacProject = await MeynSysmacProject.loadFromFile(
+      File(sysmacProjectFilePath),
+    );
+    List<File> generatedFiles = [];
+    try {
+      generatedFiles = await writeJMobileEventsFile(
+        sysmacProject,
+        outputReport,
+      );
+    } on Exception catch (e, stackTrace) {
+      var errorLink = GenerationErrorLink(
+        template: template,
+        generator: this,
+        message: 'Error generating JMobile tags file',
+        stackTrace: stackTrace,
+      );
+      outputReport.append('* ${errorLink.toMarkdown()}');
+    }
+    if (generatedFiles.isEmpty) {
+      outputReport.append('* No files generated');
+    }
+    outputReport.append(
+      '* Generated ${generatedFiles.length} files. [Click here for instructions on how to use the generated files.](meyncraft://test)',
+    );
+    return outputReport;
+  }
+
+  Future<List<File>> writeJMobileEventsFile(
+    MeynSysmacProject sysmacProject,
+    MarkdownReport outputReport,
+  ) async {
+    var events = sysmacProject.events;
+    outputReport.append('* Found ${events.length} Sysmac events\n');
+    //TODO add link in case there are warnings
+    String formattedXml = createFormattedEventsXml(events);
+    var outputFile = createOutputFile(sysmacProject, '-JMobileEvents.xml');
+    await outputFile.create();
+    await outputFile.writeAsString(formattedXml);
+    outputReport.append(
+      '* Created file: [${outputFile.path}](${outputFile.uri})\n',
+    );
+    return [outputFile];
+  }
+}
+
+@Deprecated('Use the JMobileEventsTemplate instead')
 Future<void> writeJMobileEventsFile(MeynSysmacProject sysmacProject) async {
   var events = sysmacProject.events;
   String formattedXml = createFormattedEventsXml(events);

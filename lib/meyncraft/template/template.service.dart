@@ -1,3 +1,4 @@
+import 'package:meyncraft/meyncraft/generate/exor_jmobile/jmobile_events_tempate.domain.dart';
 import 'package:meyncraft/meyncraft/generate/exor_jmobile/jmobile_tags_tempate.domain.dart';
 import 'package:meyncraft/meyncraft/generate/generator.domain.dart';
 import 'package:meyncraft/meyncraft/template/template.domain.dart';
@@ -5,28 +6,7 @@ import 'package:meyncraft/meyncraft/template/template.domain.dart';
 List<Template> allTemplates() {
   return [
     JMobileTagsTemplate(),
-
-    TemplateManifest(
-      name: 'JMobileEvents',
-      description: 'Creates JMobile events from a Sysmac project file.',
-      generatedFileInstructions:
-          'You can import the generated event file in J-Mobile:\n'
-          '* Open an existing JMobile project\n'
-          '* Open the events window from the left menu Configuration \\ Alarms\n'
-          '* Click on the "import alarms button" in the toolbar\n'
-          '* Select the generated file\n'
-          '* Note that you must clear the existing runtime dynamic alarm files during downloading:\n'
-          '  * In download dialog, click on "Advanced"\n'
-          '  * Check "Delete runtime dynamic files"\n'
-          '  * Check "Alarms"\n',
-      parameters: [sysmacProjectFileParameter],
-      generators: [
-        CodeTemplateGenerator(
-          target: '{{sysmacProjectFilePath}}-JMobile-Events.xml',
-        ),
-      ],
-      tags: ['jmobile', 'exor', 'sysmac', 'events'],
-    ),
+    JMobileEventsTemplate(),
 
     TemplateManifest(
       name: 'SysmacEventGlobalArray',

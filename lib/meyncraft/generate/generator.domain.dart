@@ -10,10 +10,15 @@ abstract class Generator {
   /// * a class that generates the content programmatically.
   String get source;
 
-  /// Path where the generated file should be placed. Can include placeholders for parameters, e.g. "src/{{name}}.dart"
+  /// Path where the generated file should be placed.
+  /// Can include placeholders for parameters, e.g. "src/{{name}}.dart"
   String get target;
 
-  /// Optional condition that must be met for this mapping to be applied, e.g. "{{includeTests == true}}"
+  /// Optional instructions (in markdown format) on how to use the generated file
+  //TODO String? get targetInstructions;
+
+  /// Optional condition that must be met
+  /// for this mapping to be applied, e.g. "{{includeTests == true}}"
   // TODO String? get when;
 
   Future<MarkdownReport> generate(
@@ -70,4 +75,7 @@ class CodeTemplateGenerator implements Generator {
     return MarkdownReport()
       ..append('CodeTemplateGenerator is deprecated and should not be used\n');
   }
+
+  // @override
+  // TODO final String?  targetInstructions = null;
 }
