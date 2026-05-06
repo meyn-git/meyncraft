@@ -2,18 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/generate/exor_jmobile/events_file.service.dart';
 import 'package:meyncraft/meyncraft/generate/exor_jmobile/jmobile_tags_tempate.domain.dart';
-import 'package:meyncraft/meyncraft/generate/generator_parameter_tab.presentation.dart';
-import 'package:meyncraft/meyncraft/generate/generator_result_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/generate/reports/isa88_report_service.dart';
 import 'package:meyncraft/meyncraft/generate/sysmac/event_array_code_file.service.dart';
 import 'package:meyncraft/meyncraft/generate/sysmac/fb_check_packml_monitor_service.dart';
 import 'package:meyncraft/meyncraft/generate/reports/event_report.service.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
-import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
 import 'package:meyncraft/meyncraft/template/template.domain.dart';
 
 Future<void> generateOld(String sysmacProjectFilePath) async {

@@ -1,10 +1,7 @@
 import 'dart:async';
 
-import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/generate/generator.service.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
 import 'package:meyncraft/meyncraft/template/template.domain.dart';
-import 'package:meyncraft/meyncraft/template/template.service.dart';
 
 abstract class Generator {
   /// A human readable description of what the generator uses as a source

@@ -6,12 +6,8 @@ import 'package:meyncraft/meyncraft/template/template.service.dart';
 import 'package:meyncraft/meyncraft/template/template_tile.presentation.dart';
 
 class AllTemplatesTab extends ClosableTab {
-  const AllTemplatesTab()
-    : super(
-        tabName: 'All Templates',
-        closable: false,
-        tabKey: const ValueKey('AllTemplatesTab'),
-      );
+  const AllTemplatesTab({super.key})
+    : super(tabName: 'All Templates', closable: false);
 
   @override
   State<StatefulWidget> createState() => _AllTemplatesTabState();

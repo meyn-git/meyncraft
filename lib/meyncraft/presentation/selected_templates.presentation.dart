@@ -90,10 +90,7 @@ class SelectedTemplatesPanel extends StatelessWidget {
       await selectSysmacFileAndGenerate(selectedTemplates);
     } else {
       _tabService.addTab(
-        GeneratorParametersTab(
-          templatesToGenerate: selectedTemplates,
-          tabKey: UniqueKey(),
-        ),
+        GeneratorParametersTab(templatesToGenerate: selectedTemplates),
       );
     }
   }
@@ -109,7 +106,7 @@ Future<void> selectSysmacFileAndGenerate(
   var parameters = {sysmacProjectFileParameter.name: sysmacProjectFilePath};
   var outputReport = MarkdownReport();
   var tabService = GetIt.I.get<TabService>();
-  tabService.addTab(GeneratorResultTab(outputReport, tabKey: UniqueKey()));
+  tabService.addTab(GeneratorResultTab(outputReport));
   await generate(selectedTemplates, parameters, outputReport);
 }
 

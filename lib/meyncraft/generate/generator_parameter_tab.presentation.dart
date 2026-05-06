@@ -14,10 +14,8 @@ import 'package:url_launcher/url_launcher.dart';
 class GeneratorParametersTab extends ClosableTab {
   final List<Template> templatesToGenerate;
 
-  const GeneratorParametersTab({
-    required this.templatesToGenerate,
-    required super.tabKey,
-  }) : super(tabName: 'Generator Parameters');
+  const GeneratorParametersTab({super.key, required this.templatesToGenerate})
+    : super(tabName: 'Generator Parameters');
 
   @override
   State<StatefulWidget> createState() => _GeneratorParametersTabState();
@@ -152,12 +150,7 @@ class _ParameterFormState extends State<ParameterForm> {
           orElse: () => throw Exception('Template not found: $templateName'),
         );
         var tabService = GetIt.I.get<TabService>();
-        tabService.addOrSelectTab(
-          TemplateDetailTab(
-            template: template,
-            tabKey: const ValueKey('TemplateDetailTab'),
-          ),
-        );
+        tabService.addOrSelectTab(TemplateDetailTab(template: template));
       } else {
         launchUrl(uri);
       }

@@ -10,7 +10,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class TemplateDetailTab extends ClosableTab {
   final Template template;
-  TemplateDetailTab({required this.template, required super.tabKey})
+  TemplateDetailTab({super.key, required this.template})
     : super(tabName: template.name, closable: true);
 
   @override
@@ -32,9 +32,7 @@ class _TemplateDetailTabState extends State<TemplateDetailTab> {
           orElse: () => throw Exception('Template not found: $templateName'),
         );
         var tabService = GetIt.I.get<TabService>();
-        tabService.addOrSelectTab(
-          TemplateDetailTab(template: template, tabKey: UniqueKey()),
-        );
+        tabService.addOrSelectTab(TemplateDetailTab(template: template));
       } else {
         launchUrl(uri);
       }

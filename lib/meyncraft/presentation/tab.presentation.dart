@@ -6,11 +6,7 @@ abstract class ClosableTab extends StatefulWidget {
   final String tabName;
   final bool closable;
 
-  const ClosableTab({
-    required Key tabKey,
-    required this.tabName,
-    this.closable = true,
-  }) : super(key: tabKey);
+  const ClosableTab({super.key, required this.tabName, this.closable = true});
 }
 
 class ClosableTabsView extends StatefulWidget {

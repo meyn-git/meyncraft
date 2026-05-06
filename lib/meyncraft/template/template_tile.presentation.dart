@@ -52,8 +52,6 @@ class _TemplateTileState extends State<TemplateTile> {
   }
 
   void addOrSelectInfoTab() {
-    _tabService.addOrSelectTab(
-      TemplateDetailTab(template: template, tabKey: UniqueKey()),
-    );
+    _tabService.addOrSelectTab(TemplateDetailTab(template: template));
   }
 }

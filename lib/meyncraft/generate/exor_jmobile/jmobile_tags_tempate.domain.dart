@@ -96,7 +96,7 @@ class JMobileTagsGenerator implements Generator {
       outputReport.append('* No files generated');
     }
     outputReport.append(
-      '* Generated $generatedFiles files. [Click here for more information](meyncraft://test)',
+      '* Generated $generatedFiles files. [Click here for instructions on how to use the generated files.](meyncraft://test)',
     );
     return outputReport;
   }

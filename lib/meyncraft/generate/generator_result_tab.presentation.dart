@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:get_it/get_it.dart';
@@ -14,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 class GeneratorResultTab extends ClosableTab {
   final MarkdownReport outputReport;
 
-  const GeneratorResultTab(this.outputReport, {required super.tabKey})
+  const GeneratorResultTab(this.outputReport, {super.key})
     : super(tabName: 'Generator Results');
 
   @override
@@ -42,9 +40,7 @@ class _GeneratorResultTabState extends State<GeneratorResultTab> {
           orElse: () => throw Exception('Template not found: $templateName'),
         );
         var tabService = GetIt.I.get<TabService>();
-        tabService.addOrSelectTab(
-          TemplateDetailTab(template: template, tabKey: UniqueKey()),
-        );
+        tabService.addOrSelectTab(TemplateDetailTab(template: template));
       } else {
         launchUrl(uri);
       }
