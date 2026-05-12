@@ -6,7 +6,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
-import 'package:meyncraft/meyncraft/style/markdown_style_sheet.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/style/markdown_style_sheet.presentation.dart';
 import 'package:meyncraft/meyncraft/template/template.domain.dart';
 import 'package:meyncraft/meyncraft/template/template_detail_tab.presentation.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,7 +15,7 @@ class GeneratorParametersTab extends ClosableTab {
   final List<Template> templatesToGenerate;
 
   const GeneratorParametersTab({super.key, required this.templatesToGenerate})
-    : super(tabName: 'Generator Parameters');
+    : super(tabTitle: 'Generator Parameters');
 
   @override
   State<StatefulWidget> createState() => _GeneratorParametersTabState();

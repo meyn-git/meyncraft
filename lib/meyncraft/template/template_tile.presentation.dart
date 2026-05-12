@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/presentation/selected_templates.service.dart';
+import 'package:meyncraft/meyncraft/template/selected_templates.service.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
 import 'package:meyncraft/meyncraft/template/template.domain.dart';
 import 'package:meyncraft/meyncraft/template/template_detail_tab.presentation.dart';

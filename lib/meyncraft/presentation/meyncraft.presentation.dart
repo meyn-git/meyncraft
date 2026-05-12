@@ -1,10 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:meyncraft/meyncraft/generate/generator.service.dart';
+import 'package:meyncraft/meyncraft/template/generate/generator.service.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/presentation/selected_templates.presentation.dart';
+import 'package:meyncraft/meyncraft/template/selected_templates.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
-import 'package:meyncraft/meyncraft/style/theme.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/style/theme.presentation.dart';
 
 class MeynCraft extends StatefulWidget {
   final List<String> args;

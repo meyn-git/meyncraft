@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
-import 'package:meyncraft/meyncraft/style/markdown_style_sheet.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/style/markdown_style_sheet.presentation.dart';
 import 'package:meyncraft/meyncraft/template/template.domain.dart';
 import 'package:meyncraft/meyncraft/template/template.service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,7 +11,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 class TemplateDetailTab extends ClosableTab {
   final Template template;
   TemplateDetailTab({super.key, required this.template})
-    : super(tabName: template.name, closable: true);
+    : super(tabTitle: template.name, closable: true);
 
   @override
   State<StatefulWidget> createState() => _TemplateDetailTabState();
@@ -51,13 +51,6 @@ class _TemplateDetailTabState extends State<TemplateDetailTab> {
     buffer.writeln(template.description);
     buffer.writeln();
 
-    if (template.generatedFileInstructions != null) {
-      buffer.writeln('## Generated File Instructions');
-      buffer.writeln();
-      buffer.writeln(template.generatedFileInstructions!);
-      buffer.writeln();
-    }
-
     if (template.gitRepository != null) {
       buffer.writeln('## Git Repository');
       buffer.writeln();
@@ -95,14 +88,15 @@ class _TemplateDetailTabState extends State<TemplateDetailTab> {
 
     if (template.generators.isNotEmpty) {
       buffer.writeln('## Generators');
-      buffer.writeln();
+
       for (final generator in template.generators) {
-        var texts = [
-          ' source: ${generator.source}',
-          ' target: ${generator.target}',
-          //TODO if (template.when != null) ' when: ${template.when}',
-        ];
-        buffer.writeln("* ${texts.join('\\\n  ')}");
+        buffer.writeln('* Source: ${generator.source}');
+        buffer.writeln('* Output path: ${generator.outputPath}');
+        if (generator.outputInstructions != null) {
+          buffer.writeln(
+            '* Output file instructions: ${generator.outputInstructions!.replaceAll('\n', '\\\n  ')}',
+          );
+        }
       }
     }
 

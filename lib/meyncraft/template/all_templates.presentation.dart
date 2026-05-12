@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/presentation/selected_templates.service.dart';
+import 'package:meyncraft/meyncraft/template/selected_templates.service.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
 import 'package:meyncraft/meyncraft/template/template.service.dart';
 import 'package:meyncraft/meyncraft/template/template_tile.presentation.dart';
 
 class AllTemplatesTab extends ClosableTab {
   const AllTemplatesTab({super.key})
-    : super(tabName: 'All Templates', closable: false);
+    : super(tabTitle: 'All Templates', closable: false);
 
   @override
   State<StatefulWidget> createState() => _AllTemplatesTabState();

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:meyncraft/meyncraft/generate/exor_jmobile/data_type.dart';
-import 'package:meyncraft/meyncraft/generate/generator.domain.dart';
-import 'package:meyncraft/meyncraft/generate/generator.service.dart';
+import 'package:meyncraft/meyncraft/presentation/markdown_tab.presentation.dart';
+import 'package:meyncraft/meyncraft/template/custom/exor_jmobile/exor_data_type.domain.dart';
+import 'package:meyncraft/meyncraft/template/generate/generator.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
@@ -13,7 +13,6 @@ import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dar
 import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/template/template.domain.dart';
-import 'package:meyncraft/meyncraft/template/template.service.dart';
 import 'package:xml/xml.dart';
 
 class JMobileTagsTemplate implements Template {
@@ -27,23 +26,6 @@ class JMobileTagsTemplate implements Template {
 
   @override
   final String? documentation = null;
-
-  @override
-  final String? generatedFileInstructions =
-      'You can import the generated tag file in JMobile:\n'
-      '* Open an existing JMobile project\n'
-      '* In the "Project view" double click on Configuration \\ Tags\n'
-      '* Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list\n'
-      '* Click on the "import dictionary button" in the toolbar\n'
-      '* Select the "Tag editor exported xml" row from the import dialog and click ok\n'
-      '* Select the generated file as the "watched dictionary file"\n'
-      '* Click on "Ok"\n'
-      '* In the "Project view" remove old dictionaries (but not dictionaries that contain internal tags)\n'
-      '* Note that new tags in dictionaries will need to by added to the tags by finding them in the "Tags" view'
-      ', selecting them and "Adding to tags" with a right click\n'
-      '* Note that pages that use tags that no longer exist need to be fixed. '
-      'These can be found with the project validator: Menu \\ Run \\ Run Project Validator. '
-      'When these tags are no longer used you can remove them from the tags.\n';
 
   @override
   final List<Parameter> parameters = [sysmacProjectFileParameter];
@@ -60,16 +42,31 @@ class JMobileTagsGenerator implements Generator {
   String get source => 'Dart code: $runtimeType';
 
   @override
-  final String target =
+  final String outputPath =
       '{{removeFileExtension(sysmacProjectFilePath)}}-JMobile-Tags.xml';
 
-  JMobileTagsGenerator();
+  @override
+  final String? outputInstructions =
+      'You can import the generated tag file in JMobile:\n'
+      '* Open an existing JMobile project\n'
+      '* In the "Project view" double click on Configuration \\ Tags\n'
+      '* Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list\n'
+      '* Click on the "import dictionary button" in the toolbar\n'
+      '* Select the "Tag editor exported xml" row from the import dialog and click ok\n'
+      '* Select the generated file as the "watched dictionary file"\n'
+      '* Click on "Ok"\n'
+      '* In the "Project view" remove old dictionaries (but not dictionaries that contain internal tags)\n'
+      '* Note that new tags in dictionaries will need to by added to the tags by finding them in the "Tags" view'
+      ', selecting them and "Adding to tags" with a right click\n'
+      '* Note that pages that use tags that no longer exist need to be fixed. '
+      'These can be found with the project validator: Menu \\ Run \\ Run Project Validator. '
+      'When these tags are no longer used you can remove them from the tags.\n';
 
   @override
-  Future<MarkdownReport> generate(
+  Future<DynamicMarkdownTabContent> generate(
     Template template,
     Map<String, dynamic> parameterValues,
-    MarkdownReport outputReport,
+    DynamicMarkdownTabContent outputReport,
   ) async {
     var sysmacProjectFilePath =
         parameterValues[sysmacProjectFileParameter.name];
@@ -104,7 +101,7 @@ class JMobileTagsGenerator implements Generator {
   /// to be imported by JMobile
   Future<List<File>> writeJMobileTagsFile(
     MeynSysmacProject sysmacProject,
-    MarkdownReport outputReport,
+    DynamicMarkdownTabContent outputReport,
   ) async {
     var tags = createTags(sysmacProject);
     outputReport.append('* Found ${tags.length} Exor-JMobile tags\n');

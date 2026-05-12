@@ -166,14 +166,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
-  flutter_markdown:
-    dependency: "direct main"
-    description:
-      name: flutter_markdown
-      sha256: "08fb8315236099ff8e90cb87bb2b935e0a724a3af1623000a9cec930468e0f27"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.7+1"
   flutter_markdown_plus:
     dependency: "direct main"
     description:
@@ -469,6 +461,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  template_engine:
+    dependency: "direct main"
+    description:
+      name: template_engine
+      sha256: "3651fa9f2dee55af4895021645698f8373ea8887650a34c70fe0766346f830fd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.3"
   term_glyph:
     dependency: transitive
     description:

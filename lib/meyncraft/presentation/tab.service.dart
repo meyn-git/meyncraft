@@ -42,7 +42,7 @@ class TabService extends ChangeNotifier {
     final existingTab = _tabs.firstWhereOrNull(
       (otherTab) =>
           tab.runtimeType == otherTab.runtimeType &&
-          tab.tabName == otherTab.tabName,
+          tab.tabTitle == otherTab.tabTitle,
     );
 
     if (existingTab == null) {

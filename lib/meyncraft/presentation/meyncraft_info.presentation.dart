@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:meyncraft/meyncraft/presentation/meyncraft_info.service.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.presentation.dart';
-import 'package:meyncraft/meyncraft/style/markdown_style_sheet.presentation.dart';
+import 'package:meyncraft/meyncraft/presentation/style/markdown_style_sheet.presentation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class MeynCraftInfoTab extends ClosableTab {
   const MeynCraftInfoTab({super.key})
-    : super(tabName: 'MeynCraft Info', closable: true);
+    : super(tabTitle: 'MeynCraft Info', closable: true);
 
   @override
   State<StatefulWidget> createState() => _MeynCraftInfoTabState();

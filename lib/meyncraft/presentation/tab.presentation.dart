@@ -3,10 +3,10 @@ import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
 
 abstract class ClosableTab extends StatefulWidget {
-  final String tabName;
+  final String tabTitle;
   final bool closable;
 
-  const ClosableTab({super.key, required this.tabName, this.closable = true});
+  const ClosableTab({super.key, required this.tabTitle, this.closable = true});
 }
 
 class ClosableTabsView extends StatefulWidget {
@@ -56,7 +56,7 @@ class _ClosableTabsViewState extends State<ClosableTabsView> {
                     ),
                     child: Row(
                       children: [
-                        Text(tab.tabName),
+                        Text(tab.tabTitle),
                         if (tab.closable) ...[
                           const SizedBox(width: 6),
                           GestureDetector(

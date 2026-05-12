@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
-import 'package:meyncraft/meyncraft/presentation/all_templates.presentation.dart';
+import 'package:meyncraft/meyncraft/template/all_templates.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/meyncraft.presentation.dart';
 import 'package:meyncraft/meyncraft/presentation/meyncraft_info.presentation.dart';
-import 'package:meyncraft/meyncraft/presentation/selected_templates.service.dart';
+import 'package:meyncraft/meyncraft/template/selected_templates.service.dart';
 import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
 import 'package:window_manager/window_manager.dart';
 

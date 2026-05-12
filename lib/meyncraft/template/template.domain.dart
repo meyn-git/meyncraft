@@ -1,4 +1,4 @@
-import 'package:meyncraft/meyncraft/generate/generator.domain.dart';
+import 'package:meyncraft/meyncraft/template/generate/generator.domain.dart';
 
 abstract class Template {
   /// Template name
@@ -6,9 +6,6 @@ abstract class Template {
 
   /// Human-readable description of what the template does
   String get description;
-
-  /// Optional instructions (optionally in markdown format) on how to use the generated file
-  String? get generatedFileInstructions;
 
   /// Optional URL of a git repository where the template is stored
   String? get gitRepository;
@@ -35,10 +32,6 @@ class TemplateManifest implements Template {
   @override
   final String description;
 
-  /// Optional instructions (optionally in markdown format) on how to use the generated file
-  @override
-  final String? generatedFileInstructions;
-
   /// Optional URL of a git repository where the template is stored
   @override
   final String? gitRepository;
@@ -61,7 +54,6 @@ class TemplateManifest implements Template {
   TemplateManifest({
     required this.name,
     required this.description,
-    this.generatedFileInstructions,
     this.gitRepository,
     this.documentation,
     this.parameters = const [],
@@ -95,3 +87,10 @@ class Parameter {
 }
 
 enum ParameterType { string, enumeration, boolean, number, relativePath, uri }
+
+final sysmacProjectFileParameter = Parameter(
+  name: 'sysmacProjectFilePath',
+  description: 'Path to the Sysmac project file to generate from',
+  type: ParameterType.relativePath,
+  required: true,
+);

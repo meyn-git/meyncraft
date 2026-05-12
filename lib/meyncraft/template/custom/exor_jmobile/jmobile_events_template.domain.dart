@@ -2,14 +2,13 @@
 
 import 'dart:io';
 
-import 'package:meyncraft/meyncraft/generate/exor_jmobile/jmobile_tags_tempate.domain.dart';
-import 'package:meyncraft/meyncraft/generate/generator.domain.dart';
-import 'package:meyncraft/meyncraft/generate/generator.service.dart';
+import 'package:meyncraft/meyncraft/presentation/markdown_tab.presentation.dart';
+import 'package:meyncraft/meyncraft/template/custom/exor_jmobile/jmobile_tags_tempate.domain.dart';
+import 'package:meyncraft/meyncraft/template/generate/generator.domain.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/meyncraft/template/template.domain.dart';
-import 'package:meyncraft/meyncraft/template/template.service.dart';
 import 'package:xml/xml.dart';
 
 class JMobileEventsTemplate implements Template {
@@ -27,18 +26,6 @@ class JMobileEventsTemplate implements Template {
   final String? gitRepository = null;
 
   @override
-  final String? generatedFileInstructions =
-      'You can import the generated event file in J-Mobile:\n'
-      '* Open an existing JMobile project\n'
-      '* Open the events window from the left menu Configuration \\ Alarms\n'
-      '* Click on the "import alarms button" in the toolbar\n'
-      '* Select the generated file\n'
-      '* Note that you must clear the existing runtime dynamic alarm files during downloading:\n'
-      '  * In download dialog, click on "Advanced"\n'
-      '  * Check "Delete runtime dynamic files"\n'
-      '  * Check "Alarms"\n';
-
-  @override
   final List<Parameter> parameters = [sysmacProjectFileParameter];
 
   @override
@@ -53,16 +40,26 @@ class JMobileEventsGenerator implements Generator {
   String get source => 'Dart code: $runtimeType';
 
   @override
-  final String target =
+  final String outputPath =
       '{{removeFileExtension(sysmacProjectFilePath)}}-JMobile-Events.xml';
 
-  JMobileEventsGenerator();
+  @override
+  final String? outputInstructions =
+      'You can import the generated event file in J-Mobile:\n'
+      '* Open an existing JMobile project\n'
+      '* Open the events window from the left menu Configuration \\ Alarms\n'
+      '* Click on the "import alarms button" in the toolbar\n'
+      '* Select the generated file\n'
+      '* Note that you must clear the existing runtime dynamic alarm files during downloading:\n'
+      '  * In download dialog, click on "Advanced"\n'
+      '  * Check "Delete runtime dynamic files"\n'
+      '  * Check "Alarms"\n';
 
   @override
-  Future<MarkdownReport> generate(
+  Future<DynamicMarkdownTabContent> generate(
     Template template,
     Map<String, dynamic> parameterValues,
-    MarkdownReport outputReport,
+    DynamicMarkdownTabContent outputReport,
   ) async {
     var sysmacProjectFilePath =
         parameterValues[sysmacProjectFileParameter.name];
@@ -98,7 +95,7 @@ class JMobileEventsGenerator implements Generator {
 
   Future<List<File>> writeJMobileEventsFile(
     MeynSysmacProject sysmacProject,
-    MarkdownReport outputReport,
+    DynamicMarkdownTabContent outputReport,
   ) async {
     var events = sysmacProject.events;
     outputReport.append('* Found ${events.length} Sysmac events\n');

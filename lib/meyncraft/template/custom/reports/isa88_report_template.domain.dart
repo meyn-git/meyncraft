@@ -1,11 +1,91 @@
 import 'dart:io';
 
-import 'package:meyncraft/meyncraft/generate/reports/event_report.service.dart';
+import 'package:meyncraft/meyncraft/presentation/markdown_tab.presentation.dart';
+import 'package:meyncraft/meyncraft/template/custom/exor_jmobile/jmobile_tags_tempate.domain.dart';
+import 'package:meyncraft/meyncraft/template/generate/generator.domain.dart';
+import 'package:meyncraft/meyncraft/template/custom/reports/event_report_template.domain.dart';
 import 'package:meyncraft/meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
 import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
+import 'package:meyncraft/meyncraft/template/template.domain.dart';
 
-Future<void> writeIsa88ReportFile(MeynSysmacProject sysmacProject) async {
+class Isa88ReportTemplate implements Template {
+  @override
+  final String name = 'Isa88Report';
+
+  @override
+  final String description =
+      'Generates an ISA 88 report from a Sysmac project.';
+
+  @override
+  final String? documentation = null;
+
+  @override
+  final String? gitRepository = null;
+
+  @override
+  final List<Parameter> parameters = [sysmacProjectFileParameter];
+
+  @override
+  final List<Generator> generators = [Isa88ReportGenerator()];
+
+  @override
+  final List<String> tags = ['sysmac', 'isa88', 'report'];
+}
+
+class Isa88ReportGenerator implements Generator {
+  @override
+  String get source => 'Dart code: $runtimeType';
+
+  @override
+  final String outputPath =
+      '{{removeFileExtension(sysmacProjectFilePath)}}-Isa88Report.csv';
+
+  @override
+  final String? outputInstructions =
+      'You can open the generated file e.g. for quick reference '
+      'using Excel or any other spreadsheet software.';
+
+  @override
+  Future<DynamicMarkdownTabContent> generate(
+    Template template,
+    Map<String, dynamic> parameterValues,
+    DynamicMarkdownTabContent outputReport,
+  ) async {
+    var sysmacProjectFilePath =
+        parameterValues[sysmacProjectFileParameter.name];
+    if (sysmacProjectFilePath == null) {
+      throw Exception('Missing parameter: ${sysmacProjectFileParameter.name}');
+    }
+    var sysmacProject = await MeynSysmacProject.loadFromFile(
+      File(sysmacProjectFilePath),
+    );
+    File? generatedFile;
+    try {
+      generatedFile = await writeIsa88ReportFile(sysmacProject);
+      outputReport.append(
+        '* Created: [${generatedFile.path}](${generatedFile.uri})',
+      );
+    } on Exception catch (e, stackTrace) {
+      var errorLink = GenerationErrorLink(
+        template: template,
+        generator: this,
+        message: 'Error generating JMobile tags file',
+        stackTrace: stackTrace,
+      );
+      outputReport.append('* ${errorLink.toMarkdown()}');
+    }
+    if (generatedFile == null) {
+      outputReport.append('* No files generated');
+    }
+    outputReport.append(
+      '* Generated 1 file. [Click here for instructions on how to use the generated files.](meyncraft://test)',
+    );
+    return outputReport;
+  }
+}
+
+Future<File> writeIsa88ReportFile(MeynSysmacProject sysmacProject) async {
   var outputFile = createOutputFile(sysmacProject, '-Isa88Report.csv');
   logger.info('Creating: ${outputFile.path}');
 
@@ -20,10 +100,7 @@ Future<void> writeIsa88ReportFile(MeynSysmacProject sysmacProject) async {
   await outputFile.create();
   await outputFile.writeAsString(report.toString());
 
-  logger.info('Created: ${outputFile.path}');
-  logger.info(
-    '     A file that can be opened with MS-Excel to quickly check the ISA88 structure of a Sysmac project',
-  );
+  return outputFile;
 }
 
 void write(
