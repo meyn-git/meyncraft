@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/code_type.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function_block/function_block.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/function_block/function_block.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/library/library.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/project_index.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/sysmac/internal/device/nj_plc/code_type.domain.dart';
+import 'package:meyncraft/sysmac/internal/device/nj_plc/function_block/function_block.domain.dart';
+import 'package:meyncraft/sysmac/internal/device/nj_plc/function_block/function_block.infrastructure.dart';
+import 'package:meyncraft/sysmac/internal/device/nj_plc/library/library.infrastructure.dart';
+import 'package:meyncraft/sysmac/project_index.infrastructure.dart';
+import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:shouldly/shouldly.dart';
 import 'package:xml/xml.dart';
 

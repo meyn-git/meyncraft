@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/identity/identity.service.dart';
+import 'package:meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyn_sysmac/identity/identity.service.dart';
 import 'package:shouldly/shouldly.dart';
 import 'package:petitparser/petitparser.dart';
 

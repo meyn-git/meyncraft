@@ -1,13 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/event/event.infrastructure.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/base_type/base_type.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/variable/variable.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/node.domain.dart';
+import 'package:meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyn_sysmac/event/event.infrastructure.dart';
+import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
+import 'package:meyncraft/sysmac/internal/base_type/base_type.domain.dart';
+import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
+import 'package:meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/sysmac/node.domain.dart';
 import 'package:shouldly/shouldly.dart';
 
 import '../../../test_resource.dart';

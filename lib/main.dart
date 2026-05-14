@@ -1,13 +1,12 @@
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/logger/logger.service.dart';
-import 'package:meyncraft/meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
-import 'package:meyncraft/meyncraft/template/all_templates.presentation.dart';
-import 'package:meyncraft/meyncraft/presentation/meyncraft.presentation.dart';
-import 'package:meyncraft/meyncraft/presentation/meyncraft_info.presentation.dart';
-import 'package:meyncraft/meyncraft/template/selected_templates.service.dart';
-import 'package:meyncraft/meyncraft/presentation/tab.service.dart';
+import 'package:meyncraft/logger/logger.service.dart';
+import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
+import 'package:meyncraft/meyncraft/meyncraft.presentation.dart';
+import 'package:meyncraft/meyncraft/about/meyncraft_about_tab.presentation.dart';
+import 'package:meyncraft/template/selected_templates.service.dart';
+import 'package:meyncraft/meyncraft/tab/tab.service.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main(List<String> args) async {
@@ -34,8 +33,8 @@ void main(List<String> args) async {
   getIt.registerSingleton<SelectedTemplateService>(SelectedTemplateService());
   getIt.registerSingleton<MeynSysmacProjectService>(MeynSysmacProjectService());
   getIt.registerSingleton<TabService>(TabService());
-  getIt.get<TabService>().addTab(AllTemplatesTab());
-  getIt.get<TabService>().addTab(MeynCraftInfoTab());
+  // TODO add later when there are many templates getIt.get<TabService>().addTab(AllTemplatesTab());
+  getIt.get<TabService>().addTab(MeynCraftAboutTab());
   getIt.get<TabService>().selectTab(0);
   runApp(MeynCraft(args));
 }

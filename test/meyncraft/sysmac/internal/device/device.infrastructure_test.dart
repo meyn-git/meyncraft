@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/device.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/device.infrastructure.dart';
-import 'package:meyncraft/meyncraft/sysmac/internal/device/nj_plc/nj_plc.domain.dart';
-import 'package:meyncraft/meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/sysmac/internal/device/device.domain.dart';
+import 'package:meyncraft/sysmac/internal/device/device.infrastructure.dart';
+import 'package:meyncraft/sysmac/internal/device/nj_plc/nj_plc.domain.dart';
+import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:shouldly/shouldly.dart';
 
 import '../../../../test_resource.dart';

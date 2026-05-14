@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meyncraft/meyncraft/template/custom/sysmac/event_default_attribute.service.dart';
+import 'package:meyncraft/template/custom/sysmac/event_default_attribute.service.dart';
 import 'package:shouldly/shouldly.dart';
 
 void main() {
