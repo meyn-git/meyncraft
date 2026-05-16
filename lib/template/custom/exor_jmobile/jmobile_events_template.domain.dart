@@ -107,8 +107,6 @@ class JMobileEventsGenerator implements Generator {
     //TODO add link in case there are warnings
     String formattedXml = createFormattedEventsXml(events);
 
-    throw Exception('Test');
-
     var outputFile = createOutputFile(sysmacProject, '-JMobileEvents.xml');
     await outputFile.create();
     await outputFile.writeAsString(formattedXml);
