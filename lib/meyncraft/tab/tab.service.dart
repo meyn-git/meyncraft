@@ -51,4 +51,33 @@ class TabService extends ChangeNotifier {
       selectTab(_tabs.indexOf(existingTab));
     }
   }
+
+  void selectPreviousTab() {
+    if (_tabs.length < 2) return;
+    var index = _selectedIndex - 1;
+    if (index < 0) {
+      index = tabs.length - 1;
+    }
+    selectTab(index);
+  }
+
+  void selectNextTab() {
+    if (_tabs.length < 2) return;
+    var index = _selectedIndex + 1;
+    if (index >= tabs.length) {
+      index = 0;
+    }
+    selectTab(index);
+  }
+
+  void closeCurrentTab() {
+    if (tabs.isEmpty) return;
+    closeTabIndex(_selectedIndex);
+  }
+
+  void closeAllTabs() {
+    for (var index = tabs.length; index >= 0; index--) {
+      closeTabIndex(index);
+    }
+  }
 }

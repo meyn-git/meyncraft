@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:meyncraft/meyncraft/command.domain.dart';
+import 'package:meyncraft/meyncraft/command.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
-import 'package:meyncraft/template/generate/generator_parameter_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator_result_tab.presentation.dart';
 import 'package:meyncraft/template/selected_templates.service.dart';
 import 'package:meyncraft/meyncraft/tab/tab.service.dart';
@@ -17,8 +18,6 @@ class SelectedTemplatesPanel extends StatelessWidget {
   SelectedTemplatesPanel({super.key});
 
   final selectedTemplateService = GetIt.I<SelectedTemplateService>();
-
-  final _tabService = GetIt.I.get<TabService>();
 
   @override
   Widget build(BuildContext context) => Column(
@@ -49,13 +48,7 @@ class SelectedTemplatesPanel extends StatelessWidget {
               // Bottom button
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: SizedBox(
-                  width: 200,
-                  child: ElevatedButton(
-                    onPressed: getParameterValues,
-                    child: const Text('Generate'),
-                  ),
-                ),
+                child: ElevatedCommandButton(Generate()),
               ),
             ],
           ),
@@ -63,25 +56,6 @@ class SelectedTemplatesPanel extends StatelessWidget {
       ),
     ],
   );
-
-  Future<void> getParameterValues() async {
-    var selectedTemplates = selectedTemplateService.selectedTemplates;
-    if (selectedTemplates.isEmpty) {
-      return;
-    }
-    var parameters = selectedTemplates.expand((t) => t.parameters).toSet();
-    if (parameters.isEmpty) {
-      return;
-    }
-    if (parameters.length == 1 &&
-        parameters.first.name == sysmacProjectFileParameter.name) {
-      await selectSysmacFileAndGenerate(selectedTemplates);
-    } else {
-      _tabService.addTab(
-        GeneratorParametersTab(templatesToGenerate: selectedTemplates),
-      );
-    }
-  }
 }
 
 // TODO replace the class above with this one when there are to many templates in the future

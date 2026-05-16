@@ -12,7 +12,7 @@ Future<DynamicMarkdownTabContent> generate(
 ) async {
   for (var template in selectedTemplates) {
     //var templateResult = TemplateGenerationResult(template, results);
-    var linkUrl = outputReport.addLink(TemplateAboutTab(template));
+    var linkUrl = outputReport.addTabLink(TemplateAboutTab(template));
     outputReport.addToMarkdown('# [${template.name}]($linkUrl)\n');
     for (var generator in template.generators) {
       try {
@@ -22,7 +22,7 @@ Future<DynamicMarkdownTabContent> generate(
           outputReport,
         );
       } on Exception catch (exception, stackTrace) {
-        var linkUri = outputReport.addLink(
+        var linkUri = outputReport.addTabLink(
           GeneratorErrorTab(template, generator, exception, stackTrace),
         );
         outputReport.addToMarkdown(
@@ -52,7 +52,7 @@ class GeneratorErrorTab extends MarkdownTab {
     StackTrace stackTrace,
   ) {
     var output = DynamicMarkdownTabContent('Error');
-    var urlLink = output.addLink(TemplateAboutTab(template));
+    var urlLink = output.addTabLink(TemplateAboutTab(template));
     output.addToMarkdown(
       '## Source\n'
       '* Template: [${template.name}]($urlLink)\n'

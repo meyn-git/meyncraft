@@ -20,7 +20,7 @@ class TemplateInstructionTab extends MarkdownTab {
     List<File> generatedFiles,
   ) {
     var output = DynamicMarkdownTabContent('Instructions');
-    var urlLink = output.addLink(TemplateAboutTab(template));
+    var urlLink = output.addTabLink(TemplateAboutTab(template));
     output.addToMarkdown(
       '## Source\n'
       '* Template: [${template.name}]($urlLink)\n'

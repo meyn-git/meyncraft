@@ -70,7 +70,7 @@ class SysmacEventGlobalArrayGenerator implements Generator {
         outputReport,
       );
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addLink(
+      var linkUri = outputReport.addTabLink(
         GeneratorErrorTab(template, this, exception, stackTrace),
       );
       outputReport.addToMarkdown(

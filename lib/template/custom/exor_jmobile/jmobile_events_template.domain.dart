@@ -77,7 +77,7 @@ class JMobileEventsGenerator implements Generator {
         outputReport,
       );
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addLink(
+      var linkUri = outputReport.addTabLink(
         GeneratorErrorTab(template, this, exception, stackTrace),
       );
       outputReport.addToMarkdown(
@@ -87,7 +87,7 @@ class JMobileEventsGenerator implements Generator {
     if (generatedFiles.isEmpty) {
       outputReport.addToMarkdown('* No files generated');
     }
-    var linkUri = outputReport.addLink(
+    var linkUri = outputReport.addTabLink(
       TemplateInstructionTab(template, this, generatedFiles),
     );
     var fileOrFiles = generatedFiles.length == 1 ? 'file' : 'files';
@@ -106,6 +106,9 @@ class JMobileEventsGenerator implements Generator {
     outputReport.addToMarkdown('* Found ${events.length} Sysmac events\n');
     //TODO add link in case there are warnings
     String formattedXml = createFormattedEventsXml(events);
+
+    throw Exception('Test');
+
     var outputFile = createOutputFile(sysmacProject, '-JMobileEvents.xml');
     await outputFile.create();
     await outputFile.writeAsString(formattedXml);

@@ -68,7 +68,7 @@ class TemplateAboutMarkdownContent extends StaticMarkdownContent {
         buffer.writeln('* Output path: ${generator.outputPath}');
         if (generator.outputInstructions != null) {
           buffer.writeln(
-            '* Output file instructions: ${generator.outputInstructions!.replaceAll('\n', '\\\n  ')}',
+            '* Output file instructions: ${generator.outputInstructions!.replaceAll('\n', '\n  ')}',
           );
         }
       }

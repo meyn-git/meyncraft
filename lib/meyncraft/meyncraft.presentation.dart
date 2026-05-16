@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meyncraft/meyncraft/command.domain.dart';
 import 'package:meyncraft/template/selected_templates.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/tab.presentation.dart';
 import 'package:meyncraft/meyncraft/style/theme.presentation.dart';
@@ -12,18 +13,40 @@ class MeynCraft extends StatefulWidget {
 }
 
 class _MeynCraftState extends State<MeynCraft> {
+  final commands = const <Command>[
+    SelectNextTab(),
+    SelectPreviousTab(),
+    CloseCurrentTab(),
+    CloseAllTabs(),
+    Generate(),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MeynCraft',
-      debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system,
-      theme: meynTheme(Brightness.light),
-      darkTheme: meynTheme(Brightness.dark),
-      //home: LogView(),
-      home: DraggableSplitView(
-        left: SelectedTemplatesPanel(),
-        right: ClosableTabsView(),
+    return Shortcuts(
+      shortcuts: {
+        for (Command command in commands.where((a) => a.hotKey != null))
+          command.hotKey!: command,
+      },
+      child: Actions(
+        actions: {
+          for (Command command in commands.where((a) => a.hotKey != null))
+            command.runtimeType: CallbackAction<Command>(
+              onInvoke: (intent) => command.action(),
+            ),
+        },
+        child: MaterialApp(
+          title: 'MeynCraft',
+          debugShowCheckedModeBanner: false,
+          themeMode: ThemeMode.system,
+          theme: meynTheme(Brightness.light),
+          darkTheme: meynTheme(Brightness.dark),
+          //home: LogView(),
+          home: DraggableSplitView(
+            left: SelectedTemplatesPanel(),
+            right: ClosableTabsView(),
+          ),
+        ),
       ),
     );
   }

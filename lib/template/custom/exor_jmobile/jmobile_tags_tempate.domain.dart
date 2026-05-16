@@ -82,7 +82,7 @@ class JMobileTagsGenerator implements Generator {
     try {
       generatedFiles = await writeJMobileTagsFile(sysmacProject, outputReport);
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addLink(
+      var linkUri = outputReport.addTabLink(
         GeneratorErrorTab(template, this, exception, stackTrace),
       );
       outputReport.addToMarkdown(
@@ -92,7 +92,7 @@ class JMobileTagsGenerator implements Generator {
     if (generatedFiles.isEmpty) {
       outputReport.addToMarkdown('* No files generated');
     }
-    var linkUri = outputReport.addLink(
+    var linkUri = outputReport.addTabLink(
       TemplateInstructionTab(template, this, generatedFiles),
     );
     var fileOrFiles = generatedFiles.length == 1 ? 'file' : 'files';

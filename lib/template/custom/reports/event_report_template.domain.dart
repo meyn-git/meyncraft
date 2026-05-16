@@ -69,7 +69,7 @@ class EventReportGenerator implements Generator {
         '* Generated file: [${generatedFile.path}](${generatedFile.uri})',
       );
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addLink(
+      var linkUri = outputReport.addTabLink(
         GeneratorErrorTab(template, this, exception, stackTrace),
       );
       outputReport.addToMarkdown(
@@ -79,7 +79,7 @@ class EventReportGenerator implements Generator {
     if (generatedFile == null) {
       outputReport.addToMarkdown('* No files generated');
     }
-    var linkUri = outputReport.addLink(
+    var linkUri = outputReport.addTabLink(
       TemplateInstructionTab(template, this, [generatedFile!]),
     );
     outputReport.addToMarkdown(
