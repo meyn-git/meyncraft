@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:meyncraft/meyncraft/command.domain.dart';
+import 'package:meyncraft/meyncraft/command.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/template_about_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
@@ -33,6 +35,8 @@ Future<DynamicMarkdownTabContent> generate(
   }
 
   outputReport.addToMarkdown('# Generation completed.');
+  outputReport.addToButtons(ElevatedCommandButton(ReGenerate()));
+  outputReport.addToButtons(ElevatedCommandButton(CloseCurrentTab()));
   return outputReport;
 }
 
@@ -45,23 +49,41 @@ class GeneratorErrorTab extends MarkdownTab {
     super.key,
   }) : super(createMarkdownContent(template, generator, exception, stackTrace));
 
-  static DynamicMarkdownTabContent createMarkdownContent(
+  static MarkdownTabContent createMarkdownContent(
     Template template,
     Generator generator,
     Exception exception,
     StackTrace stackTrace,
   ) {
-    var output = DynamicMarkdownTabContent('Error');
-    var urlLink = output.addTabLink(TemplateAboutTab(template));
-    output.addToMarkdown(
-      '## Source\n'
-      '* Template: [${template.name}]($urlLink)\n'
-      '* Generator source: ${generator.source}\n'
-      '## Exception\n'
-      '${exception.toString()}\n'
-      '## Stack trace\n'
-      '${stackTrace.toString().replaceAll('\n', '\\\n')}\n',
+    var templateTab = TemplateAboutTab(template);
+    var templateTabUri = meynCraftUriToTab(templateTab);
+    return StaticMarkdownContent(
+      tabTitle: 'Error',
+      buttons: [ElevatedCommandButton(CloseCurrentTab())],
+      markdown: createMarkdown(
+        template,
+        templateTabUri,
+        generator,
+        exception,
+        stackTrace,
+      ),
+      linkedTabs: [templateTab],
     );
-    return output;
+  }
+
+  static String createMarkdown(
+    Template template,
+    Uri templateTabUri,
+    Generator generator,
+    Exception exception,
+    StackTrace stackTrace,
+  ) {
+    return '## Source\n'
+        '* Template: [${template.name}]($templateTabUri)\n'
+        '* Generator source: ${generator.source}\n'
+        '## Exception\n'
+        '${exception.toString()}\n'
+        '## Stack trace\n'
+        '${stackTrace.toString().replaceAll('\n', '\\\n')}\n';
   }
 }

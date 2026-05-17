@@ -1,3 +1,5 @@
+import 'package:meyncraft/meyncraft/command.domain.dart';
+import 'package:meyncraft/meyncraft/command.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/template.domain.dart';
 
@@ -12,6 +14,7 @@ class TemplateAboutMarkdownContent extends StaticMarkdownContent {
     : super(
         markdown: createMarkdown(template),
         tabTitle: 'About ${template.name}',
+        buttons: [ElevatedCommandButton(CloseCurrentTab())],
       );
 
   static String createMarkdown(Template template) {

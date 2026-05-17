@@ -19,6 +19,7 @@ class _MeynCraftState extends State<MeynCraft> {
     CloseCurrentTab(),
     CloseAllTabs(),
     Generate(),
+    ReGenerate(),
   ];
 
   @override

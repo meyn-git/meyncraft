@@ -80,4 +80,9 @@ class TabService extends ChangeNotifier {
       closeTabIndex(index);
     }
   }
+
+  ClosableTab? currentTab() {
+    if (_tabs.isEmpty) return null;
+    return _tabs[_selectedIndex];
+  }
 }

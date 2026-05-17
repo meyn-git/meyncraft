@@ -19,9 +19,13 @@ String aboutMeynCraftMarkdown({String? version}) {
     //TODO use meynCraftFutureDescription when it is implemented as a template engine,
   );
   markDown.writeln();
+  markDown.writeln('## More information');
+
   markDown.writeln(
-    'For more information, visit: https://github.com/meyn-git/meyncraft',
+    '* Documentation: '
+    'https://github.com/meyn-git/meyncraft/blob/main/README.md',
   );
+  markDown.writeln('* Project: https://github.com/meyn-git/meyncraft');
   markDown.writeln();
   return markDown.toString();
 }

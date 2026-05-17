@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/tab.service.dart';
+import 'package:meyncraft/template/generate/generator.service.dart';
 import 'package:meyncraft/template/generate/generator_parameter_tab.presentation.dart';
+import 'package:meyncraft/template/generate/generator_result_tab.presentation.dart';
 import 'package:meyncraft/template/selected_templates.presentation.dart';
 import 'package:meyncraft/template/selected_templates.service.dart';
 import 'package:meyncraft/template/template.domain.dart';
@@ -116,5 +119,38 @@ class Generate extends Command {
         GeneratorParametersTab(templatesToGenerate: selectedTemplates),
       );
     }
+  };
+}
+
+class ReGenerate extends Command {
+  const ReGenerate();
+  @override
+  final hotKey = const SingleActivator(LogicalKeyboardKey.keyR, control: true);
+
+  @override
+  final text = 'Re-generate';
+
+  @override
+  void Function() get action => () async {
+    var tabService = GetIt.I.get<TabService>();
+    var currentTab = tabService.currentTab();
+    if (currentTab is! GeneratorResultTab) return;
+
+    var previousGeneratorResultTab = currentTab;
+    var selectedTemplates = previousGeneratorResultTab.selectedTemplates;
+    var parameterValues = previousGeneratorResultTab.parameterValues;
+    tabService.closeCurrentTab();
+
+    var generatorResultTab = GeneratorResultTab(
+      selectedTemplates,
+      parameterValues,
+    );
+    tabService.addTab(generatorResultTab);
+
+    await generate(
+      selectedTemplates,
+      parameterValues,
+      generatorResultTab.content as DynamicMarkdownTabContent,
+    );
   };
 }

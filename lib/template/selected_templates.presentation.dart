@@ -150,14 +150,19 @@ Future<void> selectSysmacFileAndGenerate(
   if (sysmacProjectFilePath == null) {
     return;
   }
-  var parameters = {sysmacProjectFileParameter.name: sysmacProjectFilePath};
+  var parameterValues = {
+    sysmacProjectFileParameter.name: sysmacProjectFilePath,
+  };
   var tabService = GetIt.I.get<TabService>();
-  var generatorResultTab = GeneratorResultTab();
+  var generatorResultTab = GeneratorResultTab(
+    selectedTemplates,
+    parameterValues,
+  );
   tabService.addTab(generatorResultTab);
 
   await generate(
     selectedTemplates,
-    parameters,
+    parameterValues,
     generatorResultTab.content as DynamicMarkdownTabContent,
   );
 }

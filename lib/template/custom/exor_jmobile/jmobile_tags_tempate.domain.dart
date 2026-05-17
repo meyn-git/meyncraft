@@ -91,15 +91,16 @@ class JMobileTagsGenerator implements Generator {
     }
     if (generatedFiles.isEmpty) {
       outputReport.addToMarkdown('* No files generated');
+    } else {
+      var linkUri = outputReport.addTabLink(
+        TemplateInstructionTab(template, this, generatedFiles),
+      );
+      var fileOrFiles = generatedFiles.length == 1 ? 'file' : 'files';
+      outputReport.addToMarkdown(
+        '* Generated ${generatedFiles.length} $fileOrFiles. '
+        '[Click here for instructions on how to use the generated $fileOrFiles.]($linkUri)',
+      );
     }
-    var linkUri = outputReport.addTabLink(
-      TemplateInstructionTab(template, this, generatedFiles),
-    );
-    var fileOrFiles = generatedFiles.length == 1 ? 'file' : 'files';
-    outputReport.addToMarkdown(
-      '* Generated ${generatedFiles.length} $fileOrFiles. '
-      '[Click here for instructions on how to use the generated $fileOrFiles.]($linkUri)',
-    );
     return outputReport;
   }
 
