@@ -128,6 +128,7 @@ class SysmacEventGlobalArrayGenerator implements Generator {
   }
 }
 
+@Deprecated('Use writeSysmacEventArrayXmlImportFile instead')
 Future<void> writeSysmacEventArrayXmlImportFile(
   MeynSysmacProject sysmacProject,
 ) async {
@@ -137,7 +138,7 @@ Future<void> writeSysmacEventArrayXmlImportFile(
     version: '1.0.0',
   );
   var events = sysmacProject.events;
-  List<LadderSection> sections = _createSections(events);
+  var sections = _createSections(events);
   var eventGlobalVariable = _createEventGlobalVariable();
   var eventGlobalArrayVariable = _createEventGlobalArrayVariable(sysmacProject);
   var mainBody = MainBody.ladderSection(sections);
@@ -159,7 +160,7 @@ Future<void> writeSysmacEventArrayXmlImportFile(
   await outputFile.create();
   await outputFile.writeAsString(xmlString);
 
-  logger.info('Created: ${outputFile.path}');
+  logger.info('Generated: ${outputFile.path}');
   logger.info(
     '     Import this file in Sysmac with Menu \\ Tools \\ IEC 61131-10 XML \\ Import',
   );
