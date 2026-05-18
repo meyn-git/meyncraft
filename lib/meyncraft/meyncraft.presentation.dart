@@ -20,6 +20,7 @@ class _MeynCraftState extends State<MeynCraft> {
     CloseAllTabs(),
     Generate(),
     ReGenerate(),
+    OpenMeynAboutCraftTab(),
   ];
 
   @override

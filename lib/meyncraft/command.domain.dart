@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:meyncraft/meyncraft/about/meyncraft_about_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/tab.service.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
@@ -153,4 +154,19 @@ class ReGenerate extends Command {
       generatorResultTab.content as DynamicMarkdownTabContent,
     );
   };
+}
+
+class OpenMeynAboutCraftTab extends Command {
+  const OpenMeynAboutCraftTab();
+  @override
+  void Function() get action => () {
+    var tabService = GetIt.I.get<TabService>();
+    tabService.addOrSelectTab(MeynCraftAboutTab());
+  };
+
+  @override
+  final hotKey = const SingleActivator(LogicalKeyboardKey.f1);
+
+  @override
+  final String text = 'Open MeynCraft about tab';
 }

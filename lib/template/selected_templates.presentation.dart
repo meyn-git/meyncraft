@@ -29,9 +29,22 @@ class SelectedTemplatesPanel extends StatelessWidget {
         alignment: Alignment.centerLeft,
         color: Theme.of(context).colorScheme.surfaceDim,
         padding: const EdgeInsets.only(left: 8),
-        child: Text(
-          'Selected templates',
-          //style: TextStyle(color: Theme.of(context).colorScheme.b),
+        child: Row(
+          children: [
+            Text(
+              'Selected templates',
+              //style: TextStyle(color: Theme.of(context).colorScheme.b),
+            ),
+            Spacer(),
+            Tooltip(
+              message: OpenMeynAboutCraftTab().descriptionWithHotkey,
+              child: IconButton(
+                icon: Icon(Icons.info_outline_rounded),
+                iconSize: 30.0,
+                onPressed: OpenMeynAboutCraftTab().action,
+              ),
+            ),
+          ],
         ),
       ),
 
