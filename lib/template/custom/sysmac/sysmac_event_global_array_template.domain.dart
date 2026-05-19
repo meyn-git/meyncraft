@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:meyncraft/meyncraft/about/meyncraft_about_tab.domain.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
 import 'package:meyncraft/meyn_sysmac/event/event.domain.dart';
@@ -8,6 +9,7 @@ import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
 import 'package:meyncraft/template/template.domain.dart';
+import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 import 'package:xml/xml.dart';
 
 class SysmacEventGlobalArrayTemplate implements Template {
@@ -46,8 +48,8 @@ class SysmacEventGlobalArrayGenerator implements Generator {
       '* Select the generated file by clicking the folder button\n'
       '* Click on the "Execute" button\n'
       '* Merge changes if prompted\n'
-      '* Then move the sections in the last program "GeneratedByMeynCraft" '
-      '  to the end of section "Global\\EventHandling"';
+      '* Then move the sections in the last program $_programName '
+      'to the end of section "Global\\EventHandling"';
 
   @override
   Future<DynamicMarkdownTabContent> generate(
@@ -80,8 +82,13 @@ class SysmacEventGlobalArrayGenerator implements Generator {
     if (generatedFiles.isEmpty) {
       outputReport.addToMarkdown('* No files generated');
     }
+    var linkUri = outputReport.addTabLink(
+      TemplateInstructionTab(template, this, generatedFiles),
+    );
     outputReport.addToMarkdown(
-      '* Generated ${generatedFiles.length} files. [Click here for instructions on how to use the generated files.](meyncraft://test)',
+      '* Generated ${generatedFiles.length} files. '
+      '[Click here for instructions on how to use the generated files.]'
+      '($linkUri)',
     );
     return outputReport;
   }
@@ -90,10 +97,10 @@ class SysmacEventGlobalArrayGenerator implements Generator {
     MeynSysmacProject sysmacProject,
     DynamicMarkdownTabContent outputReport,
   ) async {
+    var version = await applicationVersion();
     var pouInfo = SmcExtPouInfo(
       author: 'MeynCraft code generator',
-      //TODO would be nice if we would use the MeynCraft version by reading the pubspec.yaml file
-      version: '1.0.0',
+      version: version,
     );
 
     var events = sysmacProject.events;
@@ -132,10 +139,10 @@ class SysmacEventGlobalArrayGenerator implements Generator {
 Future<void> writeSysmacEventArrayXmlImportFile(
   MeynSysmacProject sysmacProject,
 ) async {
+  var version = await applicationVersion();
   var pouInfo = SmcExtPouInfo(
     author: 'MeynCraft code generator',
-    //TODO would be nice if we would use the MeynCraft version by reading the pubspec.yaml file
-    version: '1.0.0',
+    version: version,
   );
   var events = sysmacProject.events;
   var sections = _createSections(events);

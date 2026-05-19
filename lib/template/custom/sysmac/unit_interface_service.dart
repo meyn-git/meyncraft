@@ -53,7 +53,7 @@ Future<void> writeSysmacUnitInterfaceXmlImportFile(
 // SmcExtPouInfo _createPouInfo() {
 //   return SmcExtPouInfo(
 //     author: 'MeynCraft code generator',
-//     //TODO would be nice if we would use the MeynCraft version by reading the pubspec.yaml file
+//     //TODO would be nice if we would use the MeynCraft version by reading the pubspec.yaml file var version = await applicationVersion();
 //     version: '1.0.0',
 //   );
 // }

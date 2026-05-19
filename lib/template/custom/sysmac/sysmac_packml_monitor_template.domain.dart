@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:meyncraft/meyncraft/about/meyncraft_about_tab.domain.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
@@ -72,10 +73,10 @@ class SysmacPackMlMonitorGenerator implements Generator {
     );
     try {
       var units = sysmacProject.isa88Nodes.whereType<Unit>();
+      var version = await applicationVersion();
       var pouInfo = SmcExtPouInfo(
         author: 'MeynCraft code generator',
-        //TODO would be nice if we would use the MeynCraft version by reading the pubspec.yaml file
-        version: '1.0.0',
+        version: version,
       );
       var sections = _createSections(units);
       var mainBody = MainBody.ladderSection(sections);
