@@ -40,7 +40,7 @@ class _MeynCraftState extends State<MeynCraft> {
         child: MaterialApp(
           title: 'MeynCraft',
           debugShowCheckedModeBanner: false,
-          themeMode: ThemeMode.system,
+          themeMode: ThemeMode.dark, // for now, we only support dark theme
           theme: meynTheme(Brightness.light),
           darkTheme: meynTheme(Brightness.dark),
           //home: LogView(),
