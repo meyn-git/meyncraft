@@ -70,7 +70,6 @@ class SysmacPackMlMonitorGenerator implements Generator {
     var sysmacProject = await MeynSysmacProject.loadFromFile(
       File(sysmacProjectFilePath),
     );
-    var generatedFiles = <File>[];
     try {
       var units = sysmacProject.isa88Nodes.whereType<Unit>();
       var pouInfo = SmcExtPouInfo(
@@ -138,7 +137,7 @@ class SysmacPackMlMonitorGenerator implements Generator {
       );
 
       var linkUri = outputReport.addTabLink(
-        TemplateInstructionTab(template, this, generatedFiles),
+        TemplateInstructionTab(template, this, [outputFile]),
       );
       outputReport.addToMarkdown(
         '* Generated 1 file. '
