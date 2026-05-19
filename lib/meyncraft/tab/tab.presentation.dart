@@ -24,7 +24,7 @@ class _ClosableTabsViewState extends State<ClosableTabsView> {
     listenable: _tabService,
     builder: (context, _) {
       if (_tabService.tabs.isEmpty) {
-        return const Center(child: Text('No tabs open'));
+        return SizedBox();
       }
 
       return Column(
