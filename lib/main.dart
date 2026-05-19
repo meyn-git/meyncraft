@@ -34,7 +34,8 @@ void main(List<String> args) async {
   getIt.registerSingleton<MeynSysmacProjectService>(MeynSysmacProjectService());
   getIt.registerSingleton<TabService>(TabService());
   // TODO add later when there are many templates getIt.get<TabService>().addTab(AllTemplatesTab());
-  getIt.get<TabService>().addTab(MeynCraftAboutTab());
+  final aboutTab = await MeynCraftAboutTab.create();
+  getIt.get<TabService>().addTab(aboutTab);
   getIt.get<TabService>().selectTab(0);
   runApp(MeynCraft(args));
 }

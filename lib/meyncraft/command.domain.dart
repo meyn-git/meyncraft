@@ -159,9 +159,10 @@ class ReGenerate extends Command {
 class OpenMeynAboutCraftTab extends Command {
   const OpenMeynAboutCraftTab();
   @override
-  void Function() get action => () {
+  void Function() get action => () async {
     var tabService = GetIt.I.get<TabService>();
-    tabService.addOrSelectTab(MeynCraftAboutTab());
+    var aboutTab = await MeynCraftAboutTab.create();
+    tabService.addOrSelectTab(aboutTab);
   };
 
   @override

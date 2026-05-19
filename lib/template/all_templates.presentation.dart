@@ -16,18 +16,23 @@ class AllTemplatesTab extends ClosableTab {
 class _AllTemplatesTabState extends State<AllTemplatesTab> {
   final selectedTemplateService = GetIt.I<SelectedTemplateService>();
 
+  final _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: selectedTemplateService,
-    builder: (context, _) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-        child: ListView(
-          children: allTemplates
-              .map((template) => TemplateTile(template))
-              .toList(),
+    builder: (context, _) =>
+        // Adding a scrollbar with a visible thumb so that there is a visual
+        // indication that the list can be scrolled when there are many templates
+        Scrollbar(
+          thumbVisibility: true,
+          controller: _scrollController,
+          child: ListView.builder(
+            padding: const EdgeInsets.all(8.0),
+            controller: _scrollController,
+            itemCount: allTemplates.length,
+            itemBuilder: (context, index) => TemplateTile(allTemplates[index]),
+          ),
         ),
-      );
-    },
   );
 }

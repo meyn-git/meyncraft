@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/meyncraft/scroll_bar.presentation.dart';
 import 'package:meyncraft/meyncraft/style/markdown_style_sheet.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/tab.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/tab.service.dart';
@@ -45,24 +44,25 @@ class ContentView extends StatelessWidget {
 }
 
 class MarkdownView extends StatelessWidget {
-  const MarkdownView({super.key, required this.content});
+  MarkdownView({super.key, required this.content});
 
   final MarkdownTabContent content;
 
+  final _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) => Expanded(
-    child: ScrollbarAlwaysVisible(
-      child: SizedBox(
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: MarkdownBody(
-            styleSheet: MeynMarkdownStyleSheet(context),
-            data: content.markdown,
-            onTapLink: onLinkTap,
-            // ),
-          ),
-        ),
+    // Adding a scrollbar with a visible thumb so that there is a visual
+    // indication that the list can be scrolled when there are many templates
+    child: Scrollbar(
+      controller: _scrollController,
+      thumbVisibility: true,
+      child: Markdown(
+        controller: _scrollController,
+        styleSheet: MeynMarkdownStyleSheet(context),
+        data: content.markdown,
+        onTapLink: onLinkTap,
+        // ),
       ),
     ),
   );

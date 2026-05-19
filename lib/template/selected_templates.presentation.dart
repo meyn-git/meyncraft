@@ -18,57 +18,69 @@ class SelectedTemplatesPanel extends StatelessWidget {
   SelectedTemplatesPanel({super.key});
 
   final selectedTemplateService = GetIt.I<SelectedTemplateService>();
-
+  final ScrollController _scrollController = ScrollController();
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Container(
-        height: 40,
-        width: double.infinity,
-        alignment: Alignment.centerLeft,
-        color: Theme.of(context).colorScheme.surfaceDim,
-        padding: const EdgeInsets.only(left: 8),
-        child: Row(
-          children: [
-            Text(
-              'Selected templates',
-              //style: TextStyle(color: Theme.of(context).colorScheme.b),
-            ),
-            Spacer(),
-            Tooltip(
-              message: OpenMeynAboutCraftTab().descriptionWithHotkey,
-              child: IconButton(
-                icon: Icon(Icons.info_outline_rounded),
-                iconSize: 30.0,
-                onPressed: OpenMeynAboutCraftTab().action,
-              ),
-            ),
-          ],
-        ),
-      ),
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: selectedTemplateService,
+    builder: (BuildContext context, _) => Column(
+      children: [
+        TopToolBar(),
 
-      ListenableBuilder(
-        listenable: selectedTemplateService,
-        builder: (BuildContext context, _) => Expanded(
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  children: allTemplates.map((t) => TemplateTile(t)).toList(),
-                ),
-              ),
-              // Bottom button
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedCommandButton(Generate()),
-              ),
-            ],
+        Expanded(
+          // Adding a scrollbar with a visible thumb so that there is a visual
+          // indication that the list can be scrolled when there are many templates
+          child: Scrollbar(
+            thumbVisibility: true,
+            controller: _scrollController,
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: allTemplates.length,
+              itemBuilder: (context, index) =>
+                  TemplateTile(allTemplates[index]),
+            ),
           ),
         ),
-      ),
-    ],
+
+        // Bottom button
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedCommandButton(Generate()),
+        ),
+      ],
+    ),
   );
+}
+
+class TopToolBar extends StatelessWidget {
+  const TopToolBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 40,
+      width: double.infinity,
+      alignment: Alignment.centerLeft,
+      color: Theme.of(context).colorScheme.surfaceDim,
+      padding: const EdgeInsets.only(left: 8),
+      child: Row(
+        children: [
+          Text(
+            'Selected templates',
+            //style: TextStyle(color: Theme.of(context).colorScheme.b),
+          ),
+          Spacer(),
+          Tooltip(
+            message: OpenMeynAboutCraftTab().descriptionWithHotkey,
+            child: IconButton(
+              icon: Icon(Icons.info_outline_rounded),
+              iconSize: 30.0,
+              onPressed: OpenMeynAboutCraftTab().action,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // TODO replace the class above with this one when there are to many templates in the future
