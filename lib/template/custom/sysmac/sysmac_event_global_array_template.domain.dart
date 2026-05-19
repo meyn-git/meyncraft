@@ -48,8 +48,9 @@ class SysmacEventGlobalArrayGenerator implements Generator {
       '* Select the generated file by clicking the folder button\n'
       '* Click on the "Execute" button\n'
       '* Merge changes if prompted\n'
-      '* Then move the sections in the last program $_programName '
-      'to the end of section "Global\\EventHandling"';
+      '* Move the sections in the last program $_programName '
+      'to the end of section "Global\\EventHandling"\n'
+      '* Delete the last program $_programName\n';
 
   @override
   Future<DynamicMarkdownTabContent> generate(
@@ -86,8 +87,8 @@ class SysmacEventGlobalArrayGenerator implements Generator {
       TemplateInstructionTab(template, this, generatedFiles),
     );
     outputReport.addToMarkdown(
-      '* Generated ${generatedFiles.length} files. '
-      '[Click here for instructions on how to use the generated files.]'
+      '* Generated 1 file. '
+      '[Click here for instructions on how to use the generated file.]'
       '($linkUri)',
     );
     return outputReport;

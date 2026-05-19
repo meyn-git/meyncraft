@@ -50,10 +50,11 @@ class SysmacPackMlMonitorGenerator implements Generator {
       '* Select the generated file by clicking the folder button\n'
       '* Click on the "Execute" button\n'
       '* Merge changes if prompted\n'
-      '* Then move the sections in the $_programName program to the begin of the '
+      '* Move the sections in the $_programName program to the begin of the '
       '"UnitControl" section of the corresponding unit\n'
+      '* Delete the last program $_programName\n'
       '* Now delete function block fbCheckPackML_SC and its implementations '
-      'since the generated code is a more detailed and efficient replacement.';
+      'since the generated code is a more detailed and efficient replacement.\n';
 
   static const _programName = 'GeneratedByMeynCraft';
 
