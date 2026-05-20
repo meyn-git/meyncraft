@@ -169,7 +169,7 @@ class TopToolBar extends StatelessWidget {
 // }
 
 Future<void> selectSysmacFileAndGenerate(
-  List<Template> selectedTemplates,
+  List<TemplateProject> selectedTemplates,
 ) async {
   var sysmacProjectFilePath = await _openFilePicker();
   if (sysmacProjectFilePath == null) {

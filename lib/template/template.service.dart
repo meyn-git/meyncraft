@@ -6,7 +6,7 @@ import 'package:meyncraft/template/custom/sysmac/sysmac_event_global_array_templ
 import 'package:meyncraft/template/custom/sysmac/sysmac_packml_monitor_template.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
 
-final List<Template> allTemplates = [
+final List<TemplateProject> allTemplates = [
   JMobileTagsTemplate(),
   JMobileEventsTemplate(),
   SysmacEventGlobalArrayTemplate(),

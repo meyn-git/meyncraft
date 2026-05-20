@@ -4,20 +4,20 @@ import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/template.domain.dart';
 
 class TemplateAboutTab extends MarkdownTab {
-  TemplateAboutTab(Template template, {super.key})
+  TemplateAboutTab(TemplateProject template, {super.key})
     : super(TemplateAboutMarkdownContent(template));
   //, closable: true
 }
 
 class TemplateAboutMarkdownContent extends StaticMarkdownContent {
-  TemplateAboutMarkdownContent(Template template)
+  TemplateAboutMarkdownContent(TemplateProject template)
     : super(
         markdown: createMarkdown(template),
         tabTitle: 'About ${template.name}',
         buttons: [ElevatedCommandButton(CloseCurrentTab())],
       );
 
-  static String createMarkdown(Template template) {
+  static String createMarkdown(TemplateProject template) {
     final buffer = StringBuffer();
 
     buffer.writeln('# About the ${template.name} template');

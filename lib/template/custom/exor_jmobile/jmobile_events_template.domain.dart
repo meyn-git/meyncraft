@@ -2,17 +2,16 @@
 
 import 'dart:io';
 
+import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/event/event.domain.dart';
-import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
 import 'package:meyncraft/template/template.domain.dart';
 import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 import 'package:xml/xml.dart';
 
-class JMobileEventsTemplate implements Template {
+class JMobileEventsTemplate implements TemplateProject {
   @override
   final String name = 'JMobileEvents';
 
@@ -27,7 +26,9 @@ class JMobileEventsTemplate implements Template {
   final String? gitRepository = null;
 
   @override
-  final List<Parameter> parameters = [sysmacProjectFileParameter];
+  final List<TemplateProjectParameter> parameters = [
+    sysmacProjectFileParameter,
+  ];
 
   @override
   final List<Generator> generators = [JMobileEventsGenerator()];
@@ -58,22 +59,14 @@ class JMobileEventsGenerator implements Generator {
 
   @override
   Future<DynamicMarkdownTabContent> generate(
-    Template template,
+    TemplateProject template,
     Map<String, dynamic> parameterValues,
     DynamicMarkdownTabContent outputReport,
   ) async {
-    var sysmacProjectFilePath =
-        parameterValues[sysmacProjectFileParameter.name];
-    if (sysmacProjectFilePath == null) {
-      throw Exception('Missing parameter: ${sysmacProjectFileParameter.name}');
-    }
-    var sysmacProject = await MeynSysmacProject.loadFromFile(
-      File(sysmacProjectFilePath),
-    );
     List<File> generatedFiles = [];
     try {
       generatedFiles = await writeJMobileEventsFile(
-        sysmacProject,
+        parameterValues,
         outputReport,
       );
     } on Exception catch (exception, stackTrace) {
@@ -99,15 +92,19 @@ class JMobileEventsGenerator implements Generator {
   }
 
   Future<List<File>> writeJMobileEventsFile(
-    MeynSysmacProject sysmacProject,
+    Map<String, dynamic> parameterValues,
     DynamicMarkdownTabContent outputReport,
   ) async {
+    var sysmacProject = await MeynSysmacProjectService().getProject(
+      parameterValues,
+    );
     var events = sysmacProject.events;
     outputReport.addToMarkdown('* Found ${events.length} Sysmac events\n');
-    //TODO add link in case there are warnings
+
     String formattedXml = createFormattedEventsXml(events);
 
-    var outputFile = createOutputFile(sysmacProject, '-JMobileEvents.xml');
+    var outputFilePath = await createOutputPath(outputPath, parameterValues);
+    var outputFile = File(outputFilePath);
     await outputFile.create();
     await outputFile.writeAsString(formattedXml);
     outputReport.addToMarkdown(
@@ -115,34 +112,6 @@ class JMobileEventsGenerator implements Generator {
     );
     return [outputFile];
   }
-}
-
-@Deprecated('Use the JMobileEventsTemplate instead')
-Future<void> writeJMobileEventsFile(MeynSysmacProject sysmacProject) async {
-  var events = sysmacProject.events;
-  String formattedXml = createFormattedEventsXml(events);
-  var outputFile = createOutputFile(sysmacProject, '-JMobileEvents.xml');
-  await outputFile.create();
-  await outputFile.writeAsString(formattedXml);
-  logger.info('Created: ${outputFile.path}');
-  logger.info('     You can import the events in J-Mobile:');
-  logger.info('     * Open an existing JMobile project');
-  logger.info(
-    '     * Open the events window from the left menu Configuration \\ Alarms',
-  );
-  logger.info('     * Click on the "import alarms button" in the toolbar');
-  logger.info('     * Select the generated ${outputFile.path} file');
-}
-
-File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
-  var sysmacFile = sysmacProject.identity.projectFile;
-  var directory = sysmacFile.parent.path;
-  var filename = sysmacFile.uri.pathSegments.last;
-  var nameWithoutExtension = filename.split('.').first;
-  var outputPath =
-      '$directory${Platform.pathSeparator}$nameWithoutExtension$suffix';
-  var outputFile = File(outputPath);
-  return outputFile;
 }
 
 String createFormattedEventsXml(List<Event> events) {

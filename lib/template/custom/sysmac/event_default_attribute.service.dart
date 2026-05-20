@@ -47,9 +47,6 @@ Future<void> writeSysmacEventArrayXmlImportFile(
     }
   }
 
-  // var file = createOutputFile(sysmacProject, '-Sysmac-Events-DefaultAttributes.txt');
-  // file.createSync(recursive: true);
-  // file.writeAsStringSync(lines.toString());
   print(lines.toString());
 }
 
@@ -186,17 +183,6 @@ bool isEventOutput(Variable variable) =>
         .dataTypePath
         .toNamePath()
         .contains('sEvent');
-
-File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
-  var sysmacFile = sysmacProject.identity.projectFile;
-  var directory = sysmacFile.parent.path;
-  var filename = sysmacFile.uri.pathSegments.last;
-  var nameWithoutExtension = filename.split('.').first;
-  var outputPath =
-      '$directory${Platform.pathSeparator}$nameWithoutExtension$suffix';
-  var outputFile = File(outputPath);
-  return outputFile;
-}
 
 int longestSequentialMatch(String word1, String word2) {
   int maxMatch = 0;

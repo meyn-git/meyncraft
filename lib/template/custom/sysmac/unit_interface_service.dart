@@ -1,27 +1,26 @@
-import 'dart:io';
-
-import 'package:meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
-import 'package:xml/xml.dart';
 
+@Deprecated(
+  'Do we still need this or do we have a better solution for generating unit interface code?',
+)
 Future<void> writeSysmacUnitInterfaceXmlImportFile(
   MeynSysmacProject sysmacProject,
 ) async {
-  var outputFile = createOutputFile(sysmacProject, '-SysmacUnitInterface.xml');
-  logger.info('Creating: ${outputFile.path}');
+  //  var outputFile = createOutputFile(sysmacProject, '-SysmacUnitInterface.xml');
+  //  logger.info('Creating: ${outputFile.path}');
 
-  var programs = <Program>[]; //TODO createPrograms(sysmacProject);
-  var project = Project(programs, []);
-  var xmlString = project.toXmlString(
-    pretty: true,
-    indent: '  ',
-    preserveWhitespace: (node) =>
-        node is XmlElement && ['ST', 'Content'].contains(node.name.local),
-  );
+  // var programs = <Program>[]; //TODO createPrograms(sysmacProject);
+  // var project = Project(programs, []);
+  // var xmlString = project.toXmlString(
+  //   pretty: true,
+  //   indent: '  ',
+  //   preserveWhitespace: (node) =>
+  //       node is XmlElement && ['ST', 'Content'].contains(node.name.local),
+  // );
 
-  await outputFile.create();
-  await outputFile.writeAsString(xmlString);
+  //await outputFile.create();
+  //await outputFile.writeAsString(xmlString);
 
   logger.info(
     '    Import this file in Sysmac with Menu \\ Tools \\ IEC 61131-10 XML \\ Import',
@@ -423,14 +422,3 @@ Future<void> writeSysmacUnitInterfaceXmlImportFile(
 //     ]),
 //   ]);
 // }
-
-File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
-  var sysmacFile = sysmacProject.identity.projectFile;
-  var directory = sysmacFile.parent.path;
-  var filename = sysmacFile.uri.pathSegments.last;
-  var nameWithoutExtension = filename.split('.').first;
-  var outputPath =
-      '$directory${Platform.pathSeparator}$nameWithoutExtension$suffix';
-  var outputFile = File(outputPath);
-  return outputFile;
-}

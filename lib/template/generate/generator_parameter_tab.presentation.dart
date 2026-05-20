@@ -12,7 +12,7 @@ import 'package:meyncraft/template/template_about_tab.presentation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class GeneratorParametersTab extends ClosableTab {
-  final List<Template> templatesToGenerate;
+  final List<TemplateProject> templatesToGenerate;
 
   const GeneratorParametersTab({super.key, required this.templatesToGenerate})
     : super(tabTitle: 'Generator Parameters');
@@ -28,7 +28,7 @@ class _GeneratorParametersTabState extends State<GeneratorParametersTab> {
 }
 
 class ParameterForm extends StatefulWidget {
-  final List<Template> templatesToGenerate;
+  final List<TemplateProject> templatesToGenerate;
   final GeneratorParametersTab tab;
   const ParameterForm(this.templatesToGenerate, this.tab, {super.key});
 

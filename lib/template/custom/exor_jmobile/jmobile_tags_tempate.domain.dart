@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/custom/exor_jmobile/exor_data_type.domain.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
@@ -8,7 +9,6 @@ import 'package:meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
-import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
@@ -17,7 +17,7 @@ import 'package:meyncraft/template/template.domain.dart';
 import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 import 'package:xml/xml.dart';
 
-class JMobileTagsTemplate implements Template {
+class JMobileTagsTemplate implements TemplateProject {
   @override
   final String name = 'JMobileTags';
   @override
@@ -30,7 +30,9 @@ class JMobileTagsTemplate implements Template {
   final String? documentation = null;
 
   @override
-  final List<Parameter> parameters = [sysmacProjectFileParameter];
+  final List<TemplateProjectParameter> parameters = [
+    sysmacProjectFileParameter,
+  ];
 
   @override
   final List<Generator> generators = [JMobileTagsGenerator()];
@@ -66,21 +68,16 @@ class JMobileTagsGenerator implements Generator {
 
   @override
   Future<DynamicMarkdownTabContent> generate(
-    Template template,
+    TemplateProject template,
     Map<String, dynamic> parameterValues,
     DynamicMarkdownTabContent outputReport,
   ) async {
-    var sysmacProjectFilePath =
-        parameterValues[sysmacProjectFileParameter.name];
-    if (sysmacProjectFilePath == null) {
-      throw Exception('Missing parameter: ${sysmacProjectFileParameter.name}');
-    }
-    var sysmacProject = await MeynSysmacProject.loadFromFile(
-      File(sysmacProjectFilePath),
-    );
     var generatedFiles = <File>[];
     try {
-      generatedFiles = await writeJMobileTagsFile(sysmacProject, outputReport);
+      generatedFiles = await writeJMobileTagsFile(
+        parameterValues,
+        outputReport,
+      );
     } on Exception catch (exception, stackTrace) {
       var linkUri = outputReport.addTabLink(
         GeneratorErrorTab(template, this, exception, stackTrace),
@@ -107,60 +104,24 @@ class JMobileTagsGenerator implements Generator {
   /// creates an xml file with [ExorTag]s generated from a Sysmac project file
   /// to be imported by JMobile
   Future<List<File>> writeJMobileTagsFile(
-    MeynSysmacProject sysmacProject,
+    Map<String, dynamic> parameterValues,
     DynamicMarkdownTabContent outputReport,
   ) async {
+    var sysmacProject = await MeynSysmacProjectService().getProject(
+      parameterValues,
+    );
     var tags = createTags(sysmacProject);
     outputReport.addToMarkdown('* Found ${tags.length} Exor-JMobile tags\n');
     String formattedXml = createFormattedTagsXml(tags);
-    var outputFile = createOutputFile(
-      sysmacProject,
-      '-JMobileTags.xml',
-    ); //TODO use target
+    var outputFilePath = await createOutputPath(outputPath, parameterValues);
+    var outputFile = File(outputFilePath);
     await outputFile.create();
     await outputFile.writeAsString(formattedXml);
     outputReport.addToMarkdown(
-      '* Created file: [${outputFile.path}](${outputFile.uri})\n',
+      '* Generated file: [${outputFile.path}](${outputFile.uri})\n',
     );
     return [outputFile];
   }
-}
-
-/// creates an xml file with [ExorTag]s generated from a Sysmac project file
-/// to be imported by JMobile
-@Deprecated('Use the JMobileTagsTemplate instead')
-Future<void> writeJMobileTagsFile(MeynSysmacProject sysmacProject) async {
-  var tags = createTags(sysmacProject);
-  logger.info('Found ${tags.length} Exor-JMobile tags');
-  String formattedXml = createFormattedTagsXml(tags);
-  var outputFile = createOutputFile(sysmacProject, '-JMobileTags.xml');
-  await outputFile.create();
-  await outputFile.writeAsString(formattedXml);
-  logger.info('Created: ${outputFile.path})');
-  logger.info('     You can import the tags in JMobile:');
-  logger.info('     * Open an existing JMobile project');
-  logger.info(
-    '     * Open the tags window from the left menu Configuration \\ Tags',
-  );
-  logger.info(
-    '     * Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list',
-  );
-  logger.info('     * Click on the "import dictionary button" in the toolbar');
-  logger.info(
-    '     * Select the "Tag editor exported xml" row from the import dialog and click ok',
-  );
-  logger.info('     * Select the generated ${outputFile.path} file');
-}
-
-File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
-  var sysmacFile = sysmacProject.identity.projectFile;
-  var directory = sysmacFile.parent.path;
-  var filename = sysmacFile.uri.pathSegments.last;
-  var nameWithoutExtension = filename.split('.').first;
-  var outputPath =
-      '$directory${Platform.pathSeparator}$nameWithoutExtension$suffix';
-  var outputFile = File(outputPath);
-  return outputFile;
 }
 
 String createFormattedTagsXml(Iterable<ExorTag> tags) {

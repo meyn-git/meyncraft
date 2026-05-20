@@ -1,17 +1,31 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
+import 'package:meyncraft/template/template.domain.dart';
 
 /// Creates a [MeynSysmacProject] or returns a cached instance if the same file path is requested again.
 class MeynSysmacProjectService {
+  MeynSysmacProjectService._internal();
+
+  static final MeynSysmacProjectService _instance =
+      MeynSysmacProjectService._internal();
+
+  factory MeynSysmacProjectService() => _instance;
+
   final Map<FileKey, MeynSysmacProject> _cache = {};
 
-  Future<MeynSysmacProject> getProject(String? filePath) async {
-    if (filePath == null) {
-      throw ArgumentError('File path is null');
+  Future<MeynSysmacProject> getProject(
+    Map<String, dynamic> parameterValues,
+  ) async {
+    var sysmacProjectFilePath =
+        parameterValues[sysmacProjectFileParameter.name];
+    if (sysmacProjectFilePath == null ||
+        sysmacProjectFilePath is! String ||
+        sysmacProjectFilePath.isEmpty) {
+      throw Exception('Missing parameter: ${sysmacProjectFileParameter.name}');
     }
 
-    var file = File(filePath);
+    var file = File(sysmacProjectFilePath);
     var fileKey = FileKey.fromFile(file);
 
     if (_cache.containsKey(fileKey)) {

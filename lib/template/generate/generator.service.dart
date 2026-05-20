@@ -6,9 +6,10 @@ import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/template_about_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
+import 'package:template_engine/template_engine.dart';
 
 Future<DynamicMarkdownTabContent> generate(
-  List<Template> selectedTemplates,
+  List<TemplateProject> selectedTemplates,
   Map<String, dynamic> parameterValues,
   DynamicMarkdownTabContent outputReport,
 ) async {
@@ -42,7 +43,7 @@ Future<DynamicMarkdownTabContent> generate(
 
 class GeneratorErrorTab extends MarkdownTab {
   GeneratorErrorTab(
-    Template template,
+    TemplateProject template,
     Generator generator,
     Exception exception,
     StackTrace stackTrace, {
@@ -50,7 +51,7 @@ class GeneratorErrorTab extends MarkdownTab {
   }) : super(createMarkdownContent(template, generator, exception, stackTrace));
 
   static MarkdownTabContent createMarkdownContent(
-    Template template,
+    TemplateProject template,
     Generator generator,
     Exception exception,
     StackTrace stackTrace,
@@ -72,7 +73,7 @@ class GeneratorErrorTab extends MarkdownTab {
   }
 
   static String createMarkdown(
-    Template template,
+    TemplateProject template,
     Uri templateTabUri,
     Generator generator,
     Exception exception,
@@ -86,4 +87,47 @@ class GeneratorErrorTab extends MarkdownTab {
         '## Stack trace\n'
         '${stackTrace.toString().replaceAll('\n', '\\\n')}\n';
   }
+}
+
+// Uses a template engine to create the output path eg:
+// * outputPath: '{{removeFileExtension(sysmacProjectFilePath)}}-Sysmac-PackMlMonitor.xml'
+// * parameters: { sysmacProjectFilePath: 'C:/myProject/sysmacProject.smc2' }
+// * result: 'C:/myProject/sysmacProject-Sysmac-PackMlMonitor.xml'
+
+Future<String> createOutputPath(
+  String outputPath,
+  VariableMap? parameters,
+) async {
+  var functionGroups = [
+    ...DefaultFunctionGroups(),
+    FunctionGroup('MeynCraftFunctions', [
+      ExpressionFunction(
+        name: 'removeFileExtension',
+        description: 'removes a ile extension from a file path',
+        exampleExpression: "removeFileExtension('myPath/myFile.exe')",
+        exampleResult: "'myPath/myFile'",
+        parameters: <Parameter>[
+          Parameter(
+            name: 'filePath',
+            description: 'A file path, either absolute, relative or a URI',
+            presence: Presence.mandatory(),
+          ),
+        ],
+        function: (position, renderContext, parameters) {
+          var filePath = parameters['filePath'];
+          if (filePath is! String) {
+            throw ParameterException('String expected');
+          }
+
+          final index = filePath.lastIndexOf('.');
+          if (index == -1) return Future.value(filePath);
+          return Future.value(filePath.substring(0, index));
+        },
+      ),
+    ]),
+  ];
+  var engine = TemplateEngine(functionGroups: functionGroups);
+  var parseResult = await engine.parseText(outputPath);
+  var renderResult = await engine.render(parseResult, parameters);
+  return renderResult.text;
 }

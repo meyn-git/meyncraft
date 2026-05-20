@@ -8,7 +8,7 @@ import 'package:meyncraft/template/template_about_tab.presentation.dart';
 class TemplateTile extends StatefulWidget {
   const TemplateTile(this.template, {super.key});
 
-  final Template template;
+  final TemplateProject template;
 
   @override
   State<TemplateTile> createState() => _TemplateTileState();
@@ -17,10 +17,10 @@ class TemplateTile extends StatefulWidget {
 class _TemplateTileState extends State<TemplateTile> {
   final _tabService = GetIt.I.get<TabService>();
 
-  List<Template> get selectedTemplates =>
+  List<TemplateProject> get selectedTemplates =>
       GetIt.I<SelectedTemplateService>().selectedTemplates;
 
-  Template get template => widget.template;
+  TemplateProject get template => widget.template;
 
   bool get isSelected => selectedTemplates.contains(template);
 

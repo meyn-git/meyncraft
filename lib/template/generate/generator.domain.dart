@@ -22,7 +22,7 @@ abstract class Generator {
   // TODO String? get when;
 
   Future<DynamicMarkdownTabContent> generate(
-    Template template,
+    TemplateProject template,
     Map<String, dynamic> parameterValues,
     DynamicMarkdownTabContent outputReport,
   );

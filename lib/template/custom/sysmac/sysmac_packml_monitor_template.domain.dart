@@ -1,17 +1,17 @@
 import 'dart:io';
 
+import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
 import 'package:meyncraft/meyncraft/about/meyncraft_about_tab.domain.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
-import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
 import 'package:meyncraft/template/template.domain.dart';
 import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 import 'package:xml/xml.dart';
 
-class SysmacPackMlMonitorTemplate implements Template {
+class SysmacPackMlMonitorTemplate implements TemplateProject {
   @override
   final String name = 'SysmacPackMlMonitor';
 
@@ -26,7 +26,9 @@ class SysmacPackMlMonitorTemplate implements Template {
       'Creates Pack-ML monitor code (e.g. to debug Pack-ML issues) from a Sysmac project file.';
 
   @override
-  final List<Parameter> parameters = [sysmacProjectFileParameter];
+  final List<TemplateProjectParameter> parameters = [
+    sysmacProjectFileParameter,
+  ];
 
   @override
   final List<Generator> generators = [SysmacPackMlMonitorGenerator()];
@@ -41,7 +43,7 @@ class SysmacPackMlMonitorGenerator implements Generator {
 
   @override
   final String outputPath =
-      '{{removeFileExtension(sysmacProjectFilePath)}}-Sysmac-{{unit.name}}-PackMlMonitor.txt';
+      '{{removeFileExtension(sysmacProjectFilePath)}}-Sysmac-PackMlMonitor.xml';
 
   @override
   final String? outputInstructions =
@@ -60,17 +62,12 @@ class SysmacPackMlMonitorGenerator implements Generator {
 
   @override
   Future<DynamicMarkdownTabContent> generate(
-    Template template,
+    TemplateProject template,
     Map<String, dynamic> parameterValues,
     DynamicMarkdownTabContent outputReport,
   ) async {
-    var sysmacProjectFilePath =
-        parameterValues[sysmacProjectFileParameter.name];
-    if (sysmacProjectFilePath == null) {
-      throw Exception('Missing parameter: ${sysmacProjectFileParameter.name}');
-    }
-    var sysmacProject = await MeynSysmacProject.loadFromFile(
-      File(sysmacProjectFilePath),
+    var sysmacProject = await MeynSysmacProjectService().getProject(
+      parameterValues,
     );
     try {
       var units = sysmacProject.isa88Nodes.whereType<Unit>();
@@ -127,10 +124,8 @@ class SysmacPackMlMonitorGenerator implements Generator {
             node is XmlElement && ['ST', 'Content'].contains(node.name.local),
       );
 
-      var outputFile = createOutputFile(
-        sysmacProject,
-        '-SysmacPackMlMonitor.xml',
-      );
+      var outputFilePath = await createOutputPath(outputPath, parameterValues);
+      var outputFile = File(outputFilePath);
       await outputFile.create();
       await outputFile.writeAsString(xmlString);
 
@@ -270,17 +265,6 @@ class SysmacPackMlMonitorGenerator implements Generator {
 //   await outputFile.writeAsString(structuredText.toString());
 //   return outputFile;
 // }
-
-File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
-  var sysmacFile = sysmacProject.identity.projectFile;
-  var directory = sysmacFile.parent.path;
-  var filename = sysmacFile.uri.pathSegments.last;
-  var nameWithoutExtension = filename.split('.').first;
-  var outputPath =
-      '$directory${Platform.pathSeparator}$nameWithoutExtension$suffix';
-  var outputFile = File(outputPath);
-  return outputFile;
-}
 
 /// PackML state transitions with PLC name and description
 enum PackMlTransitionCommand {

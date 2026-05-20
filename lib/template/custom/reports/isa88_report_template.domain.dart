@@ -1,16 +1,14 @@
 import 'dart:io';
 
+import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
-import 'package:meyncraft/template/custom/reports/event_report_template.domain.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
-import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
 import 'package:meyncraft/template/template.domain.dart';
 import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 
-class Isa88ReportTemplate implements Template {
+class Isa88ReportTemplate implements TemplateProject {
   @override
   final String name = 'Isa88Report';
 
@@ -25,7 +23,9 @@ class Isa88ReportTemplate implements Template {
   final String? gitRepository = null;
 
   @override
-  final List<Parameter> parameters = [sysmacProjectFileParameter];
+  final List<TemplateProjectParameter> parameters = [
+    sysmacProjectFileParameter,
+  ];
 
   @override
   final List<Generator> generators = [Isa88ReportGenerator()];
@@ -40,7 +40,7 @@ class Isa88ReportGenerator implements Generator {
 
   @override
   final String outputPath =
-      '{{removeFileExtension(sysmacProjectFilePath)}}-Isa88Report.csv';
+      '{{removeFileExtension(sysmacProjectFilePath)}}-Report-Isa88.csv';
 
   @override
   final String? outputInstructions =
@@ -49,21 +49,13 @@ class Isa88ReportGenerator implements Generator {
 
   @override
   Future<DynamicMarkdownTabContent> generate(
-    Template template,
+    TemplateProject template,
     Map<String, dynamic> parameterValues,
     DynamicMarkdownTabContent outputReport,
   ) async {
-    var sysmacProjectFilePath =
-        parameterValues[sysmacProjectFileParameter.name];
-    if (sysmacProjectFilePath == null) {
-      throw Exception('Missing parameter: ${sysmacProjectFileParameter.name}');
-    }
-    var sysmacProject = await MeynSysmacProject.loadFromFile(
-      File(sysmacProjectFilePath),
-    );
     File? generatedFile;
     try {
-      generatedFile = await writeIsa88ReportFile(sysmacProject);
+      generatedFile = await writeIsa88ReportFile(parameterValues);
       outputReport.addToMarkdown(
         '* Generated file: [${generatedFile.path}](${generatedFile.uri})',
       );
@@ -87,104 +79,105 @@ class Isa88ReportGenerator implements Generator {
     );
     return outputReport;
   }
-}
 
-Future<File> writeIsa88ReportFile(MeynSysmacProject sysmacProject) async {
-  var outputFile = createOutputFile(sysmacProject, '-Isa88Report.csv');
-  logger.info('Creating: ${outputFile.path}');
+  Future<File> writeIsa88ReportFile(
+    Map<String, dynamic> parameterValues,
+  ) async {
+    var sysmacProject = await MeynSysmacProjectService().getProject(
+      parameterValues,
+    );
+    var outputFilePath = await createOutputPath(outputPath, parameterValues);
+    var outputFile = File(outputFilePath);
 
-  var isa88Nodes = sysmacProject.isa88Nodes;
+    var isa88Nodes = sysmacProject.isa88Nodes;
 
-  var report = StringBuffer();
+    var report = StringBuffer();
 
-  for (var rootNode in isa88Nodes) {
-    write(report, node: rootNode, level: 0);
-  }
-
-  await outputFile.create();
-  await outputFile.writeAsString(report.toString());
-
-  return outputFile;
-}
-
-void write(
-  StringBuffer report, {
-  required int level,
-  String? parameter,
-  required Isa88Node node,
-}) {
-  var nodeTitle =
-      '${parameter == null ? '' : '$parameter= '}${node.name} (${node.runtimeType})';
-  var nodeParameters = _createNodeParameters(node);
-  report.writeln(
-    [
-      for (int i = 0; i < level; i++) wrapWithDoubleQuotes(''),
-      wrapWithDoubleQuotes(nodeTitle),
-      for (int i = level; i < 10; i++) wrapWithDoubleQuotes(''),
-      for (var nodeParameter in nodeParameters.entries)
-        wrapWithDoubleQuotes(
-          '${nodeParameter.key}= '
-          '${nodeParameter.value}',
-        ),
-    ].join(','),
-  );
-
-  if (node is Unit) {
-    for (var equipmentModule in node.equipmentModules) {
-      write(report, level: level + 1, node: equipmentModule);
+    for (var rootNode in isa88Nodes) {
+      write(report, node: rootNode, level: 0);
     }
-  } else if (node is EquipmentModule) {
-    for (var child in node.argumentsAndModules.entries) {
-      write(report, level: level + 1, parameter: child.key, node: child.value);
+
+    await outputFile.create();
+    await outputFile.writeAsString(report.toString());
+
+    return outputFile;
+  }
+
+  String wrapWithDoubleQuotes(String text) => '"$text"';
+
+  void write(
+    StringBuffer report, {
+    required int level,
+    String? parameter,
+    required Isa88Node node,
+  }) {
+    var nodeTitle =
+        '${parameter == null ? '' : '$parameter= '}${node.name} (${node.runtimeType})';
+    var nodeParameters = _createNodeParameters(node);
+    report.writeln(
+      [
+        for (int i = 0; i < level; i++) wrapWithDoubleQuotes(''),
+        wrapWithDoubleQuotes(nodeTitle),
+        for (int i = level; i < 10; i++) wrapWithDoubleQuotes(''),
+        for (var nodeParameter in nodeParameters.entries)
+          wrapWithDoubleQuotes(
+            '${nodeParameter.key}= '
+            '${nodeParameter.value}',
+          ),
+      ].join(','),
+    );
+
+    if (node is Unit) {
+      for (var equipmentModule in node.equipmentModules) {
+        write(report, level: level + 1, node: equipmentModule);
+      }
+    } else if (node is EquipmentModule) {
+      for (var child in node.argumentsAndModules.entries) {
+        write(
+          report,
+          level: level + 1,
+          parameter: child.key,
+          node: child.value,
+        );
+      }
+    } else if (node is ControlModule) {
+      for (var controlModule in node.argumentsAndControlModules.entries) {
+        write(
+          report,
+          level: level + 1,
+          parameter: controlModule.key,
+          node: controlModule.value,
+        );
+      }
     }
-  } else if (node is ControlModule) {
-    for (var controlModule in node.argumentsAndControlModules.entries) {
-      write(
-        report,
-        level: level + 1,
-        parameter: controlModule.key,
-        node: controlModule.value,
-      );
+  }
+
+  Map<String, String> _createNodeParameters(Isa88Node node) {
+    if (node is Unit) {
+      return {
+        'variableToEquipment': node.variableToEquipment
+            .toNamePathWithArrayIndexes()
+            .join('.'),
+        'function(block)': node.callPath.toString(),
+      };
     }
-  }
-}
+    if (node is EquipmentModule) {
+      return {
+        'variableFromParent': node.variableFromParent
+            .toNamePathWithArrayIndexes()
+            .join('.'),
+        'function(block)': node.callPath.toString(),
+      };
+    }
+    if (node is ControlModule) {
+      return {
+        'variableFromParent': node.variableFromParent
+            .toNamePathWithArrayIndexes()
+            .join('.'),
+        'function(block)': node.callPath.toString(),
+      };
+    }
 
-Map<String, String> _createNodeParameters(Isa88Node node) {
-  if (node is Unit) {
-    return {
-      'variableToEquipment': node.variableToEquipment
-          .toNamePathWithArrayIndexes()
-          .join('.'),
-      'function(block)': node.callPath.toString(),
-    };
+    return {};
   }
-  if (node is EquipmentModule) {
-    return {
-      'variableFromParent': node.variableFromParent
-          .toNamePathWithArrayIndexes()
-          .join('.'),
-      'function(block)': node.callPath.toString(),
-    };
-  }
-  if (node is ControlModule) {
-    return {
-      'variableFromParent': node.variableFromParent
-          .toNamePathWithArrayIndexes()
-          .join('.'),
-      'function(block)': node.callPath.toString(),
-    };
-  }
-
-  return {};
-}
-
-File createOutputFile(MeynSysmacProject sysmacProject, String suffix) {
-  var sysmacFile = sysmacProject.identity.projectFile;
-  var directory = sysmacFile.parent.path;
-  var filename = sysmacFile.uri.pathSegments.last;
-  var nameWithoutExtension = filename.split('.').first;
-  var outputPath =
-      '$directory${Platform.pathSeparator}$nameWithoutExtension$suffix';
-  var outputFile = File(outputPath);
-  return outputFile;
 }

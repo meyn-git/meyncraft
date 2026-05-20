@@ -1,14 +1,13 @@
 import 'dart:io';
 
+import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
-import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
 import 'package:meyncraft/template/template.domain.dart';
 import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
-import 'package:template_engine/template_engine.dart' as te;
 
-class EventReportTemplate implements Template {
+class EventReportTemplate implements TemplateProject {
   @override
   final String name = 'EventReport';
 
@@ -23,7 +22,9 @@ class EventReportTemplate implements Template {
   final String? gitRepository = null;
 
   @override
-  final List<Parameter> parameters = [sysmacProjectFileParameter];
+  final List<TemplateProjectParameter> parameters = [
+    sysmacProjectFileParameter,
+  ];
 
   @override
   final List<Generator> generators = [EventReportGenerator()];
@@ -38,7 +39,7 @@ class EventReportGenerator implements Generator {
 
   @override
   final String outputPath =
-      '{{removeFileExtension(sysmacProjectFilePath)}}-EventReport.csv';
+      '{{removeFileExtension(sysmacProjectFilePath)}}-Report-Events.csv';
 
   @override
   final String? outputInstructions =
@@ -47,24 +48,13 @@ class EventReportGenerator implements Generator {
 
   @override
   Future<DynamicMarkdownTabContent> generate(
-    Template template,
+    TemplateProject template,
     Map<String, dynamic> parameterValues,
     DynamicMarkdownTabContent outputReport,
   ) async {
-    var sysmacProjectFilePath =
-        parameterValues[sysmacProjectFileParameter.name];
-    if (sysmacProjectFilePath == null) {
-      throw Exception('Missing parameter: ${sysmacProjectFileParameter.name}');
-    }
-    var sysmacProject = await MeynSysmacProject.loadFromFile(
-      File(sysmacProjectFilePath),
-    );
     File? generatedFile;
     try {
-      generatedFile = await writeEventReportFile(
-        sysmacProject,
-        parameterValues,
-      );
+      generatedFile = await writeEventReportFile(parameterValues);
       outputReport.addToMarkdown(
         '* Generated file: [${generatedFile.path}](${generatedFile.uri})',
       );
@@ -90,9 +80,11 @@ class EventReportGenerator implements Generator {
   }
 
   Future<File> writeEventReportFile(
-    MeynSysmacProject sysmacProject,
     Map<String, dynamic> parameterValues,
   ) async {
+    var sysmacProject = await MeynSysmacProjectService().getProject(
+      parameterValues,
+    );
     var events = sysmacProject.events;
 
     var report = StringBuffer();
@@ -120,47 +112,12 @@ class EventReportGenerator implements Generator {
       );
     }
 
-    var outputPath = await createOutputPath(parameterValues);
-    var outputFile = File(outputPath);
+    var outputFilePath = await createOutputPath(outputPath, parameterValues);
+    var outputFile = File(outputFilePath);
     await outputFile.create();
     await outputFile.writeAsString(report.toString());
     return outputFile;
   }
 
-  Future<String> createOutputPath(te.VariableMap? parameters) async {
-    var functionGroups = [
-      ...te.DefaultFunctionGroups(),
-      te.FunctionGroup('MeynCraftFunctions', [
-        te.ExpressionFunction(
-          name: 'removeFileExtension',
-          description: 'removes a ile extension from a file path',
-          exampleExpression: "removeFileExtension('myPath/myFile.exe')",
-          exampleResult: "'myPath/myFile'",
-          parameters: <te.Parameter>[
-            te.Parameter(
-              name: 'filePath',
-              description: 'A file path, either absolute, relative or a URI',
-              presence: te.Presence.mandatory(),
-            ),
-          ],
-          function: (position, renderContext, parameters) {
-            var filePath = parameters['filePath'];
-            if (filePath is! String) {
-              throw te.ParameterException('String expected');
-            }
-
-            final index = filePath.lastIndexOf('.');
-            if (index == -1) return Future.value(filePath);
-            return Future.value(filePath.substring(0, index));
-          },
-        ),
-      ]),
-    ];
-    var engine = te.TemplateEngine(functionGroups: functionGroups);
-    var parseResult = await engine.parseText(outputPath);
-    var renderResult = await engine.render(parseResult, parameters);
-    return renderResult.text;
-  }
+  String wrapWithDoubleQuotes(String text) => '"$text"';
 }
-
-String wrapWithDoubleQuotes(String text) => '"$text"';

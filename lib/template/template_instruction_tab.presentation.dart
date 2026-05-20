@@ -7,7 +7,7 @@ import 'package:meyncraft/template/template_about_tab.presentation.dart';
 
 class TemplateInstructionTab extends MarkdownTab {
   TemplateInstructionTab(
-    Template template,
+    TemplateProject template,
     Generator generator,
     List<File> generatedFiles, {
     super.key,
@@ -15,7 +15,7 @@ class TemplateInstructionTab extends MarkdownTab {
   //, closable: true
 
   static DynamicMarkdownTabContent createMarkdownContent(
-    Template template,
+    TemplateProject template,
     Generator generator,
     List<File> generatedFiles,
   ) {

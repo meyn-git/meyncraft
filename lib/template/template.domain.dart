@@ -1,6 +1,6 @@
 import 'package:meyncraft/template/generate/generator.domain.dart';
 
-abstract class Template {
+abstract class TemplateProject {
   /// Template name
   String get name;
 
@@ -14,7 +14,7 @@ abstract class Template {
   String? get documentation;
 
   /// Input parameters
-  List<Parameter> get parameters;
+  List<TemplateProjectParameter> get parameters;
 
   /// Template source-to-target mappings
   List<Generator> get generators;
@@ -22,8 +22,8 @@ abstract class Template {
   List<String> get tags;
 }
 
-/// A template from a template manifest file
-class TemplateManifest implements Template {
+/// A template from a template manifest YAML file
+class TemplateProjectManifest implements TemplateProject {
   /// Template name
   @override
   final String name;
@@ -42,7 +42,7 @@ class TemplateManifest implements Template {
 
   /// Input parameters
   @override
-  final List<Parameter> parameters;
+  final List<TemplateProjectParameter> parameters;
 
   /// Template source-to-target mappings
   @override
@@ -51,7 +51,7 @@ class TemplateManifest implements Template {
   @override
   final List<String> tags;
 
-  TemplateManifest({
+  TemplateProjectManifest({
     required this.name,
     required this.description,
     this.gitRepository,
@@ -64,7 +64,7 @@ class TemplateManifest implements Template {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TemplateManifest &&
+      other is TemplateProjectManifest &&
           runtimeType == other.runtimeType &&
           name == other.name;
 
@@ -72,13 +72,13 @@ class TemplateManifest implements Template {
   int get hashCode => name.hashCode;
 }
 
-class Parameter {
+class TemplateProjectParameter {
   final String name;
   final String description;
   final ParameterType type;
   final bool required;
 
-  const Parameter({
+  const TemplateProjectParameter({
     required this.name,
     required this.description,
     required this.type,
@@ -88,7 +88,7 @@ class Parameter {
 
 enum ParameterType { string, enumeration, boolean, number, relativePath, uri }
 
-final sysmacProjectFileParameter = const Parameter(
+final sysmacProjectFileParameter = const TemplateProjectParameter(
   name: 'sysmacProjectFilePath',
   description: 'Path to the Sysmac project file to generate from',
   type: ParameterType.relativePath,
