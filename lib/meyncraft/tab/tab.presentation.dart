@@ -21,10 +21,10 @@ class _ClosableTabsViewState extends State<ClosableTabsView> {
   final TabService _tabService = GetIt.I.get<TabService>();
 
   final toolTipText = [
-    SelectNextTab().descriptionWithHotkey,
-    SelectPreviousTab().descriptionWithHotkey,
-    CloseCurrentTab().descriptionWithHotkey,
-    CloseAllTabs().descriptionWithHotkey,
+    SelectNextTab().toolTip,
+    SelectPreviousTab().toolTip,
+    CloseCurrentTab().toolTip,
+    CloseAllTabs().toolTip,
   ].join('\n');
 
   @override

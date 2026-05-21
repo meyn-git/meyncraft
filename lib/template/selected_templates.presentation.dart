@@ -70,7 +70,7 @@ class TopToolBar extends StatelessWidget {
           ),
           Spacer(),
           Tooltip(
-            message: OpenMeynAboutCraftTab().descriptionWithHotkey,
+            message: OpenMeynAboutCraftTab().toolTip,
             child: IconButton(
               icon: Icon(Icons.info_outline_rounded),
               iconSize: 30.0,

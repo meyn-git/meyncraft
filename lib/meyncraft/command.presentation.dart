@@ -8,7 +8,7 @@ class ElevatedCommandButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Tooltip(
-    message: command.descriptionWithHotkey,
-    child: ElevatedButton(onPressed: command.action, child: Text(command.text)),
+    message: command.toolTip,
+    child: ElevatedButton(onPressed: command.action, child: Text(command.name)),
   );
 }

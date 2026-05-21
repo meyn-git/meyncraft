@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/tab.presentation.dart';
 
 /// Service to manage the state of open tabs in the application.
@@ -40,9 +41,7 @@ class TabService extends ChangeNotifier {
 
   void addOrSelectTab(ClosableTab tab) {
     final existingTab = _tabs.firstWhereOrNull(
-      (otherTab) =>
-          tab.runtimeType == otherTab.runtimeType &&
-          tab.tabTitle == otherTab.tabTitle,
+      (otherTab) => isMarkdownTabWithSameTitleAndContent(tab, otherTab),
     );
 
     if (existingTab == null) {
@@ -84,5 +83,18 @@ class TabService extends ChangeNotifier {
   ClosableTab? currentTab() {
     if (_tabs.isEmpty) return null;
     return _tabs[_selectedIndex];
+  }
+
+  bool isMarkdownTabWithSameTitleAndContent(
+    ClosableTab tab,
+    ClosableTab otherTab,
+  ) {
+    if (tab is! MarkdownTab || otherTab is! MarkdownTab) {
+      return false;
+    }
+    if (tab.tabTitle != otherTab.tabTitle) {
+      return false;
+    }
+    return tab.content.markdown == otherTab.content.markdown;
   }
 }

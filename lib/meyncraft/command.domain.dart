@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/about/meyncraft_about_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/tab.service.dart';
@@ -15,15 +15,50 @@ abstract class Command extends Intent {
   const Command();
 
   SingleActivator? get hotKey;
-  String? get hotKeyText =>
-      hotKey?.debugDescribeKeys().replaceAll(' ', '').replaceAll('Key', '');
 
-  String get text;
+  /// The name on the button and in the menu
+  String get name;
 
-  String get descriptionWithHotkey =>
-      '$text${hotKey == null ? '' : ' ($hotKeyText)'}';
+  /// override this to provide a more detailed description, e.g. for tooltips
+  String get description => name;
+
+  /// Description with the hotkey for display in tooltips
+  String get toolTip =>
+      '$description${hotKey == null ? '' : ' (${hotKey!.toShortcutString()})'}';
 
   void Function() get action;
+}
+
+extension SingleActivatorX on SingleActivator {
+  String toShortcutString() => <String>[
+    if (control) 'Control',
+    if (alt) 'Alt',
+    if (meta) 'Meta',
+    if (shift) 'Shift',
+    _keyLabel(trigger),
+  ].join('+');
+
+  String _keyLabel(LogicalKeyboardKey key) {
+    var specialKeys = {
+      LogicalKeyboardKey.enter: 'Enter',
+      LogicalKeyboardKey.escape: 'Esc',
+      LogicalKeyboardKey.space: 'Space',
+      LogicalKeyboardKey.tab: 'Tab',
+      LogicalKeyboardKey.backspace: 'Backspace',
+      LogicalKeyboardKey.delete: 'Del',
+    };
+
+    if (specialKeys.containsKey(key)) {
+      return specialKeys[key]!;
+    }
+
+    // Prefer keyLabel if meaningful
+    if (key.keyLabel.isNotEmpty) {
+      return key.keyLabel.toUpperCase();
+    }
+
+    return key.keyId.toString();
+  }
 }
 
 class SelectNextTab extends Command {
@@ -33,7 +68,7 @@ class SelectNextTab extends Command {
   final hotKey = const SingleActivator(LogicalKeyboardKey.tab, control: true);
 
   @override
-  final text = 'Select next tab';
+  final name = 'Select next tab';
 
   @override
   void Function() get action => () {
@@ -52,7 +87,7 @@ class SelectPreviousTab extends Command {
   );
 
   @override
-  final text = 'Select precious tab';
+  final name = 'Select precious tab';
 
   @override
   void Function() get action => () {
@@ -67,7 +102,11 @@ class CloseCurrentTab extends Command {
   final hotKey = const SingleActivator(LogicalKeyboardKey.f4, control: true);
 
   @override
-  String get text => 'Close tab';
+  final String name = 'Close';
+
+  @override
+  final String description = 'Close the current tab';
+
   @override
   void Function() get action => () {
     GetIt.I.get<TabService>().closeCurrentTab();
@@ -85,7 +124,8 @@ class CloseAllTabs extends Command {
   );
 
   @override
-  String get text => 'Close all tabs';
+  String get name => 'Close all tabs';
+
   @override
   void Function() get action => () {
     GetIt.I.get<TabService>().closeAllTabs();
@@ -98,7 +138,10 @@ class Generate extends Command {
   final hotKey = const SingleActivator(LogicalKeyboardKey.keyG, control: true);
 
   @override
-  final text = 'Generate';
+  final name = 'Generate';
+
+  @override
+  final String description = 'Generate using the selected templates';
 
   @override
   void Function() get action => () async {
@@ -129,7 +172,11 @@ class ReGenerate extends Command {
   final hotKey = const SingleActivator(LogicalKeyboardKey.keyR, control: true);
 
   @override
-  final text = 'Re-generate';
+  final name = 'Re-generate';
+
+  @override
+  final String description =
+      'Re-generate the same templates with the same parameters';
 
   @override
   void Function() get action => () async {
@@ -158,16 +205,21 @@ class ReGenerate extends Command {
 
 class OpenMeynAboutCraftTab extends Command {
   const OpenMeynAboutCraftTab();
+
+  @override
+  final hotKey = const SingleActivator(LogicalKeyboardKey.f1);
+
+  @override
+  final String name = 'About MeynCraft';
+
+  @override
+  final String description =
+      'Open the MeynCraft about tab for more information.';
+
   @override
   void Function() get action => () async {
     var tabService = GetIt.I.get<TabService>();
     var aboutTab = await MeynCraftAboutTab.create();
     tabService.addOrSelectTab(aboutTab);
   };
-
-  @override
-  final hotKey = const SingleActivator(LogicalKeyboardKey.f1);
-
-  @override
-  final String text = 'Open MeynCraft about tab';
 }
