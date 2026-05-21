@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyncraft/command.domain.dart';
 import 'package:meyncraft/meyncraft/command.presentation.dart';
 import 'package:meyncraft/template/generate/generator_report.domain.dart';
