@@ -1,11 +1,10 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
-import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
+import 'package:meyncraft/template/generate/generator_report.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
-import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 
 class EventReportTemplate implements TemplateProject {
   @override
@@ -47,47 +46,42 @@ class EventReportGenerator implements Generator {
       'using Excel or any other spreadsheet software.';
 
   @override
-  Future<DynamicMarkdownTabContent> generate(
+  Future<GeneratorReport> generate(
     TemplateProject template,
     Map<String, dynamic> parameterValues,
-    DynamicMarkdownTabContent outputReport,
+    GeneratorReport report,
   ) async {
-    File? generatedFile;
+    var generatedFiles = <File>[];
     try {
-      generatedFile = await writeEventReportFile(parameterValues);
-      outputReport.addToMarkdown(
-        '* Generated file: [${generatedFile.path}](${generatedFile.uri})',
+      var generatedFile = await writeEventReportFile(
+        template,
+        parameterValues,
+        report,
       );
+      report.addGeneratedFileToMarkdown(generatedFile);
+      generatedFiles.add(generatedFile);
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addTabLink(
-        GeneratorErrorTab(template, this, exception, stackTrace),
-      );
-      outputReport.addToMarkdown(
-        '* **Failed** [Click here for more information]($linkUri)',
-      );
+      report.addFailureToMarkdown(template, this, exception, stackTrace);
     }
-    if (generatedFile == null) {
-      outputReport.addToMarkdown('* No files generated');
-    }
-    var linkUri = outputReport.addTabLink(
-      TemplateInstructionTab(template, this, [generatedFile!]),
-    );
-    outputReport.addToMarkdown(
-      '* Generated 1 file. '
-      '[Click here for instructions on how to use the generated file.]($linkUri)',
-    );
-    return outputReport;
+    report.addGenerationSummary(template, this, generatedFiles);
+    return report;
   }
 
   Future<File> writeEventReportFile(
+    TemplateProject template,
     Map<String, dynamic> parameterValues,
+    GeneratorReport report,
   ) async {
     var sysmacProject = await MeynSysmacProjectService().getProject(
       parameterValues,
     );
     var events = sysmacProject.events;
+    report.addToMarkdown('* Found ${events.length} Sysmac events\n');
+    if (events.warnings.isNotEmpty) {
+      report.addWarningsToMarkdown(template, this, events.warnings);
+    }
 
-    var report = StringBuffer();
+    var csv = StringBuffer();
     for (var event in events) {
       var componentCodesOldStyle = event.componentCodes.join(', ');
       var componentCodesNewStyle = event.variableNameWithComponentCodes.values
@@ -97,7 +91,7 @@ class EventReportGenerator implements Generator {
         for (var entry in event.variableNameWithHardwareAddress.entries)
           '${entry.key}:${entry.value}',
       ].join(', ');
-      report.writeln(
+      csv.writeln(
         [
           event.number,
           event.namePath,
@@ -115,7 +109,7 @@ class EventReportGenerator implements Generator {
     var outputFilePath = await createOutputPath(outputPath, parameterValues);
     var outputFile = File(outputFilePath);
     await outputFile.create();
-    await outputFile.writeAsString(report.toString());
+    await outputFile.writeAsString(csv.toString());
     return outputFile;
   }
 

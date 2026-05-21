@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
 import 'package:meyncraft/meyn_sysmac/event/additional_attribute.infrastructure.dart';
 import 'package:meyncraft/meyn_sysmac/event/event.domain.dart';
@@ -9,18 +8,24 @@ import 'package:meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/meyn_sysmac/event/component_code.domain.dart';
+import 'package:meyncraft/template/generate/warning.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
 const String eventGlobalVariableName = 'EventGlobal';
 
-List<Event> createEvents(SysmacProject sysmacProject) {
+Events createEvents(SysmacProject sysmacProject) {
   var eventGlobal = sysmacProject.globalVariables.firstWhereOrNull(
     (v) => v.name == eventGlobalVariableName,
   );
   if (eventGlobal == null) {
-    logger.warning('Could not find a global variable with name: $eventGlobal');
-    return [];
+    return Events([], [
+      Warning(
+        'Could not find a global variable with name: $eventGlobalVariableName',
+      ),
+    ]);
   }
+
+  var warnings = <Warning>[];
   var eventPaths = eventGlobal.findAllNodePaths<NodePathWithIndexes>(
     eventPathFinder(),
   );
@@ -33,11 +38,12 @@ List<Event> createEvents(SysmacProject sysmacProject) {
           counter,
           eventPath,
           additionalCommentAttributeMap,
+          warnings,
         ),
       )
       .toList();
-  logger.info('Found ${events.length} events');
-  return events;
+
+  return Events(events, warnings);
 }
 
 bool isLeafNode(Node<Node<dynamic>> node) => node.children.isEmpty;
@@ -119,24 +125,34 @@ Event createEvent(
   Counter counter,
   NodePathWithIndexes eventPath,
   Map<String, String> additionalCommentAttributeMap,
+  List<Warning> warnings,
 ) {
   var namePathWithArrayIndexes = eventPath.toNamePathWithArrayIndexes().join(
     '.',
   );
-  var eventValues = createEventValues(additionalCommentAttributeMap, eventPath);
+  var eventValues = createEventValues(
+    additionalCommentAttributeMap,
+    eventPath,
+    warnings,
+  );
   var acknowledgeNeeded = AcknowledgeAttribute.acknowledge(eventValues);
   var priority = PriorityAttribute.priority(eventValues);
   var ioAttributeVariablePaths = IoAttribute.findIoAttributeVariablePaths(
     sysmacProject,
     namePathWithArrayIndexes,
     eventValues,
+    warnings,
   );
   var variablePathWithComponentCodes =
       IoAttribute.findIoVariableNameWithComponentCodes(
         ioAttributeVariablePaths,
+        warnings,
       );
   var variableNameWithHardwareAddress =
-      IoAttribute.findIoVariableNameWithAddresses(ioAttributeVariablePaths);
+      IoAttribute.findIoVariableNameWithAddresses(
+        ioAttributeVariablePaths,
+        warnings,
+      );
 
   //TODO change to ioVariables
   var componentCodes = findComponentCodes(
@@ -163,6 +179,7 @@ Event createEvent(
 List<dynamic> createEventValues(
   Map<String, String> additionalCommentAttributeMap,
   NodePathWithIndexes eventPath,
+  List<Warning> warnings,
 ) {
   var additionalAttributes = findAdditionalCommentAttributes(
     additionalCommentAttributeMap,
@@ -177,8 +194,10 @@ List<dynamic> createEventValues(
   var eventValues = replaceEventValues(namePath, values);
   var unknownAttributes = eventValues.whereType<UnknownAttribute>();
   if (unknownAttributes.isNotEmpty) {
-    logger.warning(
-      'Unknown attributes found in event "$namePath" with commentPath "$commentPath": $unknownAttributes',
+    warnings.add(
+      Warning(
+        'Unknown attributes found in event "$namePath" with commentPath "$commentPath": $unknownAttributes',
+      ),
     );
   }
   return eventValues;
@@ -303,3 +322,8 @@ String createGroupName(String namePath) {
 Iterable<String> _uniqueNamePaths(Iterable<NodePath> nodePaths) => nodePaths
     .map((nodePath) => nodePath.map((node) => node.name).join('.'))
     .toSet();
+
+class Events extends DelegatingList<Event> {
+  final List<Warning> warnings;
+  Events(super.events, this.warnings);
+}

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meyncraft/meyncraft/about/meyncraft_about_tab.presentation.dart';
-import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/meyncraft/tab/tab.service.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
 import 'package:meyncraft/template/generate/generator_parameter_tab.presentation.dart';
+import 'package:meyncraft/template/generate/generator_report.domain.dart';
 import 'package:meyncraft/template/generate/generator_result_tab.presentation.dart';
 import 'package:meyncraft/template/selected_templates.presentation.dart';
 import 'package:meyncraft/template/selected_templates.service.dart';
@@ -151,7 +151,7 @@ class ReGenerate extends Command {
     await generate(
       selectedTemplates,
       parameterValues,
-      generatorResultTab.content as DynamicMarkdownTabContent,
+      generatorResultTab.content as GeneratorReport,
     );
   };
 }

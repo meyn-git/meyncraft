@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
-import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
 import 'package:meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
+import 'package:meyncraft/template/generate/generator_report.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
-import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 
 class Isa88ReportTemplate implements TemplateProject {
   @override
@@ -48,36 +47,21 @@ class Isa88ReportGenerator implements Generator {
       'using Excel or any other spreadsheet software.';
 
   @override
-  Future<DynamicMarkdownTabContent> generate(
+  Future<GeneratorReport> generate(
     TemplateProject template,
     Map<String, dynamic> parameterValues,
-    DynamicMarkdownTabContent outputReport,
+    GeneratorReport report,
   ) async {
-    File? generatedFile;
+    List<File> generatedFiles = [];
     try {
-      generatedFile = await writeIsa88ReportFile(parameterValues);
-      outputReport.addToMarkdown(
-        '* Generated file: [${generatedFile.path}](${generatedFile.uri})',
-      );
+      var generatedFile = await writeIsa88ReportFile(parameterValues);
+      report.addGeneratedFileToMarkdown(generatedFile);
+      generatedFiles.add(generatedFile);
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addTabLink(
-        GeneratorErrorTab(template, this, exception, stackTrace),
-      );
-      outputReport.addToMarkdown(
-        '* **Failed** [Click here for more information]($linkUri)',
-      );
+      report.addFailureToMarkdown(template, this, exception, stackTrace);
     }
-    if (generatedFile == null) {
-      outputReport.addToMarkdown('* No files generated');
-    }
-    var linkUri = outputReport.addTabLink(
-      TemplateInstructionTab(template, this, [generatedFile!]),
-    );
-    outputReport.addToMarkdown(
-      '* Generated 1 file. '
-      '[Click here for instructions on how to use the generated file.]($linkUri)',
-    );
-    return outputReport;
+    report.addGenerationSummary(template, this, generatedFiles);
+    return report;
   }
 
   Future<File> writeIsa88ReportFile(

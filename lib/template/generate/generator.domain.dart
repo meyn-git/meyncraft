@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
+import 'package:meyncraft/template/generate/generator_report.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
 
 abstract class Generator {
@@ -21,9 +21,9 @@ abstract class Generator {
   /// for this mapping to be applied, e.g. "{{includeTests == true}}"
   // TODO String? get when;
 
-  Future<DynamicMarkdownTabContent> generate(
+  Future<GeneratorReport> generate(
     TemplateProject template,
     Map<String, dynamic> parameterValues,
-    DynamicMarkdownTabContent outputReport,
+    GeneratorReport report,
   );
 }

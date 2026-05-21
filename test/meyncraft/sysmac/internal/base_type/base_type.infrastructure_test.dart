@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/sysmac/internal/base_type/base_type.infrastructure.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
@@ -832,7 +830,6 @@ void main() {
   });
 
   group('function createDataTypes', () {
-    GetIt.I.registerSingleton<Logger>(Logger());
     File file = SysmacProjectTestResource().file;
     late SysmacProjectArchive sysmacProjectArchive;
     setUpAll(() async {

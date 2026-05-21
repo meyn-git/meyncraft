@@ -57,7 +57,7 @@ Map<VariableGroup, List<Variable>> createVariableGroups(
   var projectIndexXml = sysmacProjectArchive.projectIndexXml;
   var variableArchiveFile = projectIndexXml.findArchiveFile(id);
   if (variableArchiveFile == null) {
-    logger.warning('Could not find variable archive file: $id');
+    logger.w('Could not find variable archive file: $id');
     return {};
   }
   var variableData = convertContentToUtf8(variableArchiveFile);

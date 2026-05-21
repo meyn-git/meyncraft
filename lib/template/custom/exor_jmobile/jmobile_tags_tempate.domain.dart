@@ -1,18 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
-import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/custom/exor_jmobile/exor_data_type.domain.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
 import 'package:meyncraft/sysmac/iec61131_10/iec61131_10.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
+import 'package:meyncraft/template/generate/generator_report.domain.dart';
+import 'package:meyncraft/template/generate/warning.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
 import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 import 'package:xml/xml.dart';
@@ -67,60 +68,59 @@ class JMobileTagsGenerator implements Generator {
       'When these tags are no longer used you can remove them from the tags.\n';
 
   @override
-  Future<DynamicMarkdownTabContent> generate(
+  Future<GeneratorReport> generate(
     TemplateProject template,
     Map<String, dynamic> parameterValues,
-    DynamicMarkdownTabContent outputReport,
+    GeneratorReport report,
   ) async {
     var generatedFiles = <File>[];
     try {
-      generatedFiles = await writeJMobileTagsFile(
+      var generatedFile = await writeJMobileTagsFile(
+        template,
         parameterValues,
-        outputReport,
+        report,
       );
+      report.addGeneratedFileToMarkdown(generatedFile);
+      generatedFiles.add(generatedFile);
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addTabLink(
-        GeneratorErrorTab(template, this, exception, stackTrace),
-      );
-      outputReport.addToMarkdown(
-        '* **Failed** [Click here for more information]($linkUri)',
-      );
+      report.addFailureToMarkdown(template, this, exception, stackTrace);
     }
     if (generatedFiles.isEmpty) {
-      outputReport.addToMarkdown('* No files generated');
+      report.addToMarkdown('* No files generated');
     } else {
-      var linkUri = outputReport.addTabLink(
+      var linkUri = report.addTabLink(
         TemplateInstructionTab(template, this, generatedFiles),
       );
       var fileOrFiles = generatedFiles.length == 1 ? 'file' : 'files';
-      outputReport.addToMarkdown(
+      report.addToMarkdown(
         '* Generated ${generatedFiles.length} $fileOrFiles. '
         '[Click here for instructions on how to use the generated $fileOrFiles.]($linkUri)',
       );
     }
-    return outputReport;
+    return report;
   }
 
   /// creates an xml file with [ExorTag]s generated from a Sysmac project file
   /// to be imported by JMobile
-  Future<List<File>> writeJMobileTagsFile(
+  Future<File> writeJMobileTagsFile(
+    TemplateProject template,
     Map<String, dynamic> parameterValues,
-    DynamicMarkdownTabContent outputReport,
+    GeneratorReport report,
   ) async {
     var sysmacProject = await MeynSysmacProjectService().getProject(
       parameterValues,
     );
     var tags = createTags(sysmacProject);
-    outputReport.addToMarkdown('* Found ${tags.length} Exor-JMobile tags\n');
+    report.addToMarkdown('* Found ${tags.length} Exor-JMobile tags\n');
+    if (tags.warnings.isNotEmpty) {
+      report.addWarningsToMarkdown(template, this, tags.warnings);
+    }
     String formattedXml = createFormattedTagsXml(tags);
     var outputFilePath = await createOutputPath(outputPath, parameterValues);
     var outputFile = File(outputFilePath);
     await outputFile.create();
     await outputFile.writeAsString(formattedXml);
-    outputReport.addToMarkdown(
-      '* Generated file: [${outputFile.path}](${outputFile.uri})\n',
-    );
-    return [outputFile];
+    return outputFile;
   }
 }
 
@@ -136,7 +136,7 @@ String createFormattedTagsXml(Iterable<ExorTag> tags) {
   return formattedXml;
 }
 
-Iterable<ExorTag> createTags(
+ExorTags createTags(
   SysmacProject sysmacProject, {
   List<bool Function(String namePath)> skipRules = const [
     skipMeynConnect,
@@ -155,10 +155,26 @@ Iterable<ExorTag> createTags(
           (skipRule) => skipRule(tagPath.toNamePath().join('.')),
         ),
       );
-  var exorTags = tagPaths
-      .map((tagPath) => _createExorTag(tagPath))
-      .whereType<ExorTag>();
-  return exorTags;
+
+  var exorTags = <ExorTag>[];
+  var warnings = <Warning>[];
+  for (var tagPath in tagPaths) {
+    try {
+      var exorTag = _createExorTag(tagPath);
+      if (exorTag != null) {
+        exorTags.add(exorTag);
+      }
+    } on Exception catch (e) {
+      warnings.add(Warning.fromException(e));
+    }
+  }
+  return ExorTags(exorTags, warnings);
+}
+
+class ExorTags extends DelegatingList<ExorTag> {
+  final List<Warning> warnings;
+
+  ExorTags(super.tags, this.warnings);
 }
 
 bool skipMeynConnect(String namePath) => namePath.startsWith(RegExp(r'L\d_'));
@@ -355,10 +371,9 @@ ExorTag? _createExorTag(NodePathWithIndexes tagPath) {
   var nestedBaseType = baseTypeLeaf(baseType);
   var exorDataType = ExorDataType.findCompatibleType(nestedBaseType);
   if (exorDataType == null) {
-    logger.warning(
+    throw Exception(
       'No compatible Exor data type found for Omron base type: $namePath',
     );
-    return null;
   }
   return ExorTag(name: namePath, exorDataType: exorDataType);
 }
@@ -374,16 +389,15 @@ ExorTag? _createExorTag(NodePathWithIndexes tagPath) {
 //     : ExorDataType.findCompatibleType(nestedBaseType);
 // }
 
-ExorTag? _createExorTagForOneDimensionalArray(
+ExorTag _createExorTagForOneDimensionalArray(
   String namePath,
   ArrayType arrayType,
 ) {
   var compatibleType = ExorDataType.findCompatibleType(baseTypeLeaf(arrayType));
   if (compatibleType == null) {
-    logger.warning(
+    throw Exception(
       'No compatible Exor data type found for Omron base type: $namePath',
     );
-    return null;
   }
   return ExorTag(
     name: namePath,

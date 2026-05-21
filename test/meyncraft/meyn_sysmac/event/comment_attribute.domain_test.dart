@@ -1,19 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
 import 'package:meyncraft/meyn_sysmac/event/component_code.domain.dart';
 import 'package:meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/template/generate/warning.domain.dart';
 import 'package:petitparser/petitparser.dart';
 import 'package:shouldly/shouldly.dart';
 
 import '../../../test_resource.dart';
 
 void main() {
-  GetIt.I.registerSingleton<Logger>(Logger());
-
   group('commentParser', () {
     test("commentParser.parse('') should return the correct result", () {
       var result = commentPathParser.parse('');
@@ -448,10 +445,12 @@ void main() {
         var ioAttribute = IoAttribute('iMtrProtOk');
         var eventValues = [ioAttribute];
 
+        var warnings = <Warning>[];
         var ioAttributeVariablePaths = IoAttribute.findIoAttributeVariablePaths(
           sysmacProject,
           eventNamePath,
           eventValues,
+          warnings,
         );
 
         ioAttributeVariablePaths.length.should.be(1);
@@ -484,11 +483,13 @@ void main() {
         var ioAttribute1 = IoAttribute('iLvlLow');
         var ioAttribute2 = IoAttribute('iLvlProd');
         var eventValues = [ioAttribute1, ioAttribute2];
+        var warnings = <Warning>[];
 
         var ioAttributeVariablePaths = IoAttribute.findIoAttributeVariablePaths(
           sysmacProject,
           eventNamePath,
           eventValues,
+          warnings,
         );
 
         ioAttributeVariablePaths.length.should.be(2);

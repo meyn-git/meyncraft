@@ -47,7 +47,7 @@ Program? createProgram(SysmacProject sysmacProject, XmlElement programElement) {
       // which seems to be related to safety programs and functions
       return null;
     default:
-      logger.warning('unknown program sub type: $subType');
+      logger.w('unknown program sub type: $subType');
       return null;
   }
 }
@@ -125,7 +125,7 @@ StructuredTextProgram? createStructuredTextProgram(
   var id = pouBodyElement.getAttribute(idAttribute)!;
   var archiveFile = sysmacProject.archive.projectIndexXml.findArchiveFile(id);
   if (archiveFile == null) {
-    logger.warning('StructuredTextProgram archive file: $id.xml not found');
+    logger.w('StructuredTextProgram archive file: $id.xml not found');
     return null;
   }
   var structuredText = createStructuredText(archiveFile);
@@ -146,7 +146,7 @@ LadderSection? createLadderSection(
   String id = entityElement.getAttribute(idAttribute)!;
   String subType = entityElement.getAttribute(subTypeAttribute)!;
   if (subType != 'Ladder') {
-    logger.warning('Unsupported Entity sub-type: $subType');
+    logger.w('Unsupported Entity sub-type: $subType');
     return null;
   }
   return createLadderBody(
@@ -168,7 +168,7 @@ LadderSection createLadderBody({
 List<Rung> createRungs(SysmacProjectArchive sysmacProjectArchive, String id) {
   var archiveFile = sysmacProjectArchive.projectIndexXml.findArchiveFile(id);
   if (archiveFile == null) {
-    logger.warning('Ladder program archive file: $id.xml not found');
+    logger.w('Ladder program archive file: $id.xml not found');
     return [];
   }
   var content = convertContentToUtf8(archiveFile);
@@ -193,7 +193,7 @@ Rung createRungFromJsonMap(Map<String, dynamic> map) {
     var objectMap = object as Map<String, dynamic>;
     var ladderObject = createLadderObject(objectMap);
     if (ladderObject == null) {
-      logger.warning('Unknown ladder object type: ${objectMap['__type']}');
+      logger.w('Unknown ladder object type: ${objectMap['__type']}');
     } else {
       ladderObjects.add(ladderObject);
     }
@@ -320,9 +320,9 @@ Parameter? createParameter(dynamic parameter) {
     _ => null,
   };
   if (type == null) {
-    logger.warning(
-      'Unsupported Function(Block) parameter type: ${parameter['__type']}',
-    );
+    // warning(
+    //   'Unsupported Function(Block) parameter type: ${parameter['__type']}',
+    // );
     return null;
   }
   var argument = parameter['Arg']!;

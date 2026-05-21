@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:meyncraft/template/custom/exor_jmobile/jmobile_tags_tempate.domain.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:shouldly/shouldly.dart';
 
@@ -9,7 +7,6 @@ import '../../../test_resource.dart';
 
 void main() {
   group('function: createTags', () {
-    GetIt.I.registerSingleton<Logger>(Logger());
     late SysmacProject sysmacProject;
 
     setUp(() async {
@@ -18,7 +15,7 @@ void main() {
       );
     });
     test('Should return tags', () {
-      Iterable<ExorTag> tags = createTags(sysmacProject);
+      var tags = createTags(sysmacProject);
       tags.length.should.be(12606);
     });
 

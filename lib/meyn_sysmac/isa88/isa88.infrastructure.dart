@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:fluent_regex/fluent_regex.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
 import 'package:meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
@@ -9,27 +8,40 @@ import 'package:meyncraft/sysmac/internal/device/nj_plc/program/program.domain.d
 import 'package:meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/sysmac/internal/variable/variable.domain.dart';
+import 'package:meyncraft/template/generate/warning.domain.dart';
 
 /// See [Isa88Node]
-List<Isa88Node> createMeynIsa88Nodes(SysmacProject sysmacProject) {
+Isa88Nodes createMeynIsa88Nodes(SysmacProject sysmacProject) {
+  var warnings = <Warning>[];
   var allCallPaths = findAllCallPaths(sysmacProject);
   var isa88Nodes = <Isa88Node>[];
-
   var fbUnitControlCallPaths = allCallPaths.where(isFbUnitControl);
 
   for (var fbUnitControlCallPath in fbUnitControlCallPaths) {
-    var unit = createUnit(sysmacProject, allCallPaths, fbUnitControlCallPath);
+    var unit = createUnit(
+      sysmacProject,
+      allCallPaths,
+      fbUnitControlCallPath,
+      warnings,
+    );
     if (unit != null) {
       isa88Nodes.add(unit);
     }
   }
 
-  return isa88Nodes;
+  return Isa88Nodes(isa88Nodes, warnings);
+}
+
+class Isa88Nodes extends DelegatingList<Isa88Node> {
+  final List<Warning> warnings;
+
+  Isa88Nodes(super.base, this.warnings);
 }
 
 NodePathWithIndexes? _variableToEquipment(
   List<Variable> globalVariables,
   CallPath fbUnitInterfaceCallPath,
+  List<Warning> warnings,
 ) {
   final RegExp unitSuffix = RegExp(r'\.Unit$', caseSensitive: false);
   var variableToEquipmentExpression = fbUnitInterfaceCallPath.call.parametersIn
@@ -45,8 +57,8 @@ NodePathWithIndexes? _variableToEquipment(
           )
           as NodePathWithIndexes);
   if (variableToEquipment.isEmpty) {
-    logger.warning(
-      'Could not find global variable: $variableToEquipmentExpression',
+    warnings.add(
+      Warning('Could not find global variable: $variableToEquipmentExpression'),
     );
   }
 
@@ -57,6 +69,7 @@ List<EquipmentModule> _createEquipmentModules(
   List<Variable> globalVariables,
   NodePathWithIndexes variableFromUnit,
   List<CallPath> allCallPaths,
+  List<Warning> warnings,
 ) {
   var fbUnitInterfaceCallPaths = allCallPaths.where(
     (callPath) =>
@@ -72,6 +85,7 @@ List<EquipmentModule> _createEquipmentModules(
     var variableToEquipment = _variableToEquipment(
       globalVariables,
       fbUnitInterfaceCallPath,
+      warnings,
     );
     if (variableToEquipment == null) continue;
 
@@ -262,6 +276,7 @@ Unit? createUnit(
   SysmacProject sysmacProject,
   List<CallPath> allCallPaths,
   CallPath unitCallPath,
+  List<Warning> warnings,
 ) {
   var interfaceExpression = unitCallPath.call.parametersIn
       .where((parameter) => parameter.argument == 'ioUnitPackML')
@@ -286,6 +301,7 @@ Unit? createUnit(
     sysmacProject.globalVariables,
     unitToEquipmentModuleInterface,
     allCallPaths,
+    warnings,
   );
 
   return Unit(

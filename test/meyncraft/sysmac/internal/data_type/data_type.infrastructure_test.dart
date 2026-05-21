@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.infrastructure.dart';
 import 'package:meyncraft/sysmac/node.domain.dart';
@@ -67,8 +65,6 @@ const String xml = """<?xml version="1.0" encoding="utf-8"?>
 </data>""";
 
 Future<void> main() async {
-  GetIt.I.registerSingleton<Logger>(Logger());
-
   group('class: DataTypeXml', () {
     group('method: toDataTypes', () {
       var dataTypes = DataTypeArchiveXmlFile.fromXml(

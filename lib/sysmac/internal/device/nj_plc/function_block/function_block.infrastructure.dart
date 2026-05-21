@@ -68,7 +68,7 @@ FunctionBlock? createFunctionBlock(
       /// ignore safety
       return null;
     default:
-      logger.warning('Unsupported Function Block sub type: $subType');
+      logger.w('Unsupported Function Block sub type: $subType');
       return null;
   }
 }

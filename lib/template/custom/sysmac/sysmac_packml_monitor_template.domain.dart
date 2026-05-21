@@ -2,13 +2,12 @@ import 'dart:io';
 
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
 import 'package:meyncraft/meyncraft/about/meyncraft_about_tab.domain.dart';
-import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
 import 'package:meyncraft/meyn_sysmac/isa88/isa88.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
+import 'package:meyncraft/template/generate/generator_report.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
-import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 import 'package:xml/xml.dart';
 
 class SysmacPackMlMonitorTemplate implements TemplateProject {
@@ -61,14 +60,15 @@ class SysmacPackMlMonitorGenerator implements Generator {
   static const _programName = 'GeneratedByMeynCraft';
 
   @override
-  Future<DynamicMarkdownTabContent> generate(
+  Future<GeneratorReport> generate(
     TemplateProject template,
     Map<String, dynamic> parameterValues,
-    DynamicMarkdownTabContent outputReport,
+    GeneratorReport report,
   ) async {
     var sysmacProject = await MeynSysmacProjectService().getProject(
       parameterValues,
     );
+    var generatedFiles = <File>[];
     try {
       var units = sysmacProject.isa88Nodes.whereType<Unit>();
       var version = await applicationVersion();
@@ -128,29 +128,13 @@ class SysmacPackMlMonitorGenerator implements Generator {
       var outputFile = File(outputFilePath);
       await outputFile.create();
       await outputFile.writeAsString(xmlString);
-
-      outputReport.addToMarkdown(
-        '* Generated file: [${outputFile.path}](${outputFile.uri})\n',
-      );
-
-      var linkUri = outputReport.addTabLink(
-        TemplateInstructionTab(template, this, [outputFile]),
-      );
-      outputReport.addToMarkdown(
-        '* Generated 1 file. '
-        '[Click here for instructions on how to use the generated file.]($linkUri)',
-      );
+      report.addGeneratedFileToMarkdown(outputFile);
+      generatedFiles.add(outputFile);
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addTabLink(
-        GeneratorErrorTab(template, this, exception, stackTrace),
-      );
-      outputReport.addToMarkdown(
-        '* **Failed** [Click here for more information]($linkUri)',
-      );
-      outputReport.addToMarkdown('* No files generated');
+      report.addFailureToMarkdown(template, this, exception, stackTrace);
     }
-
-    return outputReport;
+    report.addGenerationSummary(template, this, generatedFiles);
+    return report;
   }
 
   List<LadderSection> _createSections(Iterable<Unit> units) =>

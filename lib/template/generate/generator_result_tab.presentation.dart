@@ -1,4 +1,5 @@
 import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
+import 'package:meyncraft/template/generate/generator_report.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
 
 class GeneratorResultTab extends MarkdownTab {
@@ -6,5 +7,5 @@ class GeneratorResultTab extends MarkdownTab {
   final Map<String, dynamic> parameterValues;
 
   GeneratorResultTab(this.selectedTemplates, this.parameterValues, {super.key})
-    : super(DynamicMarkdownTabContent('Generator result'));
+    : super(GeneratorReport());
 }

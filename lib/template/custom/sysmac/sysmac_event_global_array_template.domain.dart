@@ -8,8 +8,8 @@ import 'package:meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/sysmac/iec61131_10/iec61131_10.dart';
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
+import 'package:meyncraft/template/generate/generator_report.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
-import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 import 'package:xml/xml.dart';
 
 class SysmacEventGlobalArrayTemplate implements TemplateProject {
@@ -55,40 +55,27 @@ class SysmacEventGlobalArrayGenerator implements Generator {
       '* Delete the last program $_programName\n';
 
   @override
-  Future<DynamicMarkdownTabContent> generate(
+  Future<GeneratorReport> generate(
     TemplateProject template,
     Map<String, dynamic> parameterValues,
-    DynamicMarkdownTabContent outputReport,
+    GeneratorReport report,
   ) async {
     var generatedFiles = <File>[];
     try {
-      generatedFiles = await writeSysmacEventArrayXmlImportFile(
+      var generatedFile = await writeSysmacEventArrayXmlImportFile(
         parameterValues,
-        outputReport,
+        report,
       );
+      report.addGeneratedFileToMarkdown(generatedFile);
+      generatedFiles.add(generatedFile);
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addTabLink(
-        GeneratorErrorTab(template, this, exception, stackTrace),
-      );
-      outputReport.addToMarkdown(
-        '* **Failed** [Click here for more information]($linkUri)',
-      );
+      report.addFailureToMarkdown(template, this, exception, stackTrace);
     }
-    if (generatedFiles.isEmpty) {
-      outputReport.addToMarkdown('* No files generated');
-    }
-    var linkUri = outputReport.addTabLink(
-      TemplateInstructionTab(template, this, generatedFiles),
-    );
-    outputReport.addToMarkdown(
-      '* Generated 1 file. '
-      '[Click here for instructions on how to use the generated file.]'
-      '($linkUri)',
-    );
-    return outputReport;
+    report.addGenerationSummary(template, this, generatedFiles);
+    return report;
   }
 
-  Future<List<File>> writeSysmacEventArrayXmlImportFile(
+  Future<File> writeSysmacEventArrayXmlImportFile(
     Map<String, dynamic> parameterValues,
     DynamicMarkdownTabContent outputReport,
   ) async {
@@ -128,54 +115,10 @@ class SysmacEventGlobalArrayGenerator implements Generator {
 
     await outputFile.create();
     await outputFile.writeAsString(xmlString);
-    outputReport.addToMarkdown(
-      '* Generated file: [${outputFile.path}](${outputFile.uri})\n',
-    );
-    return [outputFile];
+
+    return outputFile;
   }
 }
-
-// @Deprecated('Use writeSysmacEventArrayXmlImportFile instead')
-// Future<void> writeSysmacEventArrayXmlImportFile(
-//   MeynSysmacProject sysmacProject,
-// ) async {
-//   var version = await applicationVersion();
-//   var pouInfo = SmcExtPouInfo(
-//     author: 'MeynCraft code generator',
-//     version: version,
-//   );
-//   var events = sysmacProject.events;
-//   var sections = _createSections(events);
-//   var eventGlobalVariable = _createEventGlobalVariable();
-//   var eventGlobalArrayVariable = _createEventGlobalArrayVariable(sysmacProject);
-//   var mainBody = MainBody.ladderSection(sections);
-//   var program = Program(
-//     programName: _programName,
-//     pouInfo: pouInfo,
-//     globalVariables: [eventGlobalVariable, eventGlobalArrayVariable],
-//     mainBody: mainBody,
-//   );
-//   var project = Project([program], [eventGlobalArrayVariable]);
-//   var xmlString = project.toXmlString(
-//     pretty: true,
-//     indent: '  ',
-//     preserveWhitespace: (node) =>
-//         node is XmlElement && ['ST', 'Content'].contains(node.name.local),
-//   );
-
-// var outputFilePath = await createOutputPath(outputPath, parameterValues);
-//     var outputFile = File(outputFilePath);
-//   await outputFile.create();
-//   await outputFile.writeAsString(xmlString);
-
-//   logger.info('Generated: ${outputFile.path}');
-//   logger.info(
-//     '     Import this file in Sysmac with Menu \\ Tools \\ IEC 61131-10 XML \\ Import',
-//   );
-//   logger.info(
-//     '     Then move the sections in program "$_programName" to the end of section "Global\\EventHandling"',
-//   );
-// }
 
 GlobalVariable _createEventGlobalArrayVariable(
   MeynSysmacProject sysmacProject,

@@ -1,4 +1,3 @@
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 
 @Deprecated(
@@ -21,14 +20,6 @@ Future<void> writeSysmacUnitInterfaceXmlImportFile(
 
   //await outputFile.create();
   //await outputFile.writeAsString(xmlString);
-
-  logger.info(
-    '    Import this file in Sysmac with Menu \\ Tools \\ IEC 61131-10 XML \\ Import',
-  );
-  logger.info(
-    '    Then move the UnitInterface sections in program "GeneratedByMeynCraft_<Unit Name>"'
-    'to the corresponding existing programs',
-  );
 }
 
 // List<Program> createPrograms(MeynSysmacProject sysmacProject) {

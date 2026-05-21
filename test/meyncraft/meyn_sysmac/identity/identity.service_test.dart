@@ -1,15 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/identity/identity.service.dart';
 import 'package:shouldly/shouldly.dart';
 import 'package:petitparser/petitparser.dart';
 
 void main() {
-  GetIt.I.registerSingleton<Logger>(Logger());
-
   group('nameParser() function', () {
     test("nameParser.parse('1').should.beOfType<Failure>()", () {
       nameParser.parse('1').should.beOfType<Failure>();

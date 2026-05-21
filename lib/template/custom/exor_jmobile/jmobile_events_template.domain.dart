@@ -3,12 +3,11 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.service.dart';
-import 'package:meyncraft/meyncraft/tab/markdown_tab.presentation.dart';
 import 'package:meyncraft/template/generate/generator.domain.dart';
 import 'package:meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/template/generate/generator.service.dart';
+import 'package:meyncraft/template/generate/generator_report.domain.dart';
 import 'package:meyncraft/template/template.domain.dart';
-import 'package:meyncraft/template/template_instruction_tab.presentation.dart';
 import 'package:xml/xml.dart';
 
 class JMobileEventsTemplate implements TemplateProject {
@@ -58,48 +57,40 @@ class JMobileEventsGenerator implements Generator {
       '  * Check "Alarms"\n';
 
   @override
-  Future<DynamicMarkdownTabContent> generate(
+  Future<GeneratorReport> generate(
     TemplateProject template,
     Map<String, dynamic> parameterValues,
-    DynamicMarkdownTabContent outputReport,
+    GeneratorReport report,
   ) async {
     List<File> generatedFiles = [];
     try {
-      generatedFiles = await writeJMobileEventsFile(
+      var generatedFile = await writeJMobileEventsFile(
+        template,
         parameterValues,
-        outputReport,
+        report,
       );
+      report.addGeneratedFileToMarkdown(generatedFile);
+      generatedFiles.add(generatedFile);
     } on Exception catch (exception, stackTrace) {
-      var linkUri = outputReport.addTabLink(
-        GeneratorErrorTab(template, this, exception, stackTrace),
-      );
-      outputReport.addToMarkdown(
-        '* **Failed** [Click here for more information]($linkUri)',
-      );
+      report.addFailureToMarkdown(template, this, exception, stackTrace);
     }
-    if (generatedFiles.isEmpty) {
-      outputReport.addToMarkdown('* No files generated');
-    }
-    var linkUri = outputReport.addTabLink(
-      TemplateInstructionTab(template, this, generatedFiles),
-    );
-    var fileOrFiles = generatedFiles.length == 1 ? 'file' : 'files';
-    outputReport.addToMarkdown(
-      '* Generated ${generatedFiles.length} $fileOrFiles. '
-      '[Click here for instructions on how to use the generated $fileOrFiles.]($linkUri)',
-    );
-    return outputReport;
+    report.addGenerationSummary(template, this, generatedFiles);
+    return report;
   }
 
-  Future<List<File>> writeJMobileEventsFile(
+  Future<File> writeJMobileEventsFile(
+    TemplateProject template,
     Map<String, dynamic> parameterValues,
-    DynamicMarkdownTabContent outputReport,
+    GeneratorReport report,
   ) async {
     var sysmacProject = await MeynSysmacProjectService().getProject(
       parameterValues,
     );
     var events = sysmacProject.events;
-    outputReport.addToMarkdown('* Found ${events.length} Sysmac events\n');
+    report.addToMarkdown('* Found ${events.length} Sysmac events\n');
+    if (events.warnings.isNotEmpty) {
+      report.addWarningsToMarkdown(template, this, events.warnings);
+    }
 
     String formattedXml = createFormattedEventsXml(events);
 
@@ -107,10 +98,7 @@ class JMobileEventsGenerator implements Generator {
     var outputFile = File(outputFilePath);
     await outputFile.create();
     await outputFile.writeAsString(formattedXml);
-    outputReport.addToMarkdown(
-      '* Generated file: [${outputFile.path}](${outputFile.uri})\n',
-    );
-    return [outputFile];
+    return outputFile;
   }
 }
 

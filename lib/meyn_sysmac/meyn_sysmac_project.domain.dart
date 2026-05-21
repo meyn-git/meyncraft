@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/meyn_sysmac/event/event.infrastructure.dart';
 import 'package:meyncraft/meyn_sysmac/identity/identity.domain.dart';
 import 'package:meyncraft/meyn_sysmac/identity/identity.service.dart';
@@ -16,7 +15,7 @@ class MeynSysmacProject extends SysmacProject {
 
   late final SysmacProjectIdentity identity = createIdentity(archive.file);
 
-  late final List<Event> events = createEvents(this);
+  late final Events events = createEvents(this);
 
   late final List<Isa88Node> isa88Nodes = createMeynIsa88Nodes(this);
 

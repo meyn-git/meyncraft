@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/identity/identity.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
@@ -29,23 +28,14 @@ SysmacProjectIdentity createIdentity(File sysmacProjectFile) {
   var electricPanel = parseResults.firstWhereOrNull((v) => v is ElectricPanel);
   var plcName = parseResults.firstWhereOrNull((v) => v is String && v != '-');
   var version = parseResults.firstWhereOrNull((v) => v is SysmacProjectVersion);
-  var identity = SysmacProjectIdentity(
+
+  return SysmacProjectIdentity(
     projectFile: sysmacProjectFile,
     site: site,
     electricPanel: electricPanel,
     plcName: plcName,
     version: version,
   );
-  var missingValues = identity.missingValues();
-  if (missingValues.isNotEmpty) {
-    logger.warning(
-      '${missingValues.join(', ')} ${missingValues.length == 1 ? 'is' : 'are'} '
-      'missing in file name: "${sysmacProjectFile.uri.pathSegments.last}". '
-      'Expected it to be something like 4321DE06-EviscerationLine1-019-002.smc2',
-    );
-  }
-
-  return identity;
 }
 
 /// Try to find [Site] information in the file path

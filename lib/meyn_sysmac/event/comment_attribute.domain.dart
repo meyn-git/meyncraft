@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:meyncraft/logger/logger.service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/meyn_sysmac/event/component_code.domain.dart';
 import 'package:meyncraft/meyn_sysmac/event/event.domain.dart';
@@ -8,6 +8,7 @@ import 'package:meyncraft/sysmac/internal/device/nj_plc/program/program.domain.d
 import 'package:meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
+import 'package:meyncraft/template/generate/warning.domain.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// A [CommentAttribute]s is additional information that is placed inside Sysmac variable or structure comments.
@@ -209,8 +210,7 @@ class IoAttribute implements CommentAttribute {
     nameValueConverter,
   );
 
-  static bool experimental = false; // kDebugMode;
-  // TODO remove false after demo
+  static bool experimental = kDebugMode;
   // TODO remove field after experimenting
 
   static IoAttribute nameValueConverter({
@@ -252,27 +252,29 @@ class IoAttribute implements CommentAttribute {
     SysmacProject sysmacProject,
     String eventNamePath,
     List eventValues,
+    List<Warning> warnings,
   ) {
     var result = <IoAttribute, NodePath>{};
     var ioAttributes = eventValues.whereType<IoAttribute>();
     var globalVariablePath = parentNamePath(eventNamePath);
     for (var ioAttribute in ioAttributes) {
       var calls = findCallsInLadderPrograms(sysmacProject, globalVariablePath);
-      //TODO remove debugmode check after testing
       if (calls.isEmpty) {
         if (experimental) {
-          logger.warning(
-            'Could not find a function or function block call that outputs: $globalVariablePath',
-            unique: true,
+          warnings.add(
+            Warning(
+              'Could not find a function or function block call that outputs: $globalVariablePath',
+            ),
           );
         }
         continue;
       } else if (calls.length > 1) {
         if (experimental) {
-          logger.warning(
-            'Found multiple function or function block calls that output to: $globalVariablePath'
-            ', calls: ${calls.map((c) => c.name).join(', ')}',
-            unique: true,
+          warnings.add(
+            Warning(
+              'Found multiple function or function block calls that output to: $globalVariablePath'
+              ', calls: ${calls.map((c) => c.name).join(', ')}',
+            ),
           );
         }
         continue;
@@ -281,10 +283,11 @@ class IoAttribute implements CommentAttribute {
       var callParameter = findCallParameter(call, ioAttribute.callArgumentName);
       if (callParameter == null) {
         if (experimental) {
-          logger.warning(
-            'Function or FunctionBlock ${call.name} '
-            'does not have parameter: ${ioAttribute.callArgumentName}',
-            unique: true,
+          warnings.add(
+            Warning(
+              'Function or FunctionBlock ${call.name} '
+              'does not have parameter: ${ioAttribute.callArgumentName}',
+            ),
           );
         }
         continue;
@@ -307,6 +310,7 @@ class IoAttribute implements CommentAttribute {
 
   static Map<String, List<ComponentCode>> findIoVariableNameWithComponentCodes(
     Map<IoAttribute, NodePath> ioAttributeVariables,
+    List<Warning> warnings,
   ) {
     var result = <String, List<ComponentCode>>{};
     for (var ioAttribute in ioAttributeVariables.keys) {
@@ -323,10 +327,11 @@ class IoAttribute implements CommentAttribute {
       //TODO remove debugmode check after testing
       if (!ioAttribute.noComponentCodeWarning && componentCodes.isEmpty) {
         if (experimental) {
-          logger.warning(
-            'Expected global variable $variableNamePath to have a '
-            'one or more component code in its comment.',
-            unique: true,
+          warnings.add(
+            Warning(
+              'Expected global variable $variableNamePath to have a '
+              'one or more component code in its comment.',
+            ),
           );
         }
       } else {
@@ -338,6 +343,7 @@ class IoAttribute implements CommentAttribute {
 
   static Map<String, String> findIoVariableNameWithAddresses(
     Map<IoAttribute, NodePath> ioAttributeVariablePaths,
+    List<Warning> warnings,
   ) {
     var result = <String, String>{};
     for (var ioAttribute in ioAttributeVariablePaths.keys) {
@@ -350,10 +356,11 @@ class IoAttribute implements CommentAttribute {
       //TODO remove debugmode check after testing
       if (!ioAttribute.noAddress && address == null || address!.isEmpty) {
         if (experimental) {
-          logger.warning(
-            'Expected global variable $variableNamePath to have an '
-            'hardware address (at) or an [address=...] in its comment.',
-            unique: true,
+          warnings.add(
+            Warning(
+              'Expected global variable $variableNamePath to have an '
+              'hardware address (at) or an [address=...] in its comment.',
+            ),
           );
         }
       } else {
@@ -522,20 +529,19 @@ class ArrayAttribute implements CommentAttribute, Replaceable {
     var arrayIndex = indexType == ArrayIndexType.first
         ? offSet
         : arrayValues.length - 1 + offSet;
-    if (arrayIndex < 0) {
-      logger.warning(
-        'Invalid array index: $arrayIndex for event: "$namePath"',
-        unique: true,
-      );
-      return 0;
-    }
-    if (arrayIndex > arrayValues.length - 1) {
-      logger.warning(
-        'Invalid array index: $arrayIndex for event: "$namePath"',
-        unique: true,
-      );
-      return 0;
-    }
+    // TODO: DO WE NEED THIS?
+    //if (arrayIndex < 0) {
+    //   warnings.add(Warning(
+    //     'Invalid array index: $arrayIndex for event: "$namePath"',
+    //   ));
+    //   return 0;
+    // }
+    // if (arrayIndex > arrayValues.length - 1) {
+    //   warnings.add(Warning(
+    //     'Invalid array index: $arrayIndex for event: "$namePath"',
+    //   ));
+    //   return 0;
+    // }
     return arrayValues[arrayIndex];
   }
 

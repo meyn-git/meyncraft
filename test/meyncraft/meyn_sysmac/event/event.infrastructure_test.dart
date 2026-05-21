@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:meyncraft/logger/logger.service.dart';
 import 'package:meyncraft/meyn_sysmac/event/event.infrastructure.dart';
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/sysmac/internal/base_type/base_type.domain.dart';
@@ -23,9 +22,6 @@ Future<void> main() async {
       sysmacProject = await MeynSysmacProject.loadFromFile(
         SysmacProjectTestResource().file,
       );
-      if (!getIt.isRegistered<Logger>()) {
-        getIt.registerSingleton<Logger>(Logger());
-      }
     });
 
     test('events isNot Empty', () {

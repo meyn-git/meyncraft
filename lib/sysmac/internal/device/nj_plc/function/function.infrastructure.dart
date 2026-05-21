@@ -68,7 +68,7 @@ Function$? createFunction(
       /// ignore safety
       return null;
     default:
-      logger.warning('Unsupported Function sub type: $subType');
+      logger.w('Unsupported Function sub type: $subType');
       return null;
   }
 }

@@ -118,7 +118,7 @@ class DataTypeArchiveXmlFile extends ArchiveXml {
     if (baseTypeExpression == 'UNION') {
       return _createUnion(dataTypeElement);
     }
-    logger.warning(
+    logger.w(
       'Unknown base type expression "$baseTypeExpression" for xml element: $dataTypeElement',
     );
     return null;

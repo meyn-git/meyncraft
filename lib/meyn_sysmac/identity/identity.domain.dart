@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:meyncraft/meyn_sysmac/identity/identity.service.dart';
+import 'package:meyncraft/template/generate/warning.domain.dart';
 import 'package:petitparser/petitparser.dart';
 import 'package:recase/recase.dart';
 
@@ -27,6 +28,18 @@ class SysmacProjectIdentity {
     if (plcName == null) 'plcName (e.g. EviscerationLine1)',
     if (version == null) 'version (e.g. 019-002 or 019-002-toBeInstalled)',
   ];
+
+  Warning? get warning {
+    var missingValues = this.missingValues();
+    if (missingValues.isEmpty) {
+      return null;
+    }
+    return Warning(
+      '${missingValues.join(', ')} ${missingValues.length == 1 ? 'is' : 'are'} '
+      'missing in file name: "${projectFile.uri.pathSegments.last}". '
+      'Expected it to be something like 4321DE06-EviscerationLine1-019-002.smc2',
+    );
+  }
 }
 
 class Site {
