@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:meyncraft/meyn_sysmac/event/comment_attribute.domain.dart';
-import 'package:meyncraft/meyn_sysmac/event/additional_attribute.infrastructure.dart';
 import 'package:meyncraft/meyn_sysmac/event/event.domain.dart';
 import 'package:meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
@@ -13,7 +12,10 @@ import 'package:petitparser/petitparser.dart';
 
 const String eventGlobalVariableName = 'EventGlobal';
 
-Events createEvents(SysmacProject sysmacProject) {
+Events createEvents(
+  SysmacProject sysmacProject,
+  Map<String, String> additionalCommentAttributeMap,
+) {
   var eventGlobal = sysmacProject.globalVariables.firstWhereOrNull(
     (v) => v.name == eventGlobalVariableName,
   );
@@ -30,7 +32,6 @@ Events createEvents(SysmacProject sysmacProject) {
     eventPathFinder(),
   );
   var counter = Counter();
-  var additionalCommentAttributeMap = createAdditionalCommentAttributeMap();
   var events = eventPaths
       .map(
         (eventPath) => createEvent(
