@@ -12,8 +12,6 @@ import 'package:meyncraft/template/selected_templates.service.dart';
 import 'package:meyncraft/template/template.domain.dart';
 
 abstract class Command extends Intent {
-  const Command();
-
   SingleActivator? get hotKey;
 
   /// The name on the button and in the menu
@@ -62,8 +60,6 @@ extension SingleActivatorX on SingleActivator {
 }
 
 class SelectNextTab extends Command {
-  const SelectNextTab();
-
   @override
   final hotKey = const SingleActivator(LogicalKeyboardKey.tab, control: true);
 
@@ -77,8 +73,6 @@ class SelectNextTab extends Command {
 }
 
 class SelectPreviousTab extends Command {
-  const SelectPreviousTab();
-
   @override
   final hotKey = const SingleActivator(
     LogicalKeyboardKey.tab,
@@ -96,8 +90,6 @@ class SelectPreviousTab extends Command {
 }
 
 class CloseCurrentTab extends Command {
-  const CloseCurrentTab();
-
   @override
   final hotKey = const SingleActivator(LogicalKeyboardKey.f4, control: true);
 
@@ -114,8 +106,6 @@ class CloseCurrentTab extends Command {
 }
 
 class CloseAllTabs extends Command {
-  const CloseAllTabs();
-
   @override
   final hotKey = const SingleActivator(
     LogicalKeyboardKey.f4,
@@ -133,7 +123,6 @@ class CloseAllTabs extends Command {
 }
 
 class Generate extends Command {
-  const Generate();
   @override
   final hotKey = const SingleActivator(LogicalKeyboardKey.keyG, control: true);
 
@@ -167,7 +156,6 @@ class Generate extends Command {
 }
 
 class ReGenerate extends Command {
-  const ReGenerate();
   @override
   final hotKey = const SingleActivator(LogicalKeyboardKey.keyR, control: true);
 
@@ -204,8 +192,6 @@ class ReGenerate extends Command {
 }
 
 class OpenMeynAboutCraftTab extends Command {
-  const OpenMeynAboutCraftTab();
-
   @override
   final hotKey = const SingleActivator(LogicalKeyboardKey.f1);
 

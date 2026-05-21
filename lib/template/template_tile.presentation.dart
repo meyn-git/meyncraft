@@ -6,9 +6,10 @@ import 'package:meyncraft/template/template.domain.dart';
 import 'package:meyncraft/template/template_about_tab.presentation.dart';
 
 class TemplateTile extends StatefulWidget {
-  const TemplateTile(this.template, {super.key});
+  const TemplateTile(this.template,  this.focusNode, {super.key});
 
   final TemplateProject template;
+  final FocusNode? focusNode;
 
   @override
   State<TemplateTile> createState() => _TemplateTileState();
@@ -24,10 +25,22 @@ class _TemplateTileState extends State<TemplateTile> {
 
   bool get isSelected => selectedTemplates.contains(template);
 
+@override
+  void initState() {  
+    super.initState();
+    if (widget.focusNode != null) {
+      // Request focus after the first frame to ensure the widget is built
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.focusNode!.requestFocus();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Row(
     children: [
       IconButton(
+        focusNode: widget.focusNode,
         onPressed: toggleTemplateSelection,
         icon: isSelected
             ? const Icon(Icons.check_box)

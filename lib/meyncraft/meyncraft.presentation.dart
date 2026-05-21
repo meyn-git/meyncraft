@@ -13,7 +13,7 @@ class MeynCraft extends StatefulWidget {
 }
 
 class _MeynCraftState extends State<MeynCraft> {
-  final commands = const <Command>[
+  final commands = <Command>[
     SelectNextTab(),
     SelectPreviousTab(),
     CloseCurrentTab(),

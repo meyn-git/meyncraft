@@ -19,6 +19,8 @@ class SelectedTemplatesPanel extends StatelessWidget {
 
   final selectedTemplateService = GetIt.I<SelectedTemplateService>();
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: selectedTemplateService,
@@ -35,8 +37,10 @@ class SelectedTemplatesPanel extends StatelessWidget {
             child: ListView.builder(
               controller: _scrollController,
               itemCount: allTemplates.length,
-              itemBuilder: (context, index) =>
-                  TemplateTile(allTemplates[index]),
+              itemBuilder: (context, index) => TemplateTile(
+                allTemplates[index],
+                 index == 0 ? _focusNode : null,
+              ),
             ),
           ),
         ),
@@ -49,6 +53,8 @@ class SelectedTemplatesPanel extends StatelessWidget {
       ],
     ),
   );
+
+  
 }
 
 class TopToolBar extends StatelessWidget {

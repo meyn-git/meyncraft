@@ -18,21 +18,27 @@ const MaterialColor meynPrimary = MaterialColor(
 
 const Color meynAccent = Color(0xFFFF00BF);
 
-ThemeData meynTheme(Brightness brightness) => ThemeData.from(
-  useMaterial3: true,
-  colorScheme:
-      ColorScheme.fromSwatch(
-        primarySwatch: meynPrimary,
-        accentColor: meynAccent,
-        brightness: brightness,
-      ).copyWith(
-        surface: brightness == Brightness.light ? Colors.white : Colors.black,
+ThemeData meynTheme(Brightness brightness) =>
+    ThemeData.from(
+      useMaterial3: true,
+      colorScheme:
+          ColorScheme.fromSwatch(
+            primarySwatch: meynPrimary,
+            accentColor: meynAccent,
+            brightness: brightness,
+          ).copyWith(
+            surface: brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+          ),
+    ).copyWith(
+      // make focus more apparent
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          overlayColor: WidgetStateProperty.all(
+            Colors.white.withValues(alpha: 0.3),
+          ), // Ripple effect color
+        ),
       ),
-)
-// .copyWith(
-//   appBarTheme: AppBarTheme(
-//     backgroundColor: Colors.black, // Use your primary color here
-//     foregroundColor: Colors.white, // Optional: sets text/icon color
-//   ),
-// );
-;
+      
+    );

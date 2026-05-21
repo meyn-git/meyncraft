@@ -31,7 +31,8 @@ class _AllTemplatesTabState extends State<AllTemplatesTab> {
             padding: const EdgeInsets.all(8.0),
             controller: _scrollController,
             itemCount: allTemplates.length,
-            itemBuilder: (context, index) => TemplateTile(allTemplates[index]),
+            itemBuilder: (context, index) =>
+                TemplateTile(allTemplates[index], null),
           ),
         ),
   );
