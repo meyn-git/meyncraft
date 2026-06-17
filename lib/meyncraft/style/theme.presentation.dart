@@ -40,5 +40,4 @@ ThemeData meynTheme(Brightness brightness) =>
           ), // Ripple effect color
         ),
       ),
-      
     );

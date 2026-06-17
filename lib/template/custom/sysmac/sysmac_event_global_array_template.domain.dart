@@ -96,7 +96,7 @@ class SysmacEventGlobalArrayGenerator implements Generator {
     var eventGlobalArrayVariable = _createEventGlobalArrayVariable(
       sysmacProject,
     );
-    var mainBody = MainBody.ladderSection(sections);
+    var mainBody = MainBody.ladderProgram(sections);
     var program = Program(
       programName: _programName,
       pouInfo: pouInfo,

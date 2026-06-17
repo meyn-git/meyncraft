@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meyncraft/template/custom/exor_jmobile/jmobile_tags_tempate.domain.dart';
+import 'package:meyncraft/template/custom/exor_jmobile/jmobile_tags_template.domain.dart';
 import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:shouldly/shouldly.dart';
 

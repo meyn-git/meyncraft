@@ -14,6 +14,7 @@ import '../../../test_resource.dart';
 final getIt = GetIt.instance;
 
 Future<void> main() async {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('class: EventService', () {
     late MeynSysmacProject sysmacProject;
 

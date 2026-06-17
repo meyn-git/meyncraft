@@ -6,7 +6,7 @@ import 'package:meyncraft/template/template.domain.dart';
 import 'package:meyncraft/template/template_about_tab.presentation.dart';
 
 class TemplateTile extends StatefulWidget {
-  const TemplateTile(this.template,  this.focusNode, {super.key});
+  const TemplateTile(this.template, this.focusNode, {super.key});
 
   final TemplateProject template;
   final FocusNode? focusNode;
@@ -25,8 +25,8 @@ class _TemplateTileState extends State<TemplateTile> {
 
   bool get isSelected => selectedTemplates.contains(template);
 
-@override
-  void initState() {  
+  @override
+  void initState() {
     super.initState();
     if (widget.focusNode != null) {
       // Request focus after the first frame to ensure the widget is built

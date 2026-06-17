@@ -24,7 +24,11 @@ class MeynSysmacProject extends SysmacProject {
 
   static Future<MeynSysmacProject> loadFromFile(File file) async {
     var sysmacProjectArchive = await SysmacProjectArchive.loadFromFile(file);
-    var additionalCommentAttributeMap = await createAdditionalCommentAttributeMap();
-    return MeynSysmacProject(sysmacProjectArchive, additionalCommentAttributeMap);
+    var additionalCommentAttributeMap =
+        await createAdditionalCommentAttributeMap();
+    return MeynSysmacProject(
+      sysmacProjectArchive,
+      additionalCommentAttributeMap,
+    );
   }
 }

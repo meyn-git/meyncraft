@@ -83,7 +83,7 @@ class Data extends XmlElement {
           ),
           XmlAttribute(XmlName('handleUnknown'), 'discard'),
         ],
-        [child],
+        [child.copy()],
       );
 }
 
@@ -331,7 +331,7 @@ class MainBody extends XmlElement {
   MainBody.structuredTextSection(String structuredText)
     : this._([StructuredTextSection(structuredText)]);
 
-  MainBody.ladderSection(List<LadderSection> sections) : this._(sections);
+  MainBody.ladderProgram(List<LadderSection> sections) : this._(sections);
 
   MainBody._(List<XmlElement> children)
     : super(XmlName('MainBody'), [], children);
@@ -354,6 +354,20 @@ class LadderSection extends BodyContent {
          XmlAttribute(XmlName('name'), name),
          XmlAttribute(XmlName('evaluationOrder'), evaluationOrder.toString()),
        ], rungs);
+
+  LadderSection.fromRungElements({
+    required String name,
+    required int evaluationOrder,
+    required List<XmlElement> rungElements,
+  }) : super(
+         [
+           XmlAttribute(XmlName('xsi:type'), 'smcext:LdSection'),
+           XmlAttribute(XmlName('name'), name),
+           XmlAttribute(XmlName('evaluationOrder'), evaluationOrder.toString()),
+         ],
+         rungElements.map((e) => e.copy()).toList(),
+         // need to clone the children because they could already have another parent
+       );
 }
 
 class StructuredTextSection extends BodyContent {

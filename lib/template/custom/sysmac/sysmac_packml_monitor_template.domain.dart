@@ -77,7 +77,7 @@ class SysmacPackMlMonitorGenerator implements Generator {
         version: version,
       );
       var sections = _createSections(units);
-      var mainBody = MainBody.ladderSection(sections);
+      var mainBody = MainBody.ladderProgram(sections);
       List<GlobalVariable> globalVariables = [
         GlobalVariable(
           Variable2(

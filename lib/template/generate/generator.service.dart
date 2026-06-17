@@ -40,7 +40,7 @@ Future<String> createOutputPath(
     FunctionGroup('MeynCraftFunctions', [
       ExpressionFunction(
         name: 'removeFileExtension',
-        description: 'removes a ile extension from a file path',
+        description: 'removes a file extension from a file path',
         exampleExpression: "removeFileExtension('myPath/myFile.exe')",
         exampleResult: "'myPath/myFile'",
         parameters: <Parameter>[

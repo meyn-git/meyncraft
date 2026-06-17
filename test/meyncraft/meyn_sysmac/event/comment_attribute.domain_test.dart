@@ -11,6 +11,7 @@ import 'package:shouldly/shouldly.dart';
 import '../../../test_resource.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('commentParser', () {
     test("commentParser.parse('') should return the correct result", () {
       var result = commentPathParser.parse('');

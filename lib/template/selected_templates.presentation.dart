@@ -39,7 +39,7 @@ class SelectedTemplatesPanel extends StatelessWidget {
               itemCount: allTemplates.length,
               itemBuilder: (context, index) => TemplateTile(
                 allTemplates[index],
-                 index == 0 ? _focusNode : null,
+                index == 0 ? _focusNode : null,
               ),
             ),
           ),
@@ -53,8 +53,6 @@ class SelectedTemplatesPanel extends StatelessWidget {
       ],
     ),
   );
-
-  
 }
 
 class TopToolBar extends StatelessWidget {
