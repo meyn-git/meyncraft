@@ -13,7 +13,7 @@ import '../../../../test_resource.dart';
 
 void main() {
   group('class: $BaseTypeFactory', () {
-    group('${IecType}s', () {
+    group('IecTypes', () {
       var baseTypeFactory = BaseTypeFactory.forIecTypes();
       test('INT', () {
         var createFromExpression = baseTypeFactory.createFromExpression('INT');
@@ -431,7 +431,7 @@ void main() {
       });
     });
 
-    group('${VbType}s', () {
+    group('VbTypes', () {
       var baseTypeFactory = BaseTypeFactory.forVbTypes();
       test('Short', () {
         var createFromExpression = baseTypeFactory.createFromExpression(

@@ -102,7 +102,7 @@ class ExorOneDimensionalArray extends ExorDataType {
   ExorOneDimensionalArray(ExorDataType compatibleType, ArrayRange arrayRange)
     : super(
         exorTypeName: '${compatibleType.exorTypeName} []',
-        iecTypeName: compatibleType.exorTypeName,
+        iecTypeName: compatibleType.iecTypeName,
         comparableOmronTypes: compatibleType.comparableOmronTypes,
         min: compatibleType.min,
         max: compatibleType.max,
