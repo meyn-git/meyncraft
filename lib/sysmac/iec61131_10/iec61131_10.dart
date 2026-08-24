@@ -310,11 +310,9 @@ class ExternalVars extends XmlElement {
   ExternalVars(
     Iterable<GlobalVariable> usedGlobalVariables, {
     bool constant = false,
-  }) : super(
-         XmlName('ExternalVars'),
-         [if (constant) XmlAttribute(XmlName('constant'), 'true')],
-         usedGlobalVariables.map((gv) => gv.variable.copyAsReference()),
-       );
+  }) : super(XmlName('ExternalVars'), [
+         if (constant) XmlAttribute(XmlName('constant'), 'true'),
+       ], usedGlobalVariables.map((gv) => gv.variable.copyAsReference()));
 }
 
 // <Documentation xsi:type="SimpleText">Program0 Comment</Documentation>

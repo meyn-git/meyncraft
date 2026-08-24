@@ -63,9 +63,18 @@ class JMobileTagsGenerator implements Generator {
       '* In the "Project view" remove old dictionaries (but not dictionaries that contain internal tags)\n'
       '* Note that new tags in dictionaries will need to by added to the tags by finding them in the "Tags" view'
       ', selecting them and "Adding to tags" with a right click\n'
-      '* Note that pages that use tags that no longer exist need to be fixed. '
-      'These can be found with the project validator: Menu \\ Run \\ Run Project Validator. '
-      'When these tags are no longer used you can remove them from the tags.\n';
+      '* Note that pages that use old tags need to be fixed. \n'
+      '  * These old tags can be found with:\n'
+      '    * The project validator: Menu \\ Run \\ Run Project Validator.\n'
+      '    * The tags window:\n'
+      '      * In the "Project view" double click on Configuration \\ Tags\n'
+      '      * Select the "Ethernet/IP CIP prot1 Model Omron" form the existing tag list\n'
+      '      * Click on the Update icon in the top toolbar\n'
+      '      * Find all tags that have a red cross behind them\n'
+      '  * Check if these old tags are used with the Tag cross reference view\n'
+      '    * If old tags are still used, update the tags in the widgets with tags that are in the dictionary\n'
+      '      The tag cross reference view has a replace button to make this easy\n'
+      '    * Remove tags that are no longer used!\n';
 
   @override
   Future<GeneratorReport> generate(
