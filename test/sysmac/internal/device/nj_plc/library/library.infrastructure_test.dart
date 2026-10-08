@@ -6,7 +6,7 @@ import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:shouldly/shouldly.dart';
 import 'package:xml/xml.dart';
 
-import '../../../../../../test_resource.dart';
+import '../../../../../test_resource.dart';
 
 void main() {
   group('SysmacProject', () {

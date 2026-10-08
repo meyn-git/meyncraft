@@ -7,7 +7,7 @@ import 'package:meyncraft/sysmac/sysmac_project.infrastructure.dart';
 import 'package:petitparser/core.dart';
 import 'package:shouldly/shouldly.dart';
 
-import '../../../../test_resource.dart';
+import '../../../test_resource.dart';
 
 void main() {
   group('createDataTypes function', () {

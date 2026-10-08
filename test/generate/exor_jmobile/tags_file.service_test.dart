@@ -3,7 +3,7 @@ import 'package:meyncraft/template/custom/exor_jmobile/jmobile_tags_template.dom
 import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:shouldly/shouldly.dart';
 
-import '../../../test_resource.dart';
+import '../../test_resource.dart';
 
 void main() {
   group('function: createTags', () {

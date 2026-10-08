@@ -8,7 +8,7 @@ import 'package:meyncraft/template/generate/warning.domain.dart';
 import 'package:petitparser/petitparser.dart';
 import 'package:shouldly/shouldly.dart';
 
-import '../../../test_resource.dart';
+import '../../test_resource.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

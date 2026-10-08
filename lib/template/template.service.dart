@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:meyncraft/template/custom/exor_jmobile/jmobile_events_template.domain.dart';
 import 'package:meyncraft/template/custom/exor_jmobile/jmobile_tags_template.domain.dart';
 import 'package:meyncraft/template/custom/reports/event_report_template.domain.dart';
@@ -12,7 +13,9 @@ final List<TemplateProject> allTemplates = [
   JMobileEventsTemplate(),
   SysmacEventGlobalArrayTemplate(),
   SysmacPackMlMonitorTemplate(),
-  SysmacPackMlUnitInterfaceTemplate(),
+  if (experimental) SysmacPackMlUnitInterfaceTemplate(),
   EventReportTemplate(),
   Isa88ReportTemplate(),
 ];
+
+bool experimental = kDebugMode;

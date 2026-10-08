@@ -9,7 +9,7 @@ import 'package:meyncraft/sysmac/internal/variable/variable.domain.dart';
 import 'package:meyncraft/sysmac/node.domain.dart';
 import 'package:shouldly/shouldly.dart';
 
-import '../../../test_resource.dart';
+import '../../test_resource.dart';
 
 final getIt = GetIt.instance;
 

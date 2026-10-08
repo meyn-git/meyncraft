@@ -6,7 +6,7 @@ import 'package:meyncraft/sysmac/node.domain.dart';
 import 'package:meyncraft/sysmac/sysmac_project.domain.dart';
 import 'package:meyncraft/sysmac/sysmac_project.infrastructure.dart';
 
-import '../../test_resource.dart';
+import '../test_resource.dart';
 
 void main() {
   group('class: $SysmacProject', () {

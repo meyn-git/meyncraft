@@ -20,6 +20,7 @@ import '../data_type/data_type.domain.dart';
 ///         * [Structure]
 ///         * [Enumeration]
 ///         * [Union]
+///   * [DataTypeReference]
 /// See [https://www.myomron.com/index.php?action=kb&article=1628] for Omron's list of "Basic Data Types"
 abstract interface class BaseType {}
 
