@@ -1,12 +1,10 @@
 import 'package:map_converter/map_converter.dart';
-import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project_map.domain.dart';
 import 'package:meyncraft/sysmac/iec61131_10/iec61131_10.dart' as iec;
 import 'package:meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
 import 'package:meyncraft/sysmac/node.domain.dart';
-import 'package:dart_mappable/dart_mappable.dart';
 
-@MappableClass()
+@MapConverter(generateOptions: GenerateOptions.toMap + GenerateOptions.schema)
 class Variable extends Node<DataTypeBase> implements BaseTypeOwner {
   @override
   final String name;

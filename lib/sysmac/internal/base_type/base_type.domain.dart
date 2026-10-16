@@ -1,5 +1,5 @@
-import 'package:collection/collection.dart';
 import 'package:fluent_regex/fluent_regex.dart';
+import 'package:map_converter/map_converter.dart';
 
 import '../data_type/data_type.domain.dart';
 
@@ -22,6 +22,17 @@ import '../data_type/data_type.domain.dart';
 ///         * [Union]
 ///   * [DataTypeReference]
 /// See [https://www.myomron.com/index.php?action=kb&article=1628] for Omron's list of "Basic Data Types"
+///
+@MapConverter(
+  generateOptions: GenerateOptions.toMap + GenerateOptions.schema,
+  includeSubClasses: {
+    ArrayType,
+    IecType,
+    VbType,
+    DataTypeBase,
+    DataTypeReference,
+  },
+)
 abstract interface class BaseType {}
 
 class UnknownBaseType extends BaseType {
@@ -57,10 +68,13 @@ BaseType baseTypeLeaf(BaseType baseType) {
 abstract interface class BasicType implements BaseType {}
 
 /// Wraps a [BaseType] in an [ArrayType] with the given [arrayRanges]
+@MapConverter(
+  generateOptions: GenerateOptions.toMap + GenerateOptions.schema,
+)
 class ArrayType implements BasicType, BaseTypeOwner {
   @override
   BaseType baseType;
-  final ArrayRanges arrayRanges;
+  final List<ArrayRange> arrayRanges;
 
   ArrayType({required this.baseType, required this.arrayRanges});
 
@@ -70,8 +84,8 @@ class ArrayType implements BasicType, BaseTypeOwner {
   }
 }
 
-class ArrayRanges extends DelegatingList<ArrayRange> {
-  ArrayRanges([super.arrayRanges = const <ArrayRange>[]]);
+extension ArrayRanges on List<ArrayRange> {
+  //ArrayRanges([super.arrayRanges = const <ArrayRange>[]]);
 
   /// e.g.
   /// if [ArrayRanges] represents [ArrayRange(min:2, max:3), ArrayRange(min:5, max:7)]
@@ -121,13 +135,14 @@ class ArrayRanges extends DelegatingList<ArrayRange> {
     return expression.toString();
   }
 
-  @override
-  String toString() {
-    if (isEmpty) return '';
-    return super.toString();
-  }
+  // @override
+  // String toString() {
+  //   if (isEmpty) return '';
+  //   return super.toString();
+  // }
 }
 
+@MapConverter()
 class ArrayRange {
   static final minName = 'min';
   static final maxName = 'max';
@@ -174,57 +189,97 @@ class ArrayRange {
 
 /// These are the built‑in types defined by IEC 61131‑3 and directly supported by Sysmac Studio.
 /// See [https://www.myomron.com/index.php?action=kb&article=1628]
+@MapConverter(
+  includeSubClasses: {
+    IecBool,
+    IecSInt,
+    IecUSInt,
+    IecByte,
+    IecInt,
+    IecUInt,
+    IecWord,
+    IecDInt,
+    IecUDInt,
+    IecDWord,
+    IecReal,
+    IecLInt,
+    IecULInt,
+    IecLWord,
+    IecLReal,
+    IecString,
+    IecTime,
+    IecDate,
+    IecDateAndTime,
+    IecTimeOfDay,
+  },
+)
 abstract class IecType extends BasicType {
   String get name =>
       runtimeType.toString().replaceFirst('Iec', '').toUpperCase();
 }
 
 /// true or false
+@MapConverter()
 class IecBool extends IecType {}
 
 /// 8 bit signed
+@MapConverter()
 class IecSInt extends IecType {}
 
 /// 8 bit un-signed, bit operation possible
+@MapConverter()
 class IecUSInt extends IecType {}
 
 /// 16 bit signed
+@MapConverter()
 class IecByte extends IecType {}
 
 /// 16 bit signed
+@MapConverter()
 class IecInt extends IecType {}
 
 /// 16 bit un-signed
+@MapConverter()
 class IecUInt extends IecType {}
 
 /// 16 bit un-signed, bit operation possible
+@MapConverter()
 class IecWord extends IecType {}
 
 /// 32 bit signed
+@MapConverter()
 class IecDInt extends IecType {}
 
 /// 32 bit un-signed
+@MapConverter()
 class IecUDInt extends IecType {}
 
 /// 32 bit un-signed, bit operation possible
+@MapConverter()
 class IecDWord extends IecType {}
 
 /// 32 bit floating point
+@MapConverter()
 class IecReal extends IecType {}
 
 /// 64 bit signed
+@MapConverter()
 class IecLInt extends IecType {}
 
 /// 64 bit un-signed
+@MapConverter()
 class IecULInt extends IecType {}
 
 /// 64 bit un-signed, bit operation possible
+@MapConverter()
 class IecLWord extends IecType {}
 
 /// 64 bit floating point
+@MapConverter()
 class IecLReal extends IecType {}
 
 /// 8 bits per character
+@MapConverter()
 class IecString extends IecType {
   final int? size;
 
@@ -232,18 +287,22 @@ class IecString extends IecType {
 }
 
 /// 64 bit
+@MapConverter()
 class IecTime extends IecType {}
 
 /// 64 bit
+@MapConverter()
 class IecDate extends IecType {}
 
 /// 64 bit
+@MapConverter()
 class IecDateAndTime extends IecType {
   @override
   String get name => 'DATE_AND_TIME';
 }
 
 /// 64 bit
+@MapConverter()
 class IecTimeOfDay extends IecType {
   @override
   String get name => 'TIME_OF_DAY';
@@ -251,56 +310,92 @@ class IecTimeOfDay extends IecType {
 
 /// A Visual Basic [BaseType] e.g.:a HMI data type
 /// See [https://www.myomron.com/index.php?action=kb&article=1628]
+@MapConverter(
+  includeSubClasses: {
+    VbBoolean,
+    VbSByte,
+    VbByte,
+    VbShort,
+    VbUShort,
+    VbInteger,
+    VbUInteger,
+    VbSingle,
+    VbLong,
+    VbULong,
+    VbDouble,
+    VbDecimal,
+    VbString,
+    VbChar,
+    VbDateTime,
+    VbTimeSpan,
+  },
+)
 abstract class VbType extends BasicType {
   String get name => runtimeType.toString().replaceFirst('Vb', '');
 }
 
+@MapConverter()
 class VbBoolean extends VbType {}
 
 /// 8 bit signed
+@MapConverter()
 class VbSByte extends VbType {}
 
 /// 8 bit un-signed
+@MapConverter()
 class VbByte extends VbType {}
 
 /// 16 bit signed
+@MapConverter()
 class VbShort extends VbType {}
 
 /// 16 bit un-signed
+@MapConverter()
 class VbUShort extends VbType {}
 
 /// 32 bit signed
+@MapConverter()
 class VbInteger extends VbType {}
 
 /// 32 bit un-signed
+@MapConverter()
 class VbUInteger extends VbType {}
 
 /// 32 bit floating point
+@MapConverter()
 class VbSingle extends VbType {}
 
 /// 64 bit signed
+@MapConverter()
 class VbLong extends VbType {}
 
 /// 64 bit un-signed
+@MapConverter()
 class VbULong extends VbType {}
 
 /// 64 bit floating point
+@MapConverter()
 class VbDouble extends VbType {}
 
+@MapConverter()
 class VbDecimal extends VbType {}
 
+@MapConverter()
 class VbString extends VbType {
   final int? size;
 
   VbString({this.size});
 }
 
+@MapConverter()
 class VbChar extends VbType {}
 
 /// 64 bit
+@MapConverter()
 class VbDateTime extends VbType {}
 
 /// 64 bit
+@MapConverter()
 class VbTimeSpan extends VbType {
   @override
   String get name => 'System.TimeSpan';

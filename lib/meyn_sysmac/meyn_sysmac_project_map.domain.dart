@@ -3,8 +3,6 @@ import 'dart:collection';
 import 'package:meyncraft/meyn_sysmac/meyn_sysmac_project.domain.dart';
 import 'package:meyncraft/sysmac/internal/base_type/base_type.domain.dart';
 import 'package:meyncraft/sysmac/internal/data_type/data_type.domain.dart';
-import 'package:meyncraft/sysmac/internal/variable/variable.domain.dart';
-
 //import 'package:meyncraft/sysmac/internal/variable/variable.domain_map_converter.dart';
 
 /// a [lazy evaluation](https://en.wikipedia.org/wiki/Lazy_evaluation) Map
@@ -86,8 +84,8 @@ class MeynSysmacProjectMap extends MapBase<String, dynamic> {
     throw UnsupportedError('MeynSysmacProjectMap is read-only');
   }
 
-  bool _variableIsIncluded(Variable variable) =>
-      variable.baseType is! VbType && variable.baseType is! UnknownBaseType;
+  //FIXME: remove? bool _variableIsIncluded(Variable variable) =>
+  //     variable.baseType is! VbType && variable.baseType is! UnknownBaseType;
 }
 
 Map<String, dynamic>? dataTypeBaseToMap(DataTypeBase dataTypeBase) {

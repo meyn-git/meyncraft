@@ -300,16 +300,14 @@ class ArrayFactory extends BaseTypeSubFactory {
     return baseTypeFactory.createFromExpression(typeExpression);
   }
 
-  ArrayRanges _createArrayRanges(String expression) {
+  List<ArrayRange> _createArrayRanges(String expression) {
     var rangeExpressions = ArrayRange.regex.allMatches(expression);
 
-    var ranges = rangeExpressions
+    return rangeExpressions
         .map(
           (match) => ArrayRange(expression.substring(match.start, match.end)),
         )
         .toList();
-
-    return ArrayRanges(ranges);
   }
 
   @override

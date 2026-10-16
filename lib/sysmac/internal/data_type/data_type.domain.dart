@@ -1,3 +1,5 @@
+import 'package:map_converter/map_converter.dart';
+
 import '../base_type/base_type.domain.dart';
 import '../../node.domain.dart';
 
@@ -37,10 +39,15 @@ extension DataTypeBaseListExtension on List<DataTypeBase> {
 abstract interface class CustomType implements BaseType {}
 
 /// Abstract base type of [DataType]s and [NameSpace]s
+@MapConverter(
+  generateOptions: GenerateOptions.toMap + GenerateOptions.schema,
+  includeSubClasses: {DataType, NameSpace},
+)
 abstract interface class DataTypeBase extends Node<DataTypeBase>
     implements CustomType {}
 
 /// [NameSpace] is a [DataType] with a name and comment only
+@MapConverter(generateOptions: GenerateOptions.toMap + GenerateOptions.schema)
 class NameSpace extends DataTypeBase {
   @override
   final String name;
@@ -59,6 +66,10 @@ class NameSpace extends DataTypeBase {
 }
 
 /// A [DataType] is a custom data type that is made of [BaseType]s
+@MapConverter(
+  generateOptions: GenerateOptions.toMap + GenerateOptions.schema,
+  includeSubClasses: {Structure, Union, Enumeration},
+)
 abstract interface class DataType extends DataTypeBase {}
 
 /// A [DataTypeMember] is a child of a [Structure] or a child of a [Union]
@@ -66,6 +77,7 @@ abstract interface class DataType extends DataTypeBase {}
 /// Its [baseType] is either an
 /// * a [BasicType]
 /// * a [DataTypeReference]
+@MapConverter(generateOptions: GenerateOptions.toMap + GenerateOptions.schema)
 class DataTypeMember extends DataType implements BaseTypeOwner {
   @override
   final String name;
@@ -95,6 +107,12 @@ class DataTypeMember extends DataType implements BaseTypeOwner {
 
 /// Refers to a DataType or one of its children
 /// This BaseType is normally owned by a [Variable], [ArrayType] or [DataTypeMember]
+@MapConverter(
+  generateOptions: GenerateOptions.toMap + GenerateOptions.schema,
+  fields: [
+    Field<NodePath, String>(#dataTypePath, toMapValue: dataTypeNodeToMapValue),
+  ],
+)
 class DataTypeReference implements BaseType, BaseTypeOwner {
   final NodePath dataTypePath;
   @override
@@ -107,6 +125,8 @@ class DataTypeReference implements BaseType, BaseTypeOwner {
     baseType = dataTypePath.last as BaseType;
   }
 }
+
+String dataTypeNodeToMapValue(NodePath nodePath) => nodePath.toString();
 
 // class UnknownDataTypeBase extends DataType {
 //   @override
@@ -130,6 +150,7 @@ class DataTypeReference implements BaseType, BaseTypeOwner {
 //   String toString() => 'UnknownDataTypeBase($typeExpression)';
 // }
 
+@MapConverter(generateOptions: GenerateOptions.toMap + GenerateOptions.schema)
 class Structure extends DataType {
   @override
   final String name;
@@ -147,6 +168,7 @@ class Structure extends DataType {
   });
 }
 
+@MapConverter(generateOptions: GenerateOptions.toMap + GenerateOptions.schema)
 class Union extends DataType {
   @override
   final String name;
@@ -160,6 +182,7 @@ class Union extends DataType {
   Union({required this.name, required this.comment, required this.children});
 }
 
+@MapConverter(generateOptions: GenerateOptions.toMap + GenerateOptions.schema)
 class Enumeration extends DataType {
   @override
   final String name;
@@ -177,6 +200,7 @@ class Enumeration extends DataType {
   });
 }
 
+@MapConverter(generateOptions: GenerateOptions.toMap + GenerateOptions.schema)
 class EnumerationMember extends DataType implements BaseTypeOwner {
   @override
   final String name;
